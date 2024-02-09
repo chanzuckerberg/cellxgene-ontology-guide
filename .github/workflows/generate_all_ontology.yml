@@ -21,7 +21,7 @@ jobs:
         with:
           filters: |
             owl_info:
-              - 'tools/ontology-builder/ontology-references/owl_info.yml
+              - 'tools/ontology-builder/ontology-references/owl_info.yml'
       - name: Set up Python 3.8
         uses: actions/setup-python@v1
         with:
@@ -43,8 +43,8 @@ jobs:
       - name: owl-processing
         if: ${{ steps.filter.outputs.owl_info == 'true' }}
         run: |
-          make download-ontologies -C cellxgene_schema_cli
-          git add ./cellxgene_schema_cli/cellxgene_schema/ontology_files/all_ontology.json.gz
+          python3 ./tools/ontology-builder/all_ontology_generator.py
+          git add ./tools/ontology-builder/ontology-references/all_ontology.json.gz
       - name: Commit
         if: ${{ steps.filter.outputs.owl_info == 'true' }}
         run: |
