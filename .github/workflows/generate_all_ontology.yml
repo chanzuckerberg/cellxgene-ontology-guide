@@ -3,7 +3,7 @@ name: Updates to Ontology Files
 on:
   push:
     paths:
-      - '**/tools/ontology-builder/ontology-references/owl_info.yml'
+      - '**/tools/ontology-builder/ontology-references/ontology_info.yml'
     branches-ignore:
       - main
 
