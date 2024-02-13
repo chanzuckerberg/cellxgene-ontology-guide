@@ -31,11 +31,7 @@ A clear and concise description of what you expected to happen.
 - Browser [e.g. chrome, safari]
 - Version [e.g. 22]
 
-**Smartphone (please complete the following information):**
-
-- Device: [e.g. iPhone6]
-- OS: [e.g. iOS8.1]
-- Browser [e.g. stock browser, safari]
+**Python Version (please complete the following information):**
 - Version [e.g. 22]
 
 ## Additional context
