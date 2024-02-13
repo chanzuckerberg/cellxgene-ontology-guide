@@ -1,18 +1,18 @@
-import env
 import gzip
 import json
 import os
 import re
 import urllib.request
 from threading import Thread
-from typing import List
+from typing import Any, Dict, List
 from urllib.error import HTTPError, URLError
 
+import env
 import owlready2
 import yaml
 
 
-def _download_ontologies(onto_info_yml: str = env.ONTO_INFO_YAML, output_dir: str = env.RAW_ONTOLOGY_DIR):
+def _download_ontologies(onto_info_yml: str = env.ONTO_INFO_YAML, output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
     """
     Downloads the ontology files specified in 'ontology_info.yml' into 'output_dir'
 
@@ -24,7 +24,7 @@ def _download_ontologies(onto_info_yml: str = env.ONTO_INFO_YAML, output_dir: st
     with open(onto_info_yml, "r") as onto_info_handle:
         ontology_info = yaml.safe_load(onto_info_handle)
 
-    def download(_ontology, _url):
+    def download(_ontology: str, _url: str) -> None:
         print(f"Start Downloading {_ontology}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
@@ -60,7 +60,7 @@ def _download_ontologies(onto_info_yml: str = env.ONTO_INFO_YAML, output_dir: st
         t.join()
 
 
-def _decompress(infile: str, tofile: str):
+def _decompress(infile: str, tofile: str) -> None:
     """
     Decompresses a gziped file
 
@@ -165,7 +165,7 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> dict:
 def _parse_ontologies(
     working_dir: str = env.RAW_ONTOLOGY_DIR,
     output_json_file: str = env.PARSED_ONTOLOGIES_FILE,
-):
+) -> None:
     """
     Parse all ontology files in working_dir. Extracts information from all classes in the ontology file.
     The extracted information is written into a gzipped a json file with the following structure:
@@ -195,7 +195,7 @@ def _parse_ontologies(
 
     :rtype None
     """
-    onto_dict = dict()
+    onto_dict: Dict[str, Any] = dict()
     for onto_file in os.listdir(working_dir):
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
         print(f"Processing {onto.name}")
