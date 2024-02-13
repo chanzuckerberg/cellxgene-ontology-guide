@@ -28,7 +28,6 @@ A clear and concise description of what you expected to happen.
 **Desktop (please complete the following information):**
 
 - OS: [e.g. iOS]
-- Browser [e.g. chrome, safari]
 - Version [e.g. 22]
 
 **Python Version (please complete the following information):**
