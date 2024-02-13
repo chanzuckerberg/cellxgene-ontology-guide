@@ -1,4 +1,3 @@
-# mypy: ignore-errors
 """
 Provides classes to recreate cell type and tissue mappings as used in CELLxGENE Discover
 
@@ -148,6 +147,26 @@ class OntologyMapper(ABC):
             if ontology_term_id.count(":") != 1:
                 raise ValueError(f"{ontology_term_id} is an invalid ontology term id, it must contain exactly one ':'")
             return ontology_term_id.replace(":", "_")
+
+    def get_label_from_writable_id(self, ontology_term_id: str):
+        """
+        Returns the label from and ontology term id that is in writable form
+        Example: "UBERON:0002048" returns "lung"
+        Example: "UBERON_0002048" raises ValueError because the ID is not in writable form
+        """
+
+        if ontology_term_id in self._cached_labels:
+            return self._cached_labels[ontology_term_id]
+
+        entity = self._get_entity_from_id(self.reformat_ontology_term_id(ontology_term_id, to_writable=False))
+        if entity:
+            result = entity.label[0]
+        else:
+            result = ontology_term_id
+
+        self._cached_labels[ontology_term_id] = result
+        return result
+
 
     def _list_ancestors(self, entity: owlready2.entity.ThingClass, ancestors: Optional[List[str]] = None) -> List[str]:
         """
@@ -406,6 +425,7 @@ class TissueGeneralMapper(TissueMapper):
         "UBERON_0001868",  # skin of chest
         "UBERON_0001511",  # skin of leg
         "UBERON_0002190",  # subcutaneous adipose tissue
+        "UBERON_0035328",  # upper outer quadrant of breast
         "UBERON_0000014",  # zone of skin
         "UBERON_0000916",  # abdomen
     ]

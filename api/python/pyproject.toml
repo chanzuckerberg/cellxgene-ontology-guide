@@ -12,3 +12,10 @@ authors = [
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = "~= 3.11"
+dependencies = [
+    "owlready2"
+]
+
+[tool.setuptools_scm]
+write_to = "cellxgene_ontology/_version.py"
+version_scheme = "post-release"
