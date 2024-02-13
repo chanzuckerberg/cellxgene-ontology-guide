@@ -38,7 +38,7 @@ def _download_ontologies(onto_info_yml: str = env.ONTO_INFO_YAML, output_dir: st
             urllib.request.urlretrieve(_url, output_file)
         print(f"Finish Downloading {_ontology}")
 
-    def _build_url(_ontology: str):
+    def _build_url(_ontology: str) -> str:
         onto_ref_data = ontology_info[_ontology]
         return f"{onto_ref_data['source']}/{onto_ref_data['version']}/{ontology.lower()}.{onto_ref_data['filetype']}"
 
@@ -77,9 +77,10 @@ def _decompress(infile: str, tofile: str) -> None:
 def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
     """
     Read ontology data from file and write into a python object
-    
+
     :param onto_file: filepath to ontology file
-    :return: 
+
+    :return: owlready2.entity.ThingClass: Ontology Term Object, with metadata parsed from ontology file
     """
     world = owlready2.World()
     onto = world.get_ontology(onto_file)
@@ -110,14 +111,14 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> L
     return ancestors
 
 
-def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> dict:
+def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
-    :return: Dict[str, str] map of ontology term IDs to pertinent metadata from ontology files
+    :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
-    term_dict = dict()
+    term_dict: Dict[str, Any] = dict()
     for onto_term in onto.classes():
         term_id = onto_term.name.replace("_", ":")
 
