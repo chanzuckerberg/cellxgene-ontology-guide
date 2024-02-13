@@ -148,17 +148,15 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> dict:
             if onto_term.comment:
                 term_dict[term_id]["comments"] = [str(c) for c in onto_term.comment]
             # stores term tracking URL, such as a github issue discussing deprecated term
-            if hasattr(onto_term, "IAO_0000233") and onto_term.IAO_0000233:
+            if getattr(onto_term, "IAO_0000233", None):
                 term_dict[term_id]["term_tracker"] = str(onto_term.IAO_0000233[0])
-
             # only need to record replaced_by OR considers
-            if onto_term.IAO_0100001 and onto_term.IAO_0100001.first():
+            if onto_term.IAO_0100001:
                 # url --> term
                 ontology_term = re.findall(r"[^\W_]+", str(onto_term.IAO_0100001[0]))
                 term_dict[term_id]["replaced_by"] = f"{ontology_term[-2]}:{ontology_term[-1]}"
-            else:
-                if hasattr(onto_term, "consider") and onto_term.consider:
-                    term_dict[term_id]["consider"] = [str(c) for c in onto_term.consider]
+            elif getattr(onto_term, "consider", None):
+                term_dict[term_id]["consider"] = [str(c) for c in onto_term.consider]
     return term_dict
 
 
