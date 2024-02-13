@@ -31,6 +31,7 @@ A clear and concise description of what you expected to happen.
 - Version [e.g. 22]
 
 **Python Version (please complete the following information):**
+
 - Version [e.g. 22]
 
 ## Additional context
