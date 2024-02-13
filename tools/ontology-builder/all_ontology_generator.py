@@ -4,7 +4,7 @@ import os
 import re
 import urllib.request
 from threading import Thread
-from typing import List
+from typing import Any, Dict, List
 from urllib.error import HTTPError, URLError
 
 import env
@@ -12,7 +12,7 @@ import owlready2
 import yaml
 
 
-def _download_owls(owl_info_yml: str = env.OWL_INFO_YAML, output_dir: str = env.ONTOLOGY_DIR):
+def _download_owls(owl_info_yml: str = env.OWL_INFO_YAML, output_dir: str = env.ONTOLOGY_DIR) -> None:
     """
     Downloads the ontology owl files specified in 'owl_info_yml' into 'output_dir'
 
@@ -25,7 +25,7 @@ def _download_owls(owl_info_yml: str = env.OWL_INFO_YAML, output_dir: str = env.
     with open(owl_info_yml, "r") as owl_info_handle:
         owl_info = yaml.safe_load(owl_info_handle)
 
-    def download(_ontology, _url):
+    def download(_ontology: str, _url: str) -> None:
         print(f"Start Downloading {_ontology}")
         # Format of owl (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
@@ -58,7 +58,7 @@ def _download_owls(owl_info_yml: str = env.OWL_INFO_YAML, output_dir: str = env.
         t.join()
 
 
-def _decompress(infile: str, tofile: str):
+def _decompress(infile: str, tofile: str) -> None:
     """
     Decompresses a gziped file
 
@@ -76,7 +76,7 @@ def _parse_owls(
     working_dir: str = env.ONTOLOGY_DIR,
     owl_info_yml: str = env.OWL_INFO_YAML,
     output_json_file: str = env.PARSED_ONTOLOGIES_FILE,
-):
+) -> None:
     """
     Parser all owl files in working_dir. Extracts information from all classes in the owl file.
     The extracted information is written into a gzipped a json file with the following structure:
@@ -118,7 +118,7 @@ def _parse_owls(
             owl_files.append(os.path.join(working_dir, owl_file))
 
     # Parse owl files
-    onto_dict = {}
+    onto_dict: Dict[str, Any] = {}
     for owl_file in owl_files:
         world = owlready2.World()
         onto = world.get_ontology(owl_file)
