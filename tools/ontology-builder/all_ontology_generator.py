@@ -1,4 +1,3 @@
-import env
 import gzip
 import json
 import os
@@ -8,6 +7,7 @@ from threading import Thread
 from typing import List
 from urllib.error import HTTPError, URLError
 
+import env
 import owlready2
 import yaml
 
