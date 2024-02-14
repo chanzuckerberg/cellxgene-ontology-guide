@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Curated 'Cell Subclass' Ontology Terms Schema",
+  "description": "A schema for validating an array of CL ontology term IDs representing high-level 'Cell Subclasses', curated for CZ CellxGene use.",
+  "type": "array",
+  "items": {
+    "type": "string",
+    "pattern": "^CL:[0-9]{7}$"
+  },
+  "minItems": 1,
+  "uniqueItems": true
+}
