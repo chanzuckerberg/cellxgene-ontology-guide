@@ -1,7 +1,7 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Tissue Ontology Descendants Schema",
-  "description": "Schema for Mapping Tissue Ontology Terms to its Descendant Tissue Ontology Terms",
+  "description": "A schema for mapping Tissue ontology terms to its descendant Tissue ontology terms",
   "type": "object",
   "patternProperties": {
     "^UBERON:[0-9]{7}$": {
