@@ -25,3 +25,29 @@ jobs:
       - uses: actions/setup-python@v5
       - name: lint checks
         uses: pre-commit/action@v3.0.0
+
+  unit-test-ontonolgy-builder:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.11
+      - name: Python cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: |
+          pip install -r tools/ontology-builder/requirements.txt
+          pip install -r tools/ontology-builder/requirements-dev.txt
+      - name: Ontology Dry Run Unit Tests
+        run: |
+          cd tools/ontology-builder && make unit-tests
