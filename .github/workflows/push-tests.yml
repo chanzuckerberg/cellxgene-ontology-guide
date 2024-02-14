@@ -49,4 +49,5 @@ jobs:
           pip install -r tools/ontology-builder/requirements.txt
           pip install -r tools/ontology-builder/requirements-dev.txt
       - name: Ontology Dry Run Unit Tests
-        run: make unit-test-ontology-builder
+        run: |
+          cd tools/ontology-builder && make unit-test
