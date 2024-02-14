@@ -1,0 +1,40 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ontology Version and Source Schema",
+  "description": "A schema for the set of valid ontology reference files mapping to a CZ CellXGene Dataset Schema Version",
+  "type": "object",
+  "properties": {
+    "CL": { "$ref": "#/definitions/ontologyEntry" },
+    "EFO": { "$ref": "#/definitions/ontologyEntry" },
+    "HANCESTRO": { "$ref": "#/definitions/ontologyEntry" },
+    "HsapDv": { "$ref": "#/definitions/ontologyEntry" },
+    "MONDO": { "$ref": "#/definitions/ontologyEntry" },
+    "MmusDv": { "$ref": "#/definitions/ontologyEntry" },
+    "NCBITaxon": { "$ref": "#/definitions/ontologyEntry" },
+    "UBERON": { "$ref": "#/definitions/ontologyEntry" },
+    "PATO": { "$ref": "#/definitions/ontologyEntry" }
+  },
+  "additionalProperties": false,
+  "definitions": {
+    "ontologyEntry": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "description": "version of ontology canonical to this data release, as defined in its source repo"
+        },
+        "source": {
+          "type": "string",
+          "format": "uri",
+          "description": "Source to find and download canonical ontology version for this data release"
+        },
+        "filetype": {
+          "type": "string",
+          "description": "filetype used to build generated artifacts for this ontology data release"
+        }
+      },
+      "required": ["version", "source", "filetype"],
+      "additionalProperties": false
+    }
+  }
+}
