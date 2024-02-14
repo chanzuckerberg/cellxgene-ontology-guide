@@ -2,4 +2,4 @@ lint:
 	pre-commit run --all-files
 
 unit-test-ontology-builder:
-	cd ./tools/ontology-builder && python -m pytest tests
+	Make unit-tests -C ./tools/ontology-builder
