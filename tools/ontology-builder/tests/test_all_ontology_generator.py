@@ -39,7 +39,6 @@ def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
         # Call the function
         _download_ontologies(onto_info_yml=mock_ontology_info, output_dir=mock_raw_ontology_dir)
 
-        # Assert urlretrieve is called with correct arguments
         mock_urlretrieve.assert_called_once()
 
 
