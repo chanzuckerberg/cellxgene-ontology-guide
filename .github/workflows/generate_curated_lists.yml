@@ -1,4 +1,4 @@
-name: Updates to Ontology Files
+name: Updates Curated Lists
 
 on:
   push:
@@ -36,7 +36,7 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/curated_lists.py
-          git add ./tools/ontology-builder/src/ontology-references/*list.json
+          git add -all
       - name: Commit
         run: |
           git commit -m "AUTO: update curated_lists"
