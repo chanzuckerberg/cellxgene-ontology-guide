@@ -34,4 +34,4 @@ repos:
       - id: mypy
         args: [--strict, --ignore-missing-imports]
         additional_dependencies: [types-PyYAML]
-        files: ^(api/python|tools/ontology-builder/src)/
+        files: ^(api/python/src|tools/ontology-builder/src)/
