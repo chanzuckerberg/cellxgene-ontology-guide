@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=69", "setuptools-scm>=8"]
+requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "cellxgene-ontology"
-dynamic = ["version"]
+name = "cellxgene_ontology_guide"
+version = "0.0.1"
 description = "Access ontology data used by CZ cellxgene"
 authors = [
     { name = "Chan Zuckerberg Initiative Foundation", email = "cellxgene@chanzuckerberg.com" }
@@ -16,6 +16,12 @@ dependencies = [
     "owlready2"
 ]
 
-[tool.setuptools_scm]
-write_to = "cellxgene_ontology/_version.py"
-version_scheme = "post-release"
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["cellxgene_ontology_guide"]
+
+[tool.pytest.ini_options]
+pythonpath = ["src/cellxgene_ontology_guide"]

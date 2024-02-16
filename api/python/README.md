@@ -1,7 +1,14 @@
+# Python API
+
+# Install
+
+```bash
+make install
+```
+
 # Run Unit Tests
 
 ```bash
-pip install .
-pip install -r requirements-dev.txt
+make install-dev
 make unit-tests
 ```

@@ -48,6 +48,33 @@ jobs:
         run: |
           pip install -r tools/ontology-builder/requirements.txt
           pip install -r tools/ontology-builder/requirements-dev.txt
-      - name: Ontology Dry Run Unit Tests
+      - name: Ontology builder unit tests
         run: |
           cd tools/ontology-builder && make unit-tests
+
+  unit-test-python-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.11
+      - name: Python cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/api/python/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: Install dependencies
+        run: |
+          cd api/python
+          make install-dev
+      - name: Python API unit tests
+        run: |
+          cd api/python
+          make unit-tests
