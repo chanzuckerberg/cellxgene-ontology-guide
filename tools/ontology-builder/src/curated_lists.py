@@ -279,6 +279,7 @@ CELL_SUBCLASSES = [
     "CL_2000004",  # pituitary gland cell
     "CL_2000064",  # ovarian surface epithelial cell
     "CL_4030031",  # interstitial cell
+    "CL_0002494",  # cardiocyte
 ]
 
 # Production cell types with no corresponding hand-curated cell class; required
