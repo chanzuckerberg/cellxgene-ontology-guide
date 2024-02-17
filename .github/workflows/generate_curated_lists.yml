@@ -36,12 +36,12 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/curated_lists.py
+      - name: Commit
+        run: |
           git add ./tools/ontology-builder/src/ontology-references/tissue_general_list.json
           git add ./tools/ontology-builder/src/ontology-references/organ_list.json
           git add ./tools/ontology-builder/src/ontology-references/cell_class_list.json
           git add ./tools/ontology-builder/src/ontology-references/cell_subclass_list.json
           git add ./tools/ontology-builder/src/ontology-references/system_list.json
-      - name: Commit
-        run: |
           git commit -m "AUTO: update curated_lists"
           git push

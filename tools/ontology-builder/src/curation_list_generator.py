@@ -11,14 +11,14 @@ def reformat_ontology_term_ids(d: List[str]) -> List[str]:
     return [i.replace("_", ":") for i in d]
 
 
-def main(path: str = "ontology-references") -> None:
+def main(path: str = env.ONTOLOGY_REF_DIR) -> None:
     """
     Using the dictionarys from curated_list.py, generate a json file that matches the JSON schema in artifact-schemas
     :param path: The destination path for the json files
     :return:
     """
     # Create a dictionary that matches the JSON schema in artifact-schemas
-    with open(os.path.join(env.ONTOLOGY_REF_DIR, "system_list.json"), "w") as f:
+    with open(os.path.join(path, "system_list.json"), "w") as f:
         json.dump(reformat_ontology_term_ids(SYSTEM_TISSUES), f, indent=0)
 
     with open(os.path.join(path, "organ_list.json"), "w") as f:
