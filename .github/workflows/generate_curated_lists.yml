@@ -15,10 +15,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-      - name: Set up Python 3.8
+      - name: Set up Python 3.11
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.11
       - name: Python cache
         uses: actions/cache@v1
         with:
@@ -36,12 +36,12 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/curated_lists.py
-      - name: Commit
-        run: |
           git add ./tools/ontology-builder/src/ontology-references/tissue_general_list.json
           git add ./tools/ontology-builder/src/ontology-references/organ_list.json
           git add ./tools/ontology-builder/src/ontology-references/cell_class_list.json
           git add ./tools/ontology-builder/src/ontology-references/cell_subclass_list.json
           git add ./tools/ontology-builder/src/ontology-references/system_list.json
+      - name: Commit
+        run: |
           git commit -m "AUTO: update curated_lists"
           git push
