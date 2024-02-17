@@ -1,6 +1,6 @@
-# #### Hand-Curation of Systems and Organs
-# #### Tissue Constants
-# Hand-curated systems.
+# # Hand-Curation of Systems and Organs
+# ## Tissue Constants
+# ### Hand-curated systems.
 SYSTEM_TISSUES = [
     "UBERON_0001017",
     "UBERON_0004535",
@@ -21,7 +21,7 @@ SYSTEM_TISSUES = [
     "UBERON_0001434",
 ]
 
-# Hand-curated organs.
+# ### Hand-curated organs.
 ORGAN_TISSUES = [
     "UBERON_0000992",
     "UBERON_0000029",
@@ -167,9 +167,9 @@ TISSUE_GENERAL = [
     "UBERON_0000916",  # abdomen
 ]
 
-# ### Cell Type Constants
-# Hand-Curation of Cell Classes and Cell Subclasses
-# Hand-curated cell classes.
+# # Cell Type Constants
+# ## Hand-Curation of Cell Classes and Cell Subclasses
+# ### Hand-curated cell classes.
 CELL_CLASSES = [
     "CL_0002494",  # cardiocyte
     "CL_0002320",  # connective tissue cell
@@ -196,7 +196,7 @@ CELL_CLASSES = [
     "CL_4033054",  # perivascular cell
 ]
 
-# Hand-curated cell subclasses.
+# ### Hand-curated cell subclasses.
 CELL_SUBCLASSES = [
     "CL_0000624",  # CD4-positive, alpha-beta T cell
     "CL_0000625",  # CD8-positive, alpha-beta T cell
