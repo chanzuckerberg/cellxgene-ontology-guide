@@ -36,7 +36,7 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/curated_lists.py
-          git add -all
+          git add --all
       - name: Commit
         run: |
           git commit -m "AUTO: update curated_lists"

@@ -1,10 +1,5 @@
 # #### Hand-Curation of Systems and Organs
-# Systems and organs were hand-curated in this [spreadsheet](
-# https://docs.google.com/spreadsheets/d/18761SLamZUN9FLAMV_zmg0lutSSUkArCEs8GnprxtZE/edit#gid=717648045).
-#
-
 # #### Tissue Constants
-
 # Hand-curated systems.
 SYSTEM_TISSUES = [
     "UBERON_0001017",
@@ -174,9 +169,6 @@ TISSUE_GENERAL = [
 
 # ### Cell Type Constants
 # Hand-Curation of Cell Classes and Cell Subclasses
-# Cell classes and cell subclasses were hand-curated in this [spreadsheet](
-# https://docs.google.com/spreadsheets/d/1ebGc-LgZJhNsKinzQZ3rpzuh1e1reSH3Rcbn88mCOaU/edit#gid=1625183014).
-
 # Hand-curated cell classes.
 CELL_CLASSES = [
     "CL_0002494",  # cardiocyte
