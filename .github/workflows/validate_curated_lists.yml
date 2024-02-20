@@ -3,7 +3,8 @@ name: Updates Curated Lists
 on:
   push:
     paths:
-      - "**/tools/ontology-builder/src/curated_lists.py"
+      - "**/tools/ontology-builder/src/ontology-references/**.json"
+      - "**/artifact-schemas/**.json"
     branches-ignore:
       - main
 
@@ -35,13 +36,4 @@ jobs:
           git config user.email github-actions@github.com
       - name: ontology-processing
         run: |
-          python3 ./tools/ontology-builder/src/curated_lists.py
-          git add ./tools/ontology-builder/src/ontology-references/tissue_general_list.json
-          git add ./tools/ontology-builder/src/ontology-references/organ_list.json
-          git add ./tools/ontology-builder/src/ontology-references/cell_class_list.json
-          git add ./tools/ontology-builder/src/ontology-references/cell_subclass_list.json
-          git add ./tools/ontology-builder/src/ontology-references/system_list.json
-      - name: Commit
-        run: |
-          git commit -m "AUTO: update curated_lists"
-          git push
+          python3 ./tools/ontology-builder/src/validate_curated_lists.py
