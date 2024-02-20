@@ -1,4 +1,4 @@
-name: Updates Curated Lists
+name: Validate Curated Lists
 
 on:
   push:
