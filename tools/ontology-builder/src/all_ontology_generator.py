@@ -99,14 +99,15 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> S
     :rtype List[str]
     :return list of ancestors (term ids), it could be empty
     """
+
     def _get_branch_ancestors(term: owlready2.entity.ThingClass):
         # a branch ancestor is defined in ontology files as having a "part_of" (BFO_0000050) relationship with a term
         branch_ancestors = set()
         for subclass in term.is_a:
             if (
-                    hasattr(subclass, "property") and
-                    subclass.property.name == "BFO_0000050" and
-                    isinstance(subclass.value, owlready2.entity.ThingClass)
+                hasattr(subclass, "property")
+                and subclass.property.name == "BFO_0000050"
+                and isinstance(subclass.value, owlready2.entity.ThingClass)
             ):
                 branch_ancestor_name = subclass.value.name.replace("obo.", "").replace("_", ":")
                 if branch_ancestor_name.split(":")[0] == onto_name:
