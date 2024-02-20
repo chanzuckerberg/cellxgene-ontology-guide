@@ -100,7 +100,7 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> S
     :return list of ancestors (term ids), it could be empty
     """
 
-    def _get_branch_ancestors(term: owlready2.entity.ThingClass):
+    def _get_branch_ancestors(term: owlready2.entity.ThingClass) -> Set[str]:
         # a branch ancestor is defined in ontology files as having a "part_of" (BFO_0000050) relationship with a term
         branch_ancestors = set()
         for subclass in term.is_a:
