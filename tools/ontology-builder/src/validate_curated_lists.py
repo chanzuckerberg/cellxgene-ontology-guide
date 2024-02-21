@@ -31,7 +31,7 @@ def verify_json(schema_file_name: str, json_file_name: str) -> bool:
 
 def main(path: str = env.ONTOLOGY_REF_DIR) -> None:
     """
-    Using the dictionarys from curated_list.py, generate a json file that matches the JSON schema in artifact-schemas
+    Verify the curated JSON lists match their respective JSON schema in artifact-schemas
     :param path: The destination path for the json files
     :return:
     """
