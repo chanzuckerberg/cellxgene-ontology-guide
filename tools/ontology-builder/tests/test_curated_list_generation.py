@@ -1,7 +1,7 @@
 import json
 
 import pytest
-from curation_list_validation import verify_json
+from validate_curated_lists import verify_json
 
 
 @pytest.fixture
