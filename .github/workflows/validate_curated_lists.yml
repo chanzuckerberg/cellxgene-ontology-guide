@@ -1,4 +1,4 @@
-name: Curated Lists
+name: Validate Curated List Update
 
 on:
   push:
@@ -27,9 +27,9 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - name: install requkirements
+      - name: install requirements
         run: |
           pip install -r tools/ontology-builder/requirements.txt
-      - name: ontology-processing
+      - name: validate curated lists
         run: |
           python3 ./tools/ontology-builder/src/validate_curated_lists.py
