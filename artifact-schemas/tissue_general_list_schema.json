@@ -1,6 +1,6 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "Curated 'Tissue General' Ontology Terms Schema ",
+  "title": "Curated 'Tissue General' Ontology Terms Schema",
   "description": "A schema for validating an array of high-level UBERON ontology term IDs representing 'general tissue' ontology terms, curated for CZ CellxGene use.",
   "type": "array",
   "items": {
