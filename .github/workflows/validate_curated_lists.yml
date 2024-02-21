@@ -1,4 +1,4 @@
-name: Validate Curated Lists
+name: Curated Lists
 
 on:
   push:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  ontology-processing:
+  validate:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -27,7 +27,7 @@ jobs:
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
           restore-keys: |
             ${{ runner.os }}-pip-
-      - name: install requirements
+      - name: install requkirements
         run: |
           pip install -r tools/ontology-builder/requirements.txt
       - name: ontology-processing
