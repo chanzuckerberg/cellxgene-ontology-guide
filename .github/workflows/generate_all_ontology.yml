@@ -3,7 +3,7 @@ name: Updates to Ontology Files
 on:
   push:
     paths:
-      - "**/api/python/src/cellxgene_ontology_guide/fixtures/ontology_info.yml"
+      - "**/api/python/src/cellxgene_ontology_guide/artifacts/ontology_info.yml"
     branches-ignore:
       - main
 

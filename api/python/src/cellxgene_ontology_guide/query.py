@@ -1,15 +1,15 @@
 import gzip
 import json
 import re
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Union
 
-import env
 import yaml
+from constants import ALL_ONTOLOGY_JSON, ONTOLOGY_INFO_YML
 
-with gzip.open(env.ALL_ONTOLOGY_JSON, "rt") as f:
+with gzip.open(ALL_ONTOLOGY_JSON, "rt") as f:
     ONTOLOGY_DICT = json.load(f)
 
-with open(env.ONTOLOGY_INFO_YML, "rt") as f:
+with open(ONTOLOGY_INFO_YML, "rt") as f:
     SUPPORTED_ONTOLOGIES = yaml.safe_load(f)
 
 
@@ -44,7 +44,7 @@ def get_term_ancestors(term_id: str, include_self: bool = False) -> List[str]:
     :return: flattened List[str] of ancestor terms
     """
     ontology_name = _parse_ontology_name(term_id)
-    ancestors = ONTOLOGY_DICT[ontology_name][term_id]["ancestors"]
+    ancestors: List[str] = ONTOLOGY_DICT[ontology_name][term_id]["ancestors"]
     return ancestors + [term_id] if include_self else ancestors
 
 
@@ -107,10 +107,11 @@ def is_term_deprecated(term_id: str) -> bool:
     :return: boolean flag indicating whether the term is deprecated
     """
     ontology_name = _parse_ontology_name(term_id)
-    return ONTOLOGY_DICT[ontology_name][term_id]["deprecated"]
+    is_deprecated: bool = ONTOLOGY_DICT[ontology_name][term_id].get("deprecated")
+    return is_deprecated
 
 
-def get_term_replacement(term_id: str) -> str:
+def get_term_replacement(term_id: str) -> Union[str, None]:
     """
     Fetch the replacement term for a deprecated ontology term, if a replacement exists. Return None otherwise.
 
@@ -120,7 +121,8 @@ def get_term_replacement(term_id: str) -> str:
     :return: replacement str term ID if it exists, None otherwise
     """
     ontology_name = _parse_ontology_name(term_id)
-    return ONTOLOGY_DICT[ontology_name][term_id].get("replaced_by", None)
+    replaced_by: str = ONTOLOGY_DICT[ontology_name][term_id].get("replaced_by")
+    return replaced_by if replaced_by else None
 
 
 def get_term_metadata(term_id: str) -> Dict[str, Any]:
@@ -154,4 +156,5 @@ def get_term_label(term_id: str) -> str:
     :return: str human-readable label for the term
     """
     ontology_name = _parse_ontology_name(term_id)
-    return ONTOLOGY_DICT[ontology_name][term_id]["label"]
+    label: str = ONTOLOGY_DICT[ontology_name][term_id]["label"]
+    return label
