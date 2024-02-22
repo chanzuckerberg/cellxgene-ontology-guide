@@ -38,4 +38,5 @@ jobs:
           monorepo-tags: true
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
+          target: "test-release"
 # bump
