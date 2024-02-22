@@ -1,0 +1,34 @@
+{
+  "bootstrap-sha": "64c2653574f614e939696b2f5e0c0f3c4833d740",
+  "release-type": "simple",
+  "group-pull-request-title-pattern": "chore: release ${version}",
+  "bump-minor-pre-major": true,
+  "prerelease": true,
+  "initial-version": "0.0.1",
+  "changelog-types": [
+    {
+      "type": "feat",
+      "section": "Features",
+      "hidden": false
+    },
+    {
+      "type": "chore",
+      "section": "Misc",
+      "hidden": false
+    },
+    {
+      "type": "fix",
+      "section": "BugFixes",
+      "hidden": false
+    }
+  ],
+  "packages": {
+    "api/python": {
+      "package-name": "python-api"
+    },
+    "tools/ontology-builder": {
+      "package-name": "ontology-builder"
+    },
+    ".": {}
+  }
+}
