@@ -1,0 +1,14 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: "/tools/ontology-builder/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "bento007"
+  - package-ecosystem: pip
+    directory: "/api/python/"
+    schedule:
+      interval: "daily"
+    assignees:
+      - "bento007"
