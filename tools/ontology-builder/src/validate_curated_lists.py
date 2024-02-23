@@ -29,7 +29,7 @@ def verify_json(schema_file_name: str, json_file_name: str) -> bool:
     return True
 
 
-def main(path: str = env.ONTOLOGY_REF_DIR) -> None:
+def main(path: str = env.ONTOLOGY_ASSETS) -> None:
     """
     Verify the curated JSON lists match their respective JSON schema in artifact-schemas
     :param path: The destination path for the json files
