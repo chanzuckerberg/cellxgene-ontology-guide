@@ -28,7 +28,6 @@
     },
     "tools/ontology-builder": {
       "package-name": "ontology-builder"
-    },
-    ".": {}
+    }
   }
 }
