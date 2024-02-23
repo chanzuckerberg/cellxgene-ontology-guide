@@ -1,7 +1,7 @@
 on:
   push:
     branches:
-      - main
+      #      - main
       - test-release # TODO remove this line after testing
 
 permissions:
