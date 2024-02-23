@@ -1,5 +1,7 @@
 import os
 
 PACKAGE_ROOT = os.path.dirname(os.path.realpath(__file__))
-ALL_ONTOLOGY_JSON = os.path.join(PACKAGE_ROOT, "artifacts/all_ontology.json.gz")
-ONTOLOGY_INFO_YML = os.path.join(PACKAGE_ROOT, "artifacts/ontology_info.yml")
+ARTIFACT_DIR = os.path.join(PACKAGE_ROOT, "artifacts")
+ALL_ONTOLOGY_FILENAME = "all_ontology.json.gz"
+ONTOLOGY_INFO_FILENAME = "ontology_info.yml"
+CURRENT_SCHEMA_VERSION = "5.0.0"
