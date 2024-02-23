@@ -3,9 +3,9 @@
   "release-type": "simple",
   "group-pull-request-title-pattern": "chore: release ${version}",
   "bump-minor-pre-major": true,
-  "prerelease": true,
   "initial-version": "0.0.1",
-  "changelog-types": [
+  "include-v-in-tag": true,
+  "changelog-sections": [
     {
       "type": "feat",
       "section": "Features",
