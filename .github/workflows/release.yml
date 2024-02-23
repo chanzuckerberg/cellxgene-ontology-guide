@@ -13,30 +13,10 @@ jobs:
   release-please:
     runs-on: [self-hosted, ARM64]
     steps:
-      - uses: actions/github-script@v6.4.1
-        id: configure-changelog
-        with:
-          result-encoding: string
-          script: |
-            const changelogTypes = [
-              {type: "feat", section: "Features", hidden: false},
-              {type: "chore", section: "Misc", hidden: false},
-              {type: "fix", section: "BugFixes", hidden: false},
-            ]
-
-            return JSON.stringify(changelogTypes)
-
       - name: release please
-        # DO NOT CHANGE THIS VERSION OF RELEASE-PLEASE PLEASEEEEEEE
-        # A future version of release-please seems to be broken and we haven't figured out
-        # why, but this version works. Updating this version will break future releases numbers.
         uses: google-github-actions/release-please-action@v4.0.2
         id: release
         with:
-          command: manifest
-          bump-minor-pre-major: true
-          changelog-types: ${{ steps.configure-changelog.outputs.result }}
-          monorepo-tags: true
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
           target-branch: "test-release" # TODO remove this line after testing
