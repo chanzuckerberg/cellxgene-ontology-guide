@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "**/api/python/src/cellxgene_ontology_guide/artifacts/ontology_info.yml"
+      - "**/artifact-schemas/all_ontology_schema.json"
     branches-ignore:
       - main
 
