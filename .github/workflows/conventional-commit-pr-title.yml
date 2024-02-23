@@ -1,4 +1,6 @@
+name: Convential Commit
 # Validates PR title follows conventional commits
+
 on:
   pull_request:
     types:
@@ -8,7 +10,7 @@ on:
       - reopened
 
 jobs:
-  conventional_commit_title:
+  lint-PR-title:
     runs-on: [self-hosted, ARM64]
     steps:
       - uses: actions/checkout@v3
