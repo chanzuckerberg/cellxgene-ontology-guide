@@ -12,3 +12,5 @@ make install
 make install-dev
 make unit-tests
 ```
+
+test update

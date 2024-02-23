@@ -1,0 +1,22 @@
+on:
+  push:
+    branches:
+      #      - main
+      - test-release # TODO remove this line after testing
+
+permissions:
+  contents: write
+  pull-requests: write
+
+name: release-please
+jobs:
+  release-please:
+    runs-on: [self-hosted, ARM64]
+    steps:
+      - name: release please
+        uses: google-github-actions/release-please-action@v4.0.2
+        id: release
+        with:
+          manifest-file: ".release-please-manifest.json"
+          config-file: "release-please-config.json"
+          target-branch: "test-release" # TODO remove this line after testing
