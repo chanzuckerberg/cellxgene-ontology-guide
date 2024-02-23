@@ -1,4 +1,4 @@
-name: Convential Commit
+name: Conventional Commit
 # Validates PR title follows conventional commits
 
 on:
