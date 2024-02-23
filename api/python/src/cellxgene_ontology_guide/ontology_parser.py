@@ -9,7 +9,18 @@ from constants import ALL_ONTOLOGY_FILENAME, CURRENT_SCHEMA_VERSION, ONTOLOGY_IN
 
 
 class OntologyParser:
+    """
+    An object to parse ontology term metadata from ontologies corresponding to a given CellxGene Schema Version.
+    """
     def __init__(self, schema_version: str = CURRENT_SCHEMA_VERSION):
+        """
+        Initialize an OntologyParser object with the ontology metadata corresponding to the given CellxGene schema
+        version. By default, loads the ontology metadata for the latest compatible schema version from disk. If a
+        different schema version is set, the corresponding ontology metadata will be loaded instead. If not available
+        from disk, it will make a network call to GitHub Release Assets.
+
+        :param schema_version: str version of the schema to load ontology metadata for
+        """
         all_ontology_filepath = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
         ontology_info_filepath = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
 
