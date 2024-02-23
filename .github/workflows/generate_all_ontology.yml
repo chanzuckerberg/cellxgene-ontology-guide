@@ -3,7 +3,7 @@ name: Updates to Ontology Files
 on:
   push:
     paths:
-      - "**/tools/ontology-builder/src/ontology-references/ontology_info.yml"
+      - "**/api/python/src/cellxgene_ontology_guide/artifacts/ontology_info.yml"
     branches-ignore:
       - main
 
@@ -36,7 +36,7 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
-          git add ./tools/ontology-builder/src/ontology-references/all_ontology.json.gz
+          git add ./api/python/src/cellxgene_ontology_guide/artifacts/all_ontology.json.gz
       - name: Commit
         run: |
           git commit -m "AUTO: update ontologies"
