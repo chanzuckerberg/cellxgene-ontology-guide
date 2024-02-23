@@ -1,4 +1,4 @@
 {
-  "tools/ontology-builder": "0.0.1",
-  "api/python": "0.0.1"
+  "tools/ontology-builder": "0.1.0",
+  "api/python": "0.1.0"
 }
