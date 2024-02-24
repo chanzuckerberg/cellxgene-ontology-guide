@@ -24,6 +24,14 @@
     "api/python": {
       "package-name": "python-api"
     },
+    "ontology-assets": {
+      "package-name": "ontology-assets",
+      "packages": {
+        "tools/ontology-builder": {
+          "package-name": "ontology-builder"
+        }
+      }
+    },
     ".": {}
   }
 }
