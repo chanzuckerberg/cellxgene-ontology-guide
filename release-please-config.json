@@ -1,0 +1,32 @@
+{
+  "release-type": "simple",
+  "group-pull-request-title-pattern": "chore: release ${version}",
+  "bump-minor-pre-major": true,
+  "initial-version": "0.0.1",
+  "include-v-in-tag": true,
+  "changelog-sections": [
+    {
+      "type": "feat",
+      "section": "Features",
+      "hidden": false
+    },
+    {
+      "type": "chore",
+      "section": "Misc",
+      "hidden": false
+    },
+    {
+      "type": "fix",
+      "section": "BugFixes",
+      "hidden": false
+    }
+  ],
+  "packages": {
+    "api/python": {
+      "package-name": "python-api"
+    },
+    "tools/ontology-builder": {
+      "package-name": "ontology-builder"
+    }
+  }
+}
