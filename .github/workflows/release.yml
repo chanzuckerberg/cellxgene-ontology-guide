@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - main
+      - tsmith/release-assets # TODO remove this line after testing
 
 permissions:
   contents: write
@@ -18,3 +19,45 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
+          target-branch: "tsmith/release-assets" # TODO remove this line after testing
+    outputs:
+      release_created: ${{ steps.release.outputs.ontology-assets--release_created }}
+      upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
+
+  add-release-artifacts:
+    runs-on: [self-hosted, ARM64]
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created == 'true' }}
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v2
+        with:
+          ref: tsmith/release-assets # TODO remove this line after testing
+          fetch-depth: 1
+      - name: Upload curated lists
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "ontology-assets/*"
+          asset_name: "ontology-assets.zip"
+          asset_content_type: "application/zip"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload ontology info
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "api/python/src/cellxgene_ontology_guide/artifacts/ontology_info.yml"
+          asset_name: "ontology_info.yml"
+          asset_content_type: "application/yml"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload all_ontology
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "api/python/src/cellxgene_ontology_guide/artifacts/all_ontology_info.yml"
+          asset_name: "all_ontology_info.yml"
+          asset_content_type: "application/yml"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
