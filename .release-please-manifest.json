@@ -1,5 +1,6 @@
 {
   "tools/ontology-builder": "0.0.1",
-  "api/python": "0.0.1",
-  "ontology-assets": "0.0.1"
+  "api/python": "0.1.0",
+  "ontology-assets": "0.0.2",
+  ".": "0.0.1"
 }
