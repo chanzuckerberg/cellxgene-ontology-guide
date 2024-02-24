@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - main
-      - tsmith/release-process # TODO remove
 
 permissions:
   contents: write
@@ -19,4 +18,3 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: tsmith/release-process # TODO remove
