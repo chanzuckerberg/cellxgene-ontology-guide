@@ -2,7 +2,6 @@ on:
   push:
     branches:
       - main
-      - tsmith/release-assets # TODO remove this line after testing
       - test-release # TODO remove this line after testing
 
 permissions:
