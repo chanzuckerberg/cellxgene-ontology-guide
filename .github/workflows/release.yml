@@ -35,20 +35,11 @@ jobs:
         with:
           ref: tsmith/release-assets # TODO change to main
           fetch-depth: 1
-      - name: Upload curated lists
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.release-please.outputs.upload_url }}
-          asset_path: "ontology-assets/*"
-          asset_name: "ontology-assets.zip"
-          asset_content_type: "application/zip"
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
       - name: Upload ontology info
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ needs.release-please.outputs.upload_url }}
-          asset_path: "api/python/src/cellxgene_ontology_guide/artifacts/ontology_info.yml"
+          asset_path: "./ontology-assets/ontology_info.yml"
           asset_name: "ontology_info.yml"
           asset_content_type: "application/yml"
         env:
@@ -57,8 +48,53 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ needs.release-please.outputs.upload_url }}
-          asset_path: "api/python/src/cellxgene_ontology_guide/artifacts/all_ontology_info.yml"
-          asset_name: "all_ontology_info.yml"
-          asset_content_type: "application/yml"
+          asset_path: "./ontology-assets/all_ontology_info.json.gz"
+          asset_name: "all_ontology_info.json.gz"
+          asset_content_type: "application/zip"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload cell_class_list.json
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "./ontology-assets/cell_class_list.json"
+          asset_name: "cell_class_list.json"
+          asset_content_type: "application/json"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload cell_subclass_list.json
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "./ontology-assets/cell_subclass_list.json"
+          asset_name: "cell_subclass_list.json"
+          asset_content_type: "application/json"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload organ_list.json
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "./ontology-assets/organ_list.json"
+          asset_name: "organ_list.json"
+          asset_content_type: "application/json"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload tissue_general_list.json
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "./ontology-assets/tissue_general_list.json"
+          asset_name: "tissue_general_list.json"
+          asset_content_type: "application/json"
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+      - name: Upload system_list.json
+        uses: actions/upload-release-asset@v1
+        with:
+          upload_url: ${{ needs.release-please.outputs.upload_url }}
+          asset_path: "./ontology-assets/system_list.json"
+          asset_name: "system_list.json"
+          asset_content_type: "application/json"
         env:
           GITHUB_TOKEN: ${{ github.token }}
