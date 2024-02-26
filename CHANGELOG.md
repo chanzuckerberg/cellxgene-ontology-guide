@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.0.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/v0.0.1...v0.0.2) (2024-02-26)
+
+
+### Misc
+
+* enable release-please for API and Assets ([#55](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/55)) ([9ecda79](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/9ecda79210c5563dce8d8c743cca8367f35395ff))
+* move curated lists to ontology-assets ([#48](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/48)) ([77916df](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/77916df50d391c48ed0100441b1366f5013888bf))
+
+
+### BugFixes
+
+* trigger all-ontology generation if schema changes ([#46](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/46)) ([3121833](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/3121833e24e39c449457e4fbd44cfb6cec5d21d5))
+
 ## 0.0.1 (2024-02-24)
 
 
