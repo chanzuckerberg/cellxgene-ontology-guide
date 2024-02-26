@@ -2,8 +2,6 @@ on:
   push:
     branches:
       - main
-      - tsmith/release-assets # TODO remove this line after testing
-      - test-release # TODO remove this line after testing
 
 permissions:
   contents: write
@@ -20,7 +18,7 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: "test-release" # TODO change to main
+          target-branch: main
     outputs:
       release_created: ${{ steps.release.outputs.ontology-assets--release_created }}
       upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
@@ -50,7 +48,7 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v2
         with:
-          ref: test-release # TODO change to main
+          ref: main
           fetch-depth: 1
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
