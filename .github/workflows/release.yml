@@ -3,7 +3,7 @@ on:
     branches:
       - main
       - test-release # TODO remove this line after testing
-
+# test comment
 permissions:
   contents: write
   pull-requests: write
