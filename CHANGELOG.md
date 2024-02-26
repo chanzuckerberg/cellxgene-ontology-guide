@@ -1,0 +1,70 @@
+# Changelog
+
+## 0.0.1 (2024-02-26)
+
+
+### Features
+
+* Add API ontology querying module ([68f3168](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/68f3168d164a192d538c987239bc2783decd5b1e))
+* Add API ontology querying module ([#39](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/39)) ([239ef2b](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/239ef2b231d2b02051c374491bfee11a7e5d9d8e))
+* **API:** setup python library ([211a099](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/211a099365b4de1ab9ff2dcf0f481a34f62f13c4))
+* **API:** setup python library ([f60f897](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f60f8975584ed5e8fa9cd6dbe91bb0ba3f4e11bb))
+* **API:** Setup the library for development ([1f7ce03](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/1f7ce0307db25ee553f0f924c872a73d4f0ae90f))
+* **data release:** add hand curated_lists.py and orphans with comments and a generator s… ([#33](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/33)) ([413dc23](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/413dc233b61cfe62faa90328fd7ceca40ff5968d))
+* Define JSON Schemas for ontology data release artifacts ([#32](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/32)) ([b23894a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b23894ad677ffdfa912ad0dc5897c099ff72efc3))
+* fix changelog ([0285ef7](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0285ef79dde453a6ff540b88ce6c391a5d992e2b))
+* implement stubbed query functions ([334deb5](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/334deb57463609d2736e369d188380686880fa9c))
+* regenerate all_ontology if the schema changes ([5f74bfb](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5f74bfb222a5d30dc5e4821c19ad2cc782e15c94))
+* set version regex for pyton api ([3720dab](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/3720dabd593b3c6138470bd0b871f32c03f94dcf))
+* setup Lintes for repo ([4a70384](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/4a70384556bbdeedcfbb1520de051c7a7aa06ace))
+* Store branch ancestors ("part_of" relationships) in all_ontology.json ([80e1f0d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/80e1f0ddc7be8e669521e09afc66eff919e2bbe6))
+* Store branch ancestors ("part_of" relationships) in all_ontology.json ([#38](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/38)) ([64c2653](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/64c2653574f614e939696b2f5e0c0f3c4833d740))
+* **testing:** add testing for ontology-builder ([e087eca](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/e087ecaf259cf102ef417296928545b74e4ef65b))
+* **testing:** add testing for ontology-builder ([e087eca](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/e087ecaf259cf102ef417296928545b74e4ef65b))
+* upload assets on release ([81725db](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/81725dbdcfe145662945bce3e1624f58c515e12a))
+
+
+### Misc
+
+* add ontology-assets to release ([b09c814](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b09c8144b90ce0bfe7a3890d7d8bc508c7fb64c3))
+* add ontology-assets to release ([04835c0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/04835c08bbbc5dce4a49864c884b7e84b8efdb92))
+* bootstrap release-please ([f32db86](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f32db86fa71fb9274fd6d3fa10c91b095ba3575f))
+* bootstrap release-please ([7d0554f](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/7d0554ffc4742d4aa363bfe8e25abab1fc51be7b))
+* change bootstrap-sha ([f2571e8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f2571e84900f204556b0ce83cbef533469ac16b6))
+* check that pr titles follow conventional commit format ([#41](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/41)) ([bd6d842](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/bd6d842c296d1b45fe3c8391a2a5dfa4770b857e))
+* clean-up extract ontology term metadata parsing ([b9d2959](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b9d2959e81e3ea09e7238bf22828c8943f8faa31))
+* configure release-please ([#40](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/40)) ([879ead2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/879ead24c2d680612302a6a8e759773bcf3a4c97))
+* **deps:** bump owlready2 from 0.38 to 0.45 in /tools/ontology-builder ([5466a08](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5466a0808bb9cae29c99cb145ba0642a35ab2303))
+* **deps:** bump owlready2 from 0.38 to 0.45 in /tools/ontology-builder ([#37](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/37)) ([db3e5c8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/db3e5c8af6ef9618947d95a76f1ee67ff0ddafaa))
+* **deps:** bump pyyaml from 6.0 to 6.0.1 in /tools/ontology-builder ([98dfba2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/98dfba2161fbf6fb2fe98dd22e31de910a4f379f))
+* **deps:** bump pyyaml from 6.0 to 6.0.1 in /tools/ontology-builder ([#36](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/36)) ([72e7e40](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/72e7e40a9ee9a3eba344ae060dcb8531fc9b664b))
+* enable release-please for API and Assets ([#55](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/55)) ([9ecda79](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/9ecda79210c5563dce8d8c743cca8367f35395ff))
+* move curated lists to ontology-assets ([#48](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/48)) ([77916df](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/77916df50d391c48ed0100441b1366f5013888bf))
+* move over all_ontology.json generator script + gha to repo from single-cell-curation ([f90fb05](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f90fb05d770ac17bfced15ca85e3f61d016dc4fa))
+* move over all_ontology.json generator script + gha to repo from single-cell-curation ([#27](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/27)) ([49237a7](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/49237a729a95092eccf725c351fdca726a21625e))
+* moving the generated artifacts ([c03c8e3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c03c8e353c61c69a807e80ec9d986bb652c41155))
+* refactor all_ontology_generator for cleanliness and modularity ([b96c552](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b96c552f5d21386fed083af039fccd918aad8844))
+* refactor all_ontology_generator for cleanliness and modularity ([b96c552](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b96c552f5d21386fed083af039fccd918aad8844))
+* refactor all_ontology_generator for cleanliness and modularity ([4384459](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/43844597e23aaabf7b3d7e0cd3593012b312ea05))
+* release 0.0.2 ([4972aa2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/4972aa291eca32a9c00c429be762143e66bb15e1))
+* release 0.0.2 ([#42](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/42)) ([19079d4](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/19079d47bb2161535b030c95628c2994dfc9827e))
+* release tsmith/release-assets ([63b782d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/63b782d2ee8a8bdbdf83e61e0d37674954c802ee))
+* release tsmith/release-assets ([#57](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/57)) ([6a6b02a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/6a6b02a96ab55f204480926ade478b197ff16e4e))
+* remove unused release.yml configs ([ce00bef](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/ce00bef8ec65fd03d973c63e14277165e098647c))
+* test-release ([5f20d18](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5f20d1862c5898e501d7dd990305e277212d7d2b))
+
+
+### BugFixes
+
+* .release-please-manifest.json is valid json ([c09f2cc](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c09f2cc479d55aed7aedb62a0cef779274d645ed))
+* add dependabot.yml ([575f371](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/575f371f8fcb74eff3db1a1060de9bbf8d479057))
+* add ontology-assets ([8d51dea](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/8d51deaa62c4620f915f806a36717ac6ab8b520e))
+* add ontology-assets ([01f504d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/01f504d0cdd5cb1031470479649a1e39dab3282f))
+* README.md ([d19efeb](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/d19efeb4b3510d7eebeb0c67af9a2755839e224c))
+* README.md ([1eae21d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/1eae21d1143d21fe248d8067671a270e46e54b19))
+* release pr format ([20d9d1d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/20d9d1d555ad6306c4c21b75ed05d37c6c13d4d0))
+* remove root from release-please-config.json ([8265b3e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/8265b3e104239f2c774b04fa13d0cf1c9d435534))
+* test branch ([f68622a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f68622aa261c6aee93d4ae568e049e1505e7b3a5))
+* test branch ([fac02bb](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/fac02bb900777a90bcd7891446d61d985cb8a87c))
+* test release ([aab95e8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/aab95e819c579b09e83b86b34f2248f03162fa01))
+* trigger all-ontology generation if schema changes ([#46](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/46)) ([3121833](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/3121833e24e39c449457e4fbd44cfb6cec5d21d5))
