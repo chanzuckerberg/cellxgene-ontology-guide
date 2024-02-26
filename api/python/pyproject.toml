@@ -13,7 +13,8 @@ license = { text = "MIT" }
 readme = "README.md"
 requires-python = "~= 3.11"
 dependencies = [
-    "PyYAML"
+    "PyYAML",
+    "requests"
 ]
 
 [project.optional-dependencies]

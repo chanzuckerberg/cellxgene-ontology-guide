@@ -1,11 +1,12 @@
 import gzip
 import json
 import re
+from io import BytesIO
 from typing import Any, Dict, List, Union
 
 import yaml
 from artifact_download import load_artifact_by_schema
-from constants import ALL_ONTOLOGY_FILENAME, PACKAGED_SCHEMA_VERSION, ONTOLOGY_INFO_FILENAME
+from constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
 
 
 class OntologyParser:
@@ -13,22 +14,21 @@ class OntologyParser:
     An object to parse ontology term metadata from ontologies corresponding to a given CellxGene Schema Version.
     """
 
-    def __init__(self, schema_version: str = PACKAGED_SCHEMA_VERSION):
+    def __init__(self, schema_version: str):
         """
         Initialize an OntologyParser object with the ontology metadata corresponding to the given CellxGene schema
-        version. By default, loads the ontology metadata for the packaged schema version from disk. If a
-        different schema version is set, the corresponding ontology metadata will be loaded instead. If not available
-        from disk, it will make a network call to GitHub Release Assets.
+        version. If not cached, it will make a network call to GitHub Release Assets to load in memory and
+        parse the corresponding ontology metadata.
 
         :param schema_version: str version of the schema to load ontology metadata for
         """
-        all_ontology_filepath = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
-        ontology_info_filepath = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
+        all_ontology = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
+        ontology_info = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
 
-        with gzip.open(all_ontology_filepath, "rt") as f:
+        with gzip.open(BytesIO(all_ontology), "rt") as f:
             self.ontology_dict = json.load(f)
 
-        with open(ontology_info_filepath, "rt") as f:
+        with open(ontology_info, "rt") as f:
             self.supported_ontologies = yaml.safe_load(f)
 
     def _parse_ontology_name(self, term_id: str) -> str:

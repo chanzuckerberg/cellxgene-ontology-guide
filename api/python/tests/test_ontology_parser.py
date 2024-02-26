@@ -34,7 +34,7 @@ def supported_ontologies():
 
 @pytest.fixture(scope="module")
 def ontology_parser(ontology_dict, supported_ontologies):
-    parser = OntologyParser()
+    parser = OntologyParser(schema_version="5.0.0")
     parser.ontology_dict = ontology_dict
     parser.supported_ontologies = supported_ontologies
     return parser
