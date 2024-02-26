@@ -19,7 +19,7 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: "main"
+          target-branch: "test-release" # TODO change to main
     outputs:
       release_created: ${{ steps.release.outputs.ontology-assets--release_created }}
       upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
@@ -32,7 +32,7 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v2
         with:
-          ref: tsmith/release-assets # TODO remove this line after testing
+          ref: tsmith/release-assets # TODO change to main
           fetch-depth: 1
       - name: Upload curated lists
         uses: actions/upload-release-asset@v1
