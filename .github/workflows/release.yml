@@ -26,7 +26,7 @@ jobs:
       upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
 
   add-release-artifacts:
-    runs-on: [self-hosted, ARM64]
+    runs-on: [ubuntu-latest]
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created == 'true' }}
     strategy:
@@ -50,7 +50,7 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v2
         with:
-          ref: tsmith/release-assets # TODO change to main
+          ref: test-release # TODO change to main
           fetch-depth: 1
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
