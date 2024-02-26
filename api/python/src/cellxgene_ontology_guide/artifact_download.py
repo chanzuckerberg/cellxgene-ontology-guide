@@ -1,6 +1,6 @@
 import os
 
-from constants import ARTIFACT_DIR, CURRENT_SCHEMA_VERSION
+from constants import ARTIFACT_DIR
 
 
 def load_artifact_by_schema(schema_version: str, filename: str) -> str:
@@ -12,8 +12,9 @@ def load_artifact_by_schema(schema_version: str, filename: str) -> str:
     :param filename: str name of the file to load
     :return: str path to the ontology file
     """
-    if schema_version == CURRENT_SCHEMA_VERSION:
-        return os.path.join(ARTIFACT_DIR, filename)
+    artifact_filepath = os.path.join(ARTIFACT_DIR, schema_version, filename)
+    if os.path.isfile(artifact_filepath):
+        return artifact_filepath
     else:
         # TODO: Add support for loading ontology files from different schema versions
         raise ValueError(f"Schema version {schema_version} is not supported in this package version.")

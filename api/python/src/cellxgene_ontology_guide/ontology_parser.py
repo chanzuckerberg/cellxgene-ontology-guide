@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Union
 
 import yaml
 from artifact_download import load_artifact_by_schema
-from constants import ALL_ONTOLOGY_FILENAME, CURRENT_SCHEMA_VERSION, ONTOLOGY_INFO_FILENAME
+from constants import ALL_ONTOLOGY_FILENAME, PACKAGED_SCHEMA_VERSION, ONTOLOGY_INFO_FILENAME
 
 
 class OntologyParser:
@@ -13,10 +13,10 @@ class OntologyParser:
     An object to parse ontology term metadata from ontologies corresponding to a given CellxGene Schema Version.
     """
 
-    def __init__(self, schema_version: str = CURRENT_SCHEMA_VERSION):
+    def __init__(self, schema_version: str = PACKAGED_SCHEMA_VERSION):
         """
         Initialize an OntologyParser object with the ontology metadata corresponding to the given CellxGene schema
-        version. By default, loads the ontology metadata for the latest compatible schema version from disk. If a
+        version. By default, loads the ontology metadata for the packaged schema version from disk. If a
         different schema version is set, the corresponding ontology metadata will be loaded instead. If not available
         from disk, it will make a network call to GitHub Release Assets.
 
