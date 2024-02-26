@@ -3,7 +3,7 @@ name: Validate Curated List Update
 on:
   push:
     paths:
-      - "**/tools/ontology-builder/src/ontology-references/**.json"
+      - "**/ontology-assets/**.json"
       - "**/artifact-schemas/**.json"
     branches-ignore:
       - main
