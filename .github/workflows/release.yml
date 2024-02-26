@@ -19,7 +19,7 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: "tsmith/release-assets" # TODO remove this line after testing
+          target-branch: "main"
     outputs:
       release_created: ${{ steps.release.outputs.ontology-assets--release_created }}
       upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
