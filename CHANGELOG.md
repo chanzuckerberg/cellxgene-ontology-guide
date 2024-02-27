@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.0.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/v0.0.1...v0.0.2) (2024-02-27)
+
+
+### BugFixes
+
+* exclude CHANGELOG.md from prettier ([968a17e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/968a17eb52edee20f7d816c9449c25542b645dae))
+* lint errors ([f5e4583](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f5e45838e3c99dc3785ffc12f5e72aecc1ceeb29))
+
 ## 0.0.1 (2024-02-26)
 
 ### Features
