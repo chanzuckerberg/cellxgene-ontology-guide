@@ -1,7 +1,7 @@
 from unittest.mock import Mock, patch
 from urllib.error import HTTPError, URLError
-import pytest
 
+import pytest
 from cellxgene_ontology_guide.artifact_download import load_artifact_by_schema
 from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_ASSET_RELEASE_URL
 
@@ -9,6 +9,7 @@ from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_A
 @pytest.fixture
 def mock_urlopen():
     """A fixture that mocks urlopen and simulates a successful response."""
+
     def get_mock_response(url):
         if url.endswith(ALL_ONTOLOGY_FILENAME):
             mock_response = Mock()
@@ -19,14 +20,17 @@ def mock_urlopen():
             return mock_response
         else:
             raise HTTPError(url, 404, "Not Found", hdrs=None, fp=None)
-    with patch('cellxgene_ontology_guide.artifact_download.urlopen', side_effect=get_mock_response) as mock:
+
+    with patch("cellxgene_ontology_guide.artifact_download.urlopen", side_effect=get_mock_response) as mock:
         yield mock
 
 
 @pytest.fixture
 def mock_urlopen_url_error():
     """A fixture that mocks urlopen and simulates a URLError."""
-    with patch('cellxgene_ontology_guide.artifact_download.urlopen', side_effect=URLError(reason='Network Unreachable')) as mock:
+    with patch(
+        "cellxgene_ontology_guide.artifact_download.urlopen", side_effect=URLError(reason="Network Unreachable")
+    ) as mock:
         yield mock
 
 

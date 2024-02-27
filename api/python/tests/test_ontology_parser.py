@@ -1,11 +1,10 @@
 import gzip
 import json
-import pytest
-from io import BytesIO
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
-from cellxgene_ontology_guide.ontology_parser import OntologyParser
+import pytest
 from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
+from cellxgene_ontology_guide.ontology_parser import OntologyParser
 
 
 @pytest.fixture(scope="module")
@@ -31,7 +30,7 @@ def ontology_dict():
             "CL:0000004": {"ancestors": ["CL:0000001", "CL:0000000"], "label": "cell B2", "deprecated": False},
         }
     }
-    return gzip.compress(json.dumps(ontology_dict).encode('utf-8'))
+    return gzip.compress(json.dumps(ontology_dict).encode("utf-8"))
 
 
 @pytest.fixture(scope="module")
@@ -46,7 +45,10 @@ def mock_load_artifact_by_schema(ontology_dict, supported_ontologies):
             return ontology_dict
         elif filename == ONTOLOGY_INFO_FILENAME:
             return supported_ontologies
-    with patch('cellxgene_ontology_guide.ontology_parser.load_artifact_by_schema', side_effect=get_mock_artifact_by_schema) as mock:
+
+    with patch(
+        "cellxgene_ontology_guide.ontology_parser.load_artifact_by_schema", side_effect=get_mock_artifact_by_schema
+    ) as mock:
         yield mock
 
 
