@@ -12,9 +12,7 @@ authors = [
 license = { text = "MIT" }
 readme = "README.md"
 requires-python = "~= 3.11"
-dependencies = [
-    "PyYAML",
-]
+dependencies = []
 
 [project.optional-dependencies]
 test = ["pytest"]

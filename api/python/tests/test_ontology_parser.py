@@ -1,10 +1,16 @@
+import gzip
+import json
 import pytest
+from io import BytesIO
+from unittest.mock import Mock, patch
+
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
+from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
 
 
 @pytest.fixture(scope="module")
 def ontology_dict():
-    return {
+    ontology_dict = {
         "CL": {
             "CL:0000000": {"ancestors": [], "label": "cell A", "deprecated": False},
             "CL:0000001": {
@@ -25,19 +31,28 @@ def ontology_dict():
             "CL:0000004": {"ancestors": ["CL:0000001", "CL:0000000"], "label": "cell B2", "deprecated": False},
         }
     }
+    return gzip.compress(json.dumps(ontology_dict).encode('utf-8'))
 
 
 @pytest.fixture(scope="module")
 def supported_ontologies():
-    return {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
+    return b'{"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}'
 
 
 @pytest.fixture(scope="module")
-def ontology_parser(ontology_dict, supported_ontologies):
-    parser = OntologyParser(schema_version="5.0.0")
-    parser.ontology_dict = ontology_dict
-    parser.supported_ontologies = supported_ontologies
-    return parser
+def mock_load_artifact_by_schema(ontology_dict, supported_ontologies):
+    def get_mock_artifact_by_schema(schema_version, filename):
+        if filename == ALL_ONTOLOGY_FILENAME:
+            return ontology_dict
+        elif filename == ONTOLOGY_INFO_FILENAME:
+            return supported_ontologies
+    with patch('cellxgene_ontology_guide.ontology_parser.load_artifact_by_schema', side_effect=get_mock_artifact_by_schema) as mock:
+        yield mock
+
+
+@pytest.fixture(scope="module")
+def ontology_parser(mock_load_artifact_by_schema):
+    return OntologyParser(schema_version="5.0.0")
 
 
 def test_parse_ontology_name(ontology_parser):

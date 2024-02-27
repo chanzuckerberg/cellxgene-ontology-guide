@@ -4,7 +4,6 @@ import re
 from io import BytesIO
 from typing import Any, Dict, List, Union
 
-import yaml
 from artifact_download import load_artifact_by_schema
 from constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
 
@@ -28,8 +27,7 @@ class OntologyParser:
         with gzip.open(BytesIO(all_ontology), "rt") as f:
             self.ontology_dict = json.load(f)
 
-        with open(ontology_info, "rt") as f:
-            self.supported_ontologies = yaml.safe_load(f)
+        self.supported_ontologies = json.loads(ontology_info)
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """

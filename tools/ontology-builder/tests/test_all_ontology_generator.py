@@ -9,7 +9,7 @@ from all_ontology_generator import _download_ontologies, _parse_ontologies
 @pytest.fixture
 def mock_ontology_info(tmpdir):
     # Create a temporary ontology info yaml file
-    onto_info_yml = tmpdir.join("ontology_info.yml")
+    onto_info_yml = tmpdir.join("ontology_info.json")
     onto_info_yml.write("ontology_name:\n  source: http://example.com\n  version: v1\n  filetype: owl\n")
     return str(onto_info_yml)
 

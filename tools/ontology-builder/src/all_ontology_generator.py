@@ -9,20 +9,19 @@ from urllib.error import HTTPError, URLError
 
 import env
 import owlready2
-import yaml
 
 
-def _download_ontologies(onto_info_yml: str = env.ONTO_INFO_YAML, output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
+def _download_ontologies(onto_info_file: str = env.ONTO_INFO_FILE, output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
     """
-    Downloads the ontology files specified in 'ontology_info.yml' into 'output_dir'
+    Downloads the ontology files specified in 'ontology_info.json' into 'output_dir'
 
-    :param str onto_info_yml: path to yaml file with ontology information
+    :param str onto_info_file: path to file with ontology information
     :param str output_dir: path to writable directory where ontology files will be downloaded to
 
     :rtype None
     """
-    with open(onto_info_yml, "r") as onto_info_handle:
-        ontology_info = yaml.safe_load(onto_info_handle)
+    with open(onto_info_file, "r") as f:
+        ontology_info = json.load(f)
 
     def download(_ontology: str, _url: str) -> None:
         print(f"Start Downloading {_ontology}")
