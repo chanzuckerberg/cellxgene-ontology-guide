@@ -8,10 +8,10 @@ from all_ontology_generator import _download_ontologies, _parse_ontologies
 
 @pytest.fixture
 def mock_ontology_info(tmpdir):
-    # Create a temporary ontology info yaml file
-    onto_info_yml = tmpdir.join("ontology_info.json")
-    onto_info_yml.write("ontology_name:\n  source: http://example.com\n  version: v1\n  filetype: owl\n")
-    return str(onto_info_yml)
+    # Create a temporary ontology info file
+    onto_info_file = tmpdir.join("ontology_info.json")
+    onto_info_file.write('{"ontology_name": {"source": "http://example.com", "version": "v1", "filetype": "owl"}}')
+    return str(onto_info_file)
 
 
 @pytest.fixture
@@ -37,7 +37,7 @@ def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
         mock_urlopen.return_value = mock_response
 
         # Call the function
-        _download_ontologies(onto_info_yml=mock_ontology_info, output_dir=mock_raw_ontology_dir)
+        _download_ontologies(onto_info_file=mock_ontology_info, output_dir=mock_raw_ontology_dir)
 
         mock_urlretrieve.assert_called_once()
 
@@ -70,7 +70,7 @@ def test_download_ontologies_http_error(mock_ontology_info, mock_raw_ontology_di
 
         # Assertion
         with pytest.raises(Exception) as exc_info:
-            _download_ontologies(onto_info_yml=mock_ontology_info, output_dir=mock_raw_ontology_dir)
+            _download_ontologies(onto_info_file=mock_ontology_info, output_dir=mock_raw_ontology_dir)
         assert "returns status code 404" in str(exc_info.value)
 
 
@@ -81,5 +81,5 @@ def test_download_ontologies_url_error(mock_ontology_info, mock_raw_ontology_dir
 
         # Assertion
         with pytest.raises(Exception) as exc_info:
-            _download_ontologies(onto_info_yml=mock_ontology_info, output_dir=mock_raw_ontology_dir)
+            _download_ontologies(onto_info_file=mock_ontology_info, output_dir=mock_raw_ontology_dir)
         assert "fails due to Connection refused" in str(exc_info.value)
