@@ -24,6 +24,7 @@ repos:
         args: [--write]
         stages: [commit]
         exclude_types: ["json"]
+        exclude: "CHANGELOG.md"
         additional_dependencies:
           - prettier@3.0.2
           - prettier-plugin-organize-imports@2.3.3
