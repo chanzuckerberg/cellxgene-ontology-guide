@@ -14,9 +14,9 @@ class OntologyParser:
     """
 
     # Private attribute to keep track of instances
-    _instances = {}
+    _instances: Dict[str, Any] = {}
 
-    def __new__(cls, schema_version: str):
+    def __new__(cls, schema_version: str) -> Any:
         """
         Ensure that only one instance per schema_version exists.
         """
@@ -34,7 +34,7 @@ class OntologyParser:
 
         :param schema_version: str version of the schema to load ontology metadata for
         """
-        if not hasattr(self, 'initialized'):  # Prevents reinitialization
+        if not hasattr(self, "initialized"):  # Prevents reinitialization
             all_ontology = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
             ontology_info = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
 
