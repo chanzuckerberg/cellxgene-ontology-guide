@@ -127,3 +127,11 @@ def test_get_term_metadata(ontology_parser):
 
 def test_get_term_label(ontology_parser):
     assert ontology_parser.get_term_label("CL:0000004") == "cell B2"
+
+
+def test__init__multiple_ontology_parsers(mock_load_artifact_by_schema, ontology_parser):
+    ontology_parser_duplicate = OntologyParser(schema_version="5.0.0")
+    ontology_parser_4 = OntologyParser(schema_version="4.0.0")
+
+    assert ontology_parser_duplicate is ontology_parser
+    assert ontology_parser_4 is not ontology_parser

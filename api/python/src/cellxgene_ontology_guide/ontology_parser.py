@@ -13,6 +13,19 @@ class OntologyParser:
     An object to parse ontology term metadata from ontologies corresponding to a given CellxGene Schema Version.
     """
 
+    # Private attribute to keep track of instances
+    _instances = {}
+
+    def __new__(cls, schema_version: str):
+        """
+        Ensure that only one instance per schema_version exists.
+        """
+        if schema_version not in cls._instances:
+            instance = super(OntologyParser, cls).__new__(cls)
+            cls._instances[schema_version] = instance
+            return instance
+        return cls._instances[schema_version]
+
     def __init__(self, schema_version: str):
         """
         Initialize an OntologyParser object with the ontology metadata corresponding to the given CellxGene schema
@@ -21,13 +34,16 @@ class OntologyParser:
 
         :param schema_version: str version of the schema to load ontology metadata for
         """
-        all_ontology = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
-        ontology_info = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
+        if not hasattr(self, 'initialized'):  # Prevents reinitialization
+            all_ontology = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
+            ontology_info = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
 
-        with gzip.open(BytesIO(all_ontology), "rt") as f:
-            self.ontology_dict = json.load(f)
+            with gzip.open(BytesIO(all_ontology), "rt") as f:
+                self.ontology_dict = json.load(f)
 
-        self.supported_ontologies = json.loads(ontology_info)
+            self.supported_ontologies = json.loads(ontology_info)
+
+            self.initialized = True
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
