@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/v0.0.1...v0.1.0) (2024-02-28)
+
+
+### Features
+
+* load GH Release Assets for schema version in memory ([#72](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/72)) ([58bad0a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/58bad0a698f262f167ba821ff00a4a7ca254d13a))
+
+
+### BugFixes
+
+* exclude CHANGELOG.md from prettier ([968a17e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/968a17eb52edee20f7d816c9449c25542b645dae))
+* lint errors ([f5e4583](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f5e45838e3c99dc3785ffc12f5e72aecc1ceeb29))
+
 ## 0.0.1 (2024-02-26)
 
 ### Features
