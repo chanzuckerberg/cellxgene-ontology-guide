@@ -163,7 +163,7 @@ class OntologyParser:
         return label
 
     def get_ontology_download_url(
-        self, ontology_name: Ontology, ontology_filetype: OntologyFileType, ontology_variant: OntologyVariant = None
+        self, ontology: Ontology, ontology_filetype: OntologyFileType, ontology_variant: OntologyVariant = None
     ) -> str:
         """
         Get the download URL for a given ontology file. If the ontology_variant is not provided, the default ontology
@@ -173,22 +173,15 @@ class OntologyParser:
         get_ontology_download_url("CL", "owl") -> "http://example.com/2024-01-01/cl.owl"
         get_ontology_download_url("CL", "obo", "base") -> "http://example.com/2024-01-01/cl-base.obo"
 
-        :param ontology_name: str name of the ontology to fetch
+        :param ontology: Ontology enum of the ontology to fetch
         :param ontology_filetype: OntologyFileType enum of the ontology file type to fetch
         :param ontology_variant: OntologyVariant enum of the ontology variant to fetch
         :return: str download URL for the requested ontology file
         """
-        if not Ontology.has_value(ontology_name):
-            raise ValueError(f"Ontology {ontology_name} is not supported by cellxgene-ontology-guide.")
-        if not OntologyFileType.has_value(ontology_filetype):
-            raise ValueError(f"Ontology filetype {ontology_filetype} is not supported by cellxgene-ontology-guide.")
-        if ontology_variant is not None and not OntologyVariant.has_value(ontology_variant):
-            raise ValueError(f"Ontology variant {ontology_variant} is not supported by cellxgene-ontology-guide.")
-
-        source_url = self.supported_ontologies[ontology_name]["source"]
-        version = self.supported_ontologies[ontology_name]["version"]
+        source_url = self.supported_ontologies[ontology.name]["source"]
+        version = self.supported_ontologies[ontology.name]["version"]
         return (
-            f"{source_url}/{version}/{ontology_name}-{ontology_variant}.{ontology_filetype}"
+            f"{source_url}/{version}/{ontology.value}-{ontology_variant.value}.{ontology_filetype.value}"
             if ontology_variant
-            else f"{source_url}/{version}/{ontology_name}.{ontology_filetype}"
+            else f"{source_url}/{version}/{ontology.value}.{ontology_filetype.value}"
         )

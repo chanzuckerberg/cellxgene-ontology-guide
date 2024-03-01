@@ -1,29 +1,23 @@
 from enum import Enum
 
 
-class OntologyGuideEnum(Enum):
-    @classmethod
-    def has_value(cls, value):
-        return value in cls._value2member_map_
-
-
-class Ontology(OntologyGuideEnum):
+class Ontology(Enum):
     """
     Enum for the set of ontologies supported by CZ CellXGene.
     """
 
-    CL = "CL"
-    EFO = "EFO"
-    MONDO = "MONDO"
-    UBERON = "UBERON"
-    HANCESTRO = "HANCESTRO"
-    HSAPDV = "HsapDv"
-    MMUSDV = "MmusDv"
-    PATO = "PATO"
-    NCBITAXON = "NCBITaxon"
+    CL = "cl"
+    EFO = "efo"
+    MONDO = "mondo"
+    UBERON = "uberon"
+    HANCESTRO = "hancestro"
+    HsapDv = "hsapdv"
+    MmusDv = "mmusdv"
+    PATO = "pato"
+    NCBITaxon = "ncbitaxon"
 
 
-class OntologyVariant(OntologyGuideEnum):
+class OntologyVariant(Enum):
     """
     Enum for the standard set of ontology variants. Each is curated for a specific purpose.
 
@@ -37,7 +31,7 @@ class OntologyVariant(OntologyGuideEnum):
     BASIC = "basic"
 
 
-class OntologyFileType(OntologyGuideEnum):
+class OntologyFileType(Enum):
     """
     Enum for the standard set of ontology file types. Each requires different parsing tools, but relay the same
     information.

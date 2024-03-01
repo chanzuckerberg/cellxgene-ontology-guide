@@ -2,6 +2,7 @@ from unittest.mock import patch
 
 import pytest
 from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
+from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 
 
@@ -127,20 +128,11 @@ def test_get_term_label(ontology_parser):
 
 
 def test_get_ontology_download_url(ontology_parser):
-    assert ontology_parser.get_ontology_download_url("CL", "owl") == "http://example.com/2024-01-01/CL.owl"
-    assert ontology_parser.get_ontology_download_url("CL", "obo", "base") == "http://example.com/2024-01-01/CL-base.obo"
-
-
-def test_get_ontology_download_url__unsupported_filetype(ontology_parser):
-    with pytest.raises(ValueError):
-        ontology_parser.get_ontology_download_url("CL", "yaml")
-
-
-def test_get_ontology_download_url__unsupported_file_variant(ontology_parser):
-    with pytest.raises(ValueError):
-        ontology_parser.get_ontology_download_url("CL", "json", "editable")
-
-
-def test_get_ontology_download_url__unsupported_ontology(ontology_parser):
-    with pytest.raises(ValueError):
-        ontology_parser.get_ontology_download_url("GO", "owl")
+    assert (
+        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OWL)
+        == "http://example.com/2024-01-01/cl.owl"
+    )
+    assert (
+        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OBO, OntologyVariant.BASE)
+        == "http://example.com/2024-01-01/cl-base.obo"
+    )
