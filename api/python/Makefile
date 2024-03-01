@@ -1,7 +1,7 @@
-install:
-	pip install -e .
+install: package-data
+	pip install .
 
-install-dev:
+install-dev: package-data
 	pip install -e .[test]
 
 package-data:
