@@ -1,30 +1,15 @@
-import gzip
-import json
 import re
-from io import BytesIO
 from typing import Any, Dict, List, Union
 
 from artifact_download import load_artifact_by_schema
 from constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
+from entities import Ontology, OntologyFileType, OntologyVariant
 
 
 class OntologyParser:
     """
     An object to parse ontology term metadata from ontologies corresponding to a given CellxGene Schema Version.
     """
-
-    # Private attribute to keep track of instances
-    _instances: Dict[str, Any] = {}
-
-    def __new__(cls, schema_version: str) -> Any:
-        """
-        Ensure that only one instance per schema_version exists.
-        """
-        if schema_version not in cls._instances:
-            instance = super(OntologyParser, cls).__new__(cls)
-            cls._instances[schema_version] = instance
-            return instance
-        return cls._instances[schema_version]
 
     def __init__(self, schema_version: str):
         """
@@ -34,16 +19,8 @@ class OntologyParser:
 
         :param schema_version: str version of the schema to load ontology metadata for
         """
-        if not hasattr(self, "initialized"):  # Prevents reinitialization
-            all_ontology = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
-            ontology_info = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
-
-            with gzip.open(BytesIO(all_ontology), "rt") as f:
-                self.ontology_dict = json.load(f)
-
-            self.supported_ontologies = json.loads(ontology_info)
-
-            self.initialized = True
+        self.ontology_dict = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
+        self.supported_ontologies = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
@@ -184,3 +161,34 @@ class OntologyParser:
         ontology_name = self._parse_ontology_name(term_id)
         label: str = self.ontology_dict[ontology_name][term_id]["label"]
         return label
+
+    def get_ontology_download_url(
+        self, ontology_name: Ontology, ontology_filetype: OntologyFileType, ontology_variant: OntologyVariant = None
+    ) -> str:
+        """
+        Get the download URL for a given ontology file. If the ontology_variant is not provided, the default ontology
+        file will be returned.
+
+        Examples:
+        get_ontology_download_url("CL", "owl") -> "http://example.com/2024-01-01/cl.owl"
+        get_ontology_download_url("CL", "obo", "base") -> "http://example.com/2024-01-01/cl-base.obo"
+
+        :param ontology_name: str name of the ontology to fetch
+        :param ontology_filetype: OntologyFileType enum of the ontology file type to fetch
+        :param ontology_variant: OntologyVariant enum of the ontology variant to fetch
+        :return: str download URL for the requested ontology file
+        """
+        if not Ontology.has_value(ontology_name):
+            raise ValueError(f"Ontology {ontology_name} is not supported by cellxgene-ontology-guide.")
+        if not OntologyFileType.has_value(ontology_filetype):
+            raise ValueError(f"Ontology filetype {ontology_filetype} is not supported by cellxgene-ontology-guide.")
+        if ontology_variant is not None and not OntologyVariant.has_value(ontology_variant):
+            raise ValueError(f"Ontology variant {ontology_variant} is not supported by cellxgene-ontology-guide.")
+
+        source_url = self.supported_ontologies[ontology_name]["source"]
+        version = self.supported_ontologies[ontology_name]["version"]
+        return (
+            f"{source_url}/{version}/{ontology_name}-{ontology_variant}.{ontology_filetype}"
+            if ontology_variant
+            else f"{source_url}/{version}/{ontology_name}.{ontology_filetype}"
+        )
