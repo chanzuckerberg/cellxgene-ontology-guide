@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.0.1...python-api-v0.1.0) (2024-03-01)
+
+
+### Features
+
+* load GH Release Assets for schema version in memory ([#72](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/72)) ([58bad0a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/58bad0a698f262f167ba821ff00a4a7ca254d13a))
+
+
+### BugFixes
+
+* lint errors ([f5e4583](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f5e45838e3c99dc3785ffc12f5e72aecc1ceeb29))
+* python api releases ([bf0477e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/bf0477edcc36a96ff72ce05c7a0081d4f4dd9d37))
+
 ## 0.0.1 (2024-02-26)
 
 ### Features
