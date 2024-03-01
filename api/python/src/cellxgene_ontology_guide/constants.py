@@ -1,6 +1,7 @@
 import os
 
 PACKAGE_ROOT = os.path.dirname(os.path.realpath(__file__))
+DATA_ROOT = os.path.join(PACKAGE_ROOT, "data")
 ALL_ONTOLOGY_FILENAME = "all_ontology.json.gz"
 ONTOLOGY_INFO_FILENAME = "ontology_info.json"
 ONTOLOGY_ASSET_RELEASE_URL = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/releases/download"
