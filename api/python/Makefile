@@ -8,8 +8,7 @@ uninstall:
 	pip uninstall -y cellxgene-ontology-guide
 
 clean: uninstall
-	rm -rf ./build ./src/cellxgene_ontology_guide.egg-info ./src/cellxgene_ontology_guide/data
-  	rm ./LICENSE
+	rm -rf ./build ./src/cellxgene_ontology_guide.egg-info ./src/cellxgene_ontology_guide/data ./LICENSE
 
 package-data:
   	cp ../../LICENSE ./LICENSE
