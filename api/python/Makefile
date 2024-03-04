@@ -11,7 +11,7 @@ clean: uninstall
 	rm -rf ./build ./src/cellxgene_ontology_guide.egg-info ./src/cellxgene_ontology_guide/data ./LICENSE
 
 package-data:
-  	cp ../../LICENSE ./LICENSE
+	cp ../../LICENSE ./LICENSE
 	cp -r ../../ontology-assets/ ./src/cellxgene_ontology_guide/data
 	touch ./src/cellxgene_ontology_guide/data/__init__.py
 
