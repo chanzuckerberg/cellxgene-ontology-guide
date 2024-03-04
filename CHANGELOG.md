@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/v0.0.1...v0.1.0) (2024-03-04)
+
+
+### Features
+
+* add data to the python package  ([#87](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/87)) ([0eb6831](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0eb68314345e641218b8bae243cff417271dca1b))
+* include license file with python package ([#85](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/85)) ([2be3d81](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2be3d817041a4fbb6d5ab8b169a69b2fd8086e38))
+* load GH Release Assets for schema version in memory ([#72](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/72)) ([58bad0a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/58bad0a698f262f167ba821ff00a4a7ca254d13a))
+* Support getting download link for ontology from source repo ([#86](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/86)) ([fd55b76](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/fd55b760e655d419adcea94ade948347fa95ca6e))
+
+
+### BugFixes
+
+* exclude CHANGELOG.md from prettier ([968a17e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/968a17eb52edee20f7d816c9449c25542b645dae))
+* lint errors ([f5e4583](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f5e45838e3c99dc3785ffc12f5e72aecc1ceeb29))
+* python api releases ([bf0477e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/bf0477edcc36a96ff72ce05c7a0081d4f4dd9d37))
+
 ## 0.0.1 (2024-02-26)
 
 ### Features
