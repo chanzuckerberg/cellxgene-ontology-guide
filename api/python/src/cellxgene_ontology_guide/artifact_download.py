@@ -16,7 +16,7 @@ def load_artifact_by_schema(schema_version: str, filename: str) -> Any:
 
     :param schema_version: str version of the schema to load ontology assets for
     :param filename: str name of the asset to load
-    :return: bytes content of the asset
+    :return: Nested dict representation of the content of the asset
     """
     try:
         ontology_asset_tag = SCHEMA_VERSION_TO_ONTOLOGY_ASSET_TAG[schema_version]
