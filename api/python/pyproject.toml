@@ -9,7 +9,7 @@ description = "Access ontology data used by CZ cellxgene"
 authors = [
     { name = "Chan Zuckerberg Initiative Foundation", email = "cellxgene@chanzuckerberg.com" }
 ]
-license = { text = "MIT" }
+license = { file = "LICENSE" }
 readme = "README.md"
 requires-python = "~= 3.11"
 dependencies = []

@@ -1,10 +1,14 @@
+import gzip
+import json
+from io import BytesIO
+from typing import Any
 from urllib.error import HTTPError, URLError
 from urllib.request import urlopen
 
 from constants import ONTOLOGY_ASSET_RELEASE_URL, SCHEMA_VERSION_TO_ONTOLOGY_ASSET_TAG
 
 
-def load_artifact_by_schema(schema_version: str, filename: str) -> bytes:
+def load_artifact_by_schema(schema_version: str, filename: str) -> Any:
     """
     Load ontology files from GitHub Release Assets, based on the provided schema version.
     Returns ValueError if the schema version is not supported in this package version or filename is not found for
@@ -12,7 +16,7 @@ def load_artifact_by_schema(schema_version: str, filename: str) -> bytes:
 
     :param schema_version: str version of the schema to load ontology assets for
     :param filename: str name of the asset to load
-    :return: bytes content of the asset
+    :return: Nested dict representation of the content of the asset
     """
     try:
         ontology_asset_tag = SCHEMA_VERSION_TO_ONTOLOGY_ASSET_TAG[schema_version]
@@ -25,7 +29,11 @@ def load_artifact_by_schema(schema_version: str, filename: str) -> bytes:
         with urlopen(download_url) as response:
             if response.status == 200:
                 content: bytes = response.read()
-                return content
+                if filename.endswith("json.gz"):
+                    with gzip.open(BytesIO(content), "rt") as f:
+                        return json.load(f)
+                else:
+                    return json.loads(content)
             else:
                 raise ValueError(f"Server responded with status code: {response.status}")
     except HTTPError as e:
