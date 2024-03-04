@@ -1,9 +1,10 @@
+import gzip
 from unittest.mock import Mock, patch
 from urllib.error import HTTPError, URLError
 
 import pytest
 from cellxgene_ontology_guide.artifact_download import load_artifact_by_schema
-from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_ASSET_RELEASE_URL
+from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_ASSET_RELEASE_URL, ONTOLOGY_INFO_FILENAME
 
 
 @pytest.fixture
@@ -15,7 +16,16 @@ def mock_urlopen():
             mock_response = Mock()
             mock_response.__enter__ = Mock(return_value=mock_response)
             mock_response.__exit__ = Mock(return_value=None)
-            mock_response.read.return_value = b'{"key": "value"}'
+            mock_response.read.return_value = gzip.compress(b'{"key": "value"}')
+            mock_response.status = 200
+            return mock_response
+        elif url.endswith(ONTOLOGY_INFO_FILENAME):
+            mock_response = Mock()
+            mock_response.__enter__ = Mock(return_value=mock_response)
+            mock_response.__exit__ = Mock(return_value=None)
+            mock_response.read.return_value = (
+                b'{"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}'
+            )
             mock_response.status = 200
             return mock_response
         else:
@@ -34,13 +44,25 @@ def mock_urlopen_url_error():
         yield mock
 
 
-def test_load_artifact_by_schema__success(mock_urlopen):
+def test_load_artifact_by_schema__success_gzip(mock_urlopen):
     schema_version = "5.0.0"
     expected_tag = "ontology-assets-v0.0.1"
-    expected_resp_content = b'{"key": "value"}'
+    expected_resp_content = {"key": "value"}
 
     result = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
     expected_download_url = f"{ONTOLOGY_ASSET_RELEASE_URL}/{expected_tag}/{ALL_ONTOLOGY_FILENAME}"
+
+    mock_urlopen.assert_called_once_with(expected_download_url)
+    assert result == expected_resp_content
+
+
+def test_load_artifact_by_schema__success_json(mock_urlopen):
+    schema_version = "5.0.0"
+    expected_tag = "ontology-assets-v0.0.1"
+    expected_resp_content = {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
+
+    result = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
+    expected_download_url = f"{ONTOLOGY_ASSET_RELEASE_URL}/{expected_tag}/{ONTOLOGY_INFO_FILENAME}"
 
     mock_urlopen.assert_called_once_with(expected_download_url)
     assert result == expected_resp_content

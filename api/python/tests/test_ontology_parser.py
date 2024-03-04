@@ -1,15 +1,14 @@
-import gzip
-import json
 from unittest.mock import patch
 
 import pytest
 from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
+from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 
 
 @pytest.fixture(scope="module")
 def ontology_dict():
-    ontology_dict = {
+    return {
         "CL": {
             "CL:0000000": {"ancestors": [], "label": "cell A", "deprecated": False},
             "CL:0000001": {
@@ -30,12 +29,11 @@ def ontology_dict():
             "CL:0000004": {"ancestors": ["CL:0000001", "CL:0000000"], "label": "cell B2", "deprecated": False},
         }
     }
-    return gzip.compress(json.dumps(ontology_dict).encode("utf-8"))
 
 
 @pytest.fixture(scope="module")
 def supported_ontologies():
-    return b'{"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}'
+    return {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
 
 
 @pytest.fixture(scope="module")
@@ -129,9 +127,12 @@ def test_get_term_label(ontology_parser):
     assert ontology_parser.get_term_label("CL:0000004") == "cell B2"
 
 
-def test__init__multiple_ontology_parsers(mock_load_artifact_by_schema, ontology_parser):
-    ontology_parser_duplicate = OntologyParser(schema_version="5.0.0")
-    ontology_parser_4 = OntologyParser(schema_version="4.0.0")
-
-    assert ontology_parser_duplicate is ontology_parser
-    assert ontology_parser_4 is not ontology_parser
+def test_get_ontology_download_url(ontology_parser):
+    assert (
+        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OWL)
+        == "http://example.com/2024-01-01/cl.owl"
+    )
+    assert (
+        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OBO, OntologyVariant.BASE)
+        == "http://example.com/2024-01-01/cl-base.obo"
+    )
