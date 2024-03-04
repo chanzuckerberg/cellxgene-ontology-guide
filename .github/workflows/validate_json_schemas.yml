@@ -1,4 +1,4 @@
-name: Validate Curated List Update
+name: Validate JSON Schemas
 
 on:
   push:

@@ -52,6 +52,9 @@ def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:
                 os.path.join(env.SCHEMA_DIR, "cell_subclass_list_schema.json"),
                 os.path.join(path, "cell_subclass_list.json"),
             ),
+            verify_json(
+                os.path.join(env.SCHEMA_DIR, "ontology_info_schema.json"), os.path.join(path, "ontology_info.json")
+            ),
         ]
     ):
         sys.exit(1)
