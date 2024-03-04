@@ -19,13 +19,16 @@ test = ["pytest"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
-include = ["cellxgene_ontology_guide"]
 
-[tool.pytest.ini_options]
-pythonpath = ["src/cellxgene_ontology_guide"]
+[tool.setuptools.package-data]
+"*" = ["*.json", "*.json.gz"]
 
 [tool.setuptools_scm]
 version_file = "src/cellxgene_ontology_guide/_version.py"
 version_scheme = "python-simplified-semver"
 root = "../.."  # relative to the location of the pyproject.toml file
 tag_regex = "^python-api-(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
+
+[tool.pytest.ini_options]
+pythonpath = ["src/cellxgene_ontology_guide"]
+
