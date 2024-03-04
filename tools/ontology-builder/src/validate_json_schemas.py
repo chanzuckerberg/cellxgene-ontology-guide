@@ -1,3 +1,4 @@
+import gzip
 import json
 import logging
 import os.path
@@ -10,6 +11,14 @@ logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 
+def get_schema_file_name(json_file_name: str, schema_dir: str = env.SCHEMA_DIR) -> str:
+    """
+    Get the schema from the json file
+    :return: the schema
+    """
+    return os.path.join(schema_dir, f"{json_file_name.split('.')[0]}_schema.json")
+
+
 def verify_json(schema_file_name: str, json_file_name: str) -> bool:
     """
     Verify that the json files match the schema
@@ -17,11 +26,24 @@ def verify_json(schema_file_name: str, json_file_name: str) -> bool:
     """
     logger.info(f"Verifying {json_file_name} against {schema_file_name}")
     try:
-        with open(schema_file_name, "r") as f:
+        with open(schema_file_name) as f:
             schema = json.load(f)
+    except Exception as e:
+        logger.exception(f"Error loading {schema_file_name}: {e}")
+        return False
 
-        with open(json_file_name, "r") as f:
-            data = json.load(f)
+    try:
+        if json_file_name.endswith(".json.gz"):
+            with gzip.open(json_file_name, "rt") as f:
+                data = json.load(f)
+        else:
+            with open(json_file_name) as f:
+                data = json.load(f)
+    except Exception as e:
+        logger.exception(f"Error loading {json_file_name}: {e}")
+        return False
+
+    try:
         validate(instance=data, schema=schema)
     except Exception as e:
         logger.exception(f"Error validating {json_file_name} against {schema_file_name}: {e}")
@@ -35,27 +57,18 @@ def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:
     :param path: The destination path for the json files
     :return:
     """
-    if not all(
-        [
-            verify_json(
-                os.path.join(env.SCHEMA_DIR, "system_list_schema.json"), os.path.join(path, "system_list.json")
-            ),
-            verify_json(os.path.join(env.SCHEMA_DIR, "organ_list_schema.json"), os.path.join(path, "organ_list.json")),
-            verify_json(
-                os.path.join(env.SCHEMA_DIR, "tissue_general_list_schema.json"),
-                os.path.join(path, "tissue_general_list.json"),
-            ),
-            verify_json(
-                os.path.join(env.SCHEMA_DIR, "cell_class_list_schema.json"), os.path.join(path, "cell_class_list.json")
-            ),
-            verify_json(
-                os.path.join(env.SCHEMA_DIR, "cell_subclass_list_schema.json"),
-                os.path.join(path, "cell_subclass_list.json"),
-            ),
-            verify_json(
-                os.path.join(env.SCHEMA_DIR, "ontology_info_schema.json"), os.path.join(path, "ontology_info.json")
-            ),
-        ]
+    files = os.listdir(path)
+    if not (
+        all(
+            verify_json(get_schema_file_name(file), os.path.join(path, file))
+            for file in files
+            if file.endswith(".json")
+        )
+        and all(
+            verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file))
+            for file in files
+            if file.endswith(".json.gz")
+        )
     ):
         sys.exit(1)
 

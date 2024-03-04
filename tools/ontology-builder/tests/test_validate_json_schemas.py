@@ -1,7 +1,8 @@
+import gzip
 import json
 
 import pytest
-from validate_json_schemas import verify_json
+from validate_json_schemas import get_schema_file_name, verify_json
 
 
 @pytest.fixture
@@ -18,12 +19,30 @@ def schema_file(tmpdir):
     return str(schema_file)
 
 
+def test_get_schema_file_name(tmpdir):
+    # Create a temporary JSON file
+    json_file = "test.json"
+
+    # Assert the output file name is correct
+    assert get_schema_file_name(str(json_file), tmpdir) == str(tmpdir.join("test_schema.json"))
+
+
 class TestVerifyJson:
     def test_valid_json(self, schema_file, tmpdir):
         # Create a valid JSON file
         json_data = {"name": "John", "age": 30}
         json_file = tmpdir.join("valid.json")
         with open(str(json_file), "w") as f:
+            json.dump(json_data, f)
+
+        # Assert validation passes
+        assert verify_json(schema_file, str(json_file)) is True
+
+    def test_valid_json_gz(self, schema_file, tmpdir):
+        # Create a valid JSON GZ file
+        json_data = {"name": "John", "age": 30}
+        json_file = tmpdir.join("valid.json.gz")
+        with gzip.open(str(json_file), "wt") as f:
             json.dump(json_data, f)
 
         # Assert validation passes
