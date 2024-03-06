@@ -254,4 +254,3 @@ if __name__ == "__main__":
     ontology_info = _get_ontology_info_file()
     _download_ontologies(ontology_info)
     _parse_ontologies(ontology_info)
-    # comment
