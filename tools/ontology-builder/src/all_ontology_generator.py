@@ -4,7 +4,7 @@ import os
 import re
 import urllib.request
 from threading import Thread
-from typing import Any, Dict, Set
+from typing import Any, Dict
 from urllib.error import HTTPError, URLError
 
 import env
@@ -87,10 +87,11 @@ def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
     return onto
 
 
-def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> Set[str]:
+def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> Dict[str, int]:
     """
-    Returns a list of ancestors ids of the given onto class, only returns those belonging to ontology_name,
-    it will format the id from the form CL_xxxx to CL:xxxx
+    Returns a list of unique ancestor ontology term ids of the given onto class. Only returns those belonging to
+    ontology_name, it will format the id from the form CL_xxxx to CL:xxxx. Ancestors are returned in ascending order
+    of distance from the given term.
 
     :param owlready2.entity.ThingClass onto_class: the class for which ancestors will be retrieved
     :param str onto_name: only ancestors from this ontology will be kept
@@ -98,32 +99,38 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> S
     :rtype List[str]
     :return list of ancestors (term ids), it could be empty
     """
-
-    def _get_branch_ancestors(term: owlready2.entity.ThingClass) -> Set[str]:
-        # a branch ancestor is defined in ontology files as having a "part_of" (BFO_0000050) relationship with a term
-        branch_ancestors = set()
-        for subclass in term.is_a:
+    ancestors: Dict[str, int] = dict()
+    queue = [(onto_class, 1)]
+    while queue:
+        term, distance = queue.pop(0)
+        for parent in term.is_a:
+            # a branch ancestor is defined as having a "part_of" (BFO_0000050) relationship with a term
             if (
-                hasattr(subclass, "property")
-                and subclass.property.name == "BFO_0000050"
-                and isinstance(subclass.value, owlready2.entity.ThingClass)
+                hasattr(parent, "property")
+                and parent.property.name == "BFO_0000050"
+                and isinstance(parent.value, owlready2.entity.ThingClass)
             ):
-                branch_ancestor_name = subclass.value.name.replace("obo.", "").replace("_", ":")
-                if branch_ancestor_name.split(":")[0] == onto_name:
-                    branch_ancestors.add(branch_ancestor_name)
-                    branch_ancestors.update(_get_ancestors(subclass.value, onto_name))
-        return branch_ancestors
+                branch_ancestor_name = parent.value.name.replace("obo.", "").replace("_", ":")
+                if branch_ancestor_name in ancestors:
+                    ancestors[branch_ancestor_name] = min(ancestors[branch_ancestor_name], distance)
+                else:
+                    queue.append((parent.value, distance + 1))
+                    if branch_ancestor_name.split(":")[0] == onto_name:
+                        ancestors[branch_ancestor_name] = distance
+            elif hasattr(parent, "name") and not hasattr(parent, "Classes"):
+                parent_name = parent.name.replace("_", ":")
+                if parent_name in ancestors:
+                    ancestors[parent_name] = min(ancestors[parent_name], distance)
+                else:
+                    queue.append((parent, distance + 1))
+                    ancestors[parent_name] = distance
 
-    ancestors = set()
-    for ancestor in onto_class.ancestors():
-        if ancestor.name.split("_")[0] == onto_name:
-            ancestors.add(ancestor.name.replace("_", ":"))
-            if onto_name != "NCBITaxon":
-                ancestors.update(_get_branch_ancestors(ancestor))
-
-    # remove self
-    ancestors.remove(onto_class.name.replace("_", ":"))
-    return ancestors
+    # filter out ancestors that are not from the ontology we are currently processing
+    return {
+        ancestor: distance
+        for ancestor, distance in sorted(ancestors.items(), key=lambda item: item[1])
+        if ancestor.split(":")[0] == onto_name
+    }
 
 
 def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[str, Any]:
@@ -151,7 +158,7 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
 
         # only write the ancestors if it's not NCBITaxon, as this saves a lot of disk space and there is
         # no current use-case for NCBITaxon
-        term_dict[term_id]["ancestors"] = [] if onto.name == "NCBITaxon" else list(ancestors)
+        term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
 
         # Gets label
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""

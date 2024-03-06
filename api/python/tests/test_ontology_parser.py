@@ -10,23 +10,23 @@ from cellxgene_ontology_guide.ontology_parser import OntologyParser
 def ontology_dict():
     return {
         "CL": {
-            "CL:0000000": {"ancestors": [], "label": "cell A", "deprecated": False},
+            "CL:0000000": {"ancestors": {}, "label": "cell A", "deprecated": False},
             "CL:0000001": {
-                "ancestors": ["CL:0000000"],
+                "ancestors": {"CL:0000000": 1},
                 "label": "cell B",
                 "deprecated": False,
                 "consider": ["CL:0000004"],
             },
-            "CL:0000002": {"ancestors": ["CL:0000000"], "label": "cell C", "deprecated": False},
+            "CL:0000002": {"ancestors": {"CL:0000000": 1}, "label": "cell C", "deprecated": False},
             "CL:0000003": {
-                "ancestors": ["CL:0000000"],
+                "ancestors": {"CL:0000000": 1},
                 "label": "obsolete cell",
                 "deprecated": True,
                 "replaced_by": "CL:0000004",
                 "comments": ["this term was deprecated in favor of a descendant term of CL:0000001"],
                 "term_tracker": "http://example.com/issue/1234",
             },
-            "CL:0000004": {"ancestors": ["CL:0000001", "CL:0000000"], "label": "cell B2", "deprecated": False},
+            "CL:0000004": {"ancestors": {"CL:0000000": 1, "CL:0000001": 2}, "label": "cell B2", "deprecated": False},
         }
     }
 
@@ -70,10 +70,10 @@ def test_parse_ontology_name__not_supported(ontology_parser):
 
 
 def test_get_term_ancestors(ontology_parser):
-    assert ontology_parser.get_term_ancestors("CL:0000004") == ["CL:0000001", "CL:0000000"]
+    assert ontology_parser.get_term_ancestors("CL:0000004") == ["CL:0000000", "CL:0000001"]
     assert ontology_parser.get_term_ancestors("CL:0000004", include_self=True) == [
-        "CL:0000001",
         "CL:0000000",
+        "CL:0000001",
         "CL:0000004",
     ]
 
@@ -81,11 +81,11 @@ def test_get_term_ancestors(ontology_parser):
 def test_get_term_list_ancestors(ontology_parser):
     assert ontology_parser.get_term_list_ancestors(["CL:0000000", "CL:0000004"]) == {
         "CL:0000000": [],
-        "CL:0000004": ["CL:0000001", "CL:0000000"],
+        "CL:0000004": ["CL:0000000", "CL:0000001"],
     }
     assert ontology_parser.get_term_list_ancestors(["CL:0000000", "CL:0000004"], include_self=True) == {
         "CL:0000000": ["CL:0000000"],
-        "CL:0000004": ["CL:0000001", "CL:0000000", "CL:0000004"],
+        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000004"],
     }
 
 

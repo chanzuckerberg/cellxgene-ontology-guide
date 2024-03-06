@@ -42,8 +42,8 @@ class OntologyParser:
 
     def get_term_ancestors(self, term_id: str, include_self: bool = False) -> List[str]:
         """
-        Get the ancestor ontology terms for a given term. If include_self is True, the term itself will be included as an
-         ancestor.
+        Get the ancestor ontology terms for a given term. If include_self is True, the term itself will be included as
+        an ancestor.
 
          Example: get_term_ancestors("CL:0000005") -> ["CL:0000000", ...]
 
@@ -52,13 +52,13 @@ class OntologyParser:
         :return: flattened List[str] of ancestor terms
         """
         ontology_name = self._parse_ontology_name(term_id)
-        ancestors: List[str] = self.ontology_dict[ontology_name][term_id]["ancestors"]
+        ancestors = list(self.ontology_dict[ontology_name][term_id]["ancestors"].keys())
         return ancestors + [term_id] if include_self else ancestors
 
-    def get_term_list_ancestors(self, term_ids: str, include_self: bool = False) -> Dict[str, List[str]]:
+    def get_term_list_ancestors(self, term_ids: List[str], include_self: bool = False) -> Dict[str, List[str]]:
         """
-        Get the ancestor ontology terms for each term in a list. If include_self is True, the term itself will be included
-         as an ancestor.
+        Get the ancestor ontology terms for each term in a list. If include_self is True, the term itself will be
+        included as an ancestor.
 
          Example: get_term_list_ancestors(["CL:0000003", "CL:0000005"], include_self=True) -> {
             "CL:0000003": ["CL:0000003"],
@@ -71,6 +71,92 @@ class OntologyParser:
         list if there are no ancestors.
         """
         return {term_id: self.get_term_ancestors(term_id, include_self) for term_id in term_ids}
+
+    def map_high_level_terms(
+        self, term_ids: List[str], high_level_terms: List[str], include_self: bool = True
+    ) -> Dict[str, List[str]]:
+        """
+        Given a list of ontology term IDs and a list of high_level_terms to map them to, returns a dictionary with
+        format
+
+        {"CL:0000003": ["CL:0000000", ...], "CL:0000005": ["CL:0000000", ...]}
+
+        Where each term_id is mapped to a List[str] of high-level terms that it is a descendant of
+
+        :param term_ids: list of str ontology terms to map high level terms for
+        :param high_level_terms: list of str ontology terms that can be mapped to descendant term_ids
+        :param include_self: bool to map a term_id to itself if it is in high_level_terms
+        :return: Dictionary mapping str term IDs to their respective List[str] of ancestor terms from the input list.
+        Each key maps to empty list if there are no ancestors among the provided input.
+        """
+        ancestors = self.get_term_list_ancestors(term_ids, include_self)
+        for term_id in term_ids:
+            ancestors[term_id] = [
+                high_level_term for high_level_term in ancestors[term_id] if high_level_term in high_level_terms
+            ]
+        return ancestors
+
+    def get_distance_between_terms(self, ontology: Ontology, term_id_1: str, term_id_2: str) -> int:
+        """
+        Get the distance between two ontology terms. The distance is defined as the number of edges between the
+        two terms. Terms must be from the same ontology.
+
+        :param ontology: Ontology enum of the ontology to find distance for
+        :param term_id_1: str ontology term to find distance for
+        :param term_id_2: str ontology term to find distance for
+        :return: int distance between the two terms, measured in number of edges between their shortest path.
+        """
+        lca = self.get_lowest_common_ancestor(ontology, term_id_1, term_id_2)
+        return int(
+            self.ontology_dict[ontology.name][term_id_1]["ancestors"][lca]
+            + self.ontology_dict[ontology.name][term_id_2]["ancestors"][lca]
+        )
+
+    def get_lowest_common_ancestor(self, ontology: Ontology, term_id_1: str, term_id_2: str) -> str:
+        """
+        Get the lowest common ancestor between two ontology terms that is from the given ontology.
+        Terms must be from the same ontology.
+
+        :param ontology: Ontology enum of the ontology to find distance for
+        :param term_id_1: str ontology term to find LCA for
+        :param term_id_2: str ontology term to find LCA for
+        :return: str term ID of the lowest common ancestor term
+        """
+        # include path to term itself
+        ancestors_1 = self.ontology_dict[ontology.name][term_id_1]["ancestors"] + {term_id_1: 0}
+        ancestors_2 = self.ontology_dict[ontology.name][term_id_2]["ancestors"] + {term_id_2: 0}
+        common_ancestors = set(ancestors_1.keys()) & set(ancestors_2.keys())
+        return str(min(common_ancestors, key=lambda x: ancestors_1[x] + ancestors_2[x]))
+
+    def map_highest_level_term(
+        self, term_ids: List[str], high_level_terms: List[str], include_self: bool = True
+    ) -> Dict[str, Union[str, None]]:
+        """
+        Given a list of ontology term IDs and a list of high_level_terms to map them to, returns a dictionary with
+        format
+
+        {"CL:0000003": "CL:0000000", "CL:0000005": "CL:0000000"}
+
+        Where each term_id is mapped to the highest level term that it is a descendant of, from the list provided. Maps
+        to None if term_id does not map to any high level terms among the provided input.
+
+        :param term_ids: list of str ontology terms to map high level terms for
+        :param high_level_terms: list of str ontology terms that can be mapped to descendant term_ids
+        :param include_self: bool to map a term_id to itself if it is in high_level_terms
+        :return: Dictionary mapping str term IDs to their respective List[str] of ancestor terms from the input list.
+        Each key maps to empty list if there are no ancestors among the provided input.
+        """
+        high_level_term_map = self.map_high_level_terms(term_ids, high_level_terms, include_self)
+        highest_level_term_map = dict()
+        for term_id in term_ids:
+            ontology = self._parse_ontology_name(term_id)
+            # map term_id to the high_level_term with the longest distance from term_id
+            highest_level_term_map[term_id] = (
+                max(high_level_term_map[term_id], key=lambda x: self.ontology_dict[ontology][term_id]["ancestors"][x])
+                if high_level_term_map[term_id]
+                else None
+            )
+        return highest_level_term_map
 
     def get_terms_descendants(self, term_ids: List[str], include_self: bool = False) -> Dict[str, List[str]]:
         """
@@ -97,7 +183,8 @@ class OntologyParser:
         for ontology in ontology_names:
             for candidate_descendant, candidate_metadata in self.ontology_dict[ontology].items():
                 for ancestor_id in descendants_dict:
-                    if ancestor_id in candidate_metadata["ancestors"]:
+                    ancestors = candidate_metadata["ancestors"].keys()
+                    if ancestor_id in ancestors:
                         descendants_dict[ancestor_id].append(candidate_descendant)
 
         return descendants_dict
