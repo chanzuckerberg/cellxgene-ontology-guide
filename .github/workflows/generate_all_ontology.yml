@@ -6,6 +6,7 @@ on:
       - "**/artifact-schemas/ontology_info_schema.json"
       - "**/artifact-schemas/all_ontology_schema.json"
       - "**/ontology-assets/ontology_info.json"
+      - "**/tools/ontology-builder/src/all_ontology_generator.py"
     branches-ignore:
       - main
 
