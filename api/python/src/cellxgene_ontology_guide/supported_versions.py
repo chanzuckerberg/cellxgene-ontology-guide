@@ -45,6 +45,10 @@ class CXGSchema:
     """A class to represent the ontology information used by a cellxgene schema version."""
 
     def __init__(self, version: Optional[str] = None):
+        """
+
+        :param version: The schema version to use. If not provided, the latest schema version will be used.
+        """
         ontology_info = load_supported_versions()
         if version is None:
             version = get_latest_schema_version(ontology_info.keys())
