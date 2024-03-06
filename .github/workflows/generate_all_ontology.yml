@@ -3,8 +3,9 @@ name: Updates to Ontology Files
 on:
   push:
     paths:
-      - "**/api/python/src/cellxgene_ontology_guide/artifacts/ontology_info.json"
+      - "**/artifact-schemas/ontology_info_schema.json"
       - "**/artifact-schemas/all_ontology_schema.json"
+      - "**/ontology-assets/ontology_info.json"
     branches-ignore:
       - main
 
