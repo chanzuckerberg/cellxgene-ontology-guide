@@ -4,24 +4,47 @@ import os
 import re
 import urllib.request
 from threading import Thread
-from typing import Any, Dict, Set
+from typing import Any, Dict, List, Optional, Set
 from urllib.error import HTTPError, URLError
 
 import env
 import owlready2
+import semantic_version
 
 
-def _download_ontologies(onto_info_file: str = env.ONTO_INFO_FILE, output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
+def _get_latest_version(versions: List[str]) -> str:
+    return "v" + str(sorted([semantic_version.Version.coerce(version[1:]) for version in versions])[-1])
+
+
+def _get_ontology_info_file(
+    ontology_info_file: str = env.ONTOLOGY_INFO_FILE, cellxgene_schema_version: Optional[str] = None
+) -> Any:
+    """
+    Read ontology information from file
+
+    :param str ontology_info_file: path to file with ontology information
+
+    :rtype Any
+    :return ontology information
+    """
+    with open(ontology_info_file, "r") as f:
+        ontology_info = json.load(f)
+        if cellxgene_schema_version:
+            ontology_info_version = ontology_info[cellxgene_schema_version]
+        else:
+            ontology_info_version = ontology_info[_get_latest_version(ontology_info.keys())]
+        return ontology_info_version
+
+
+def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
     """
     Downloads the ontology files specified in 'ontology_info.json' into 'output_dir'
 
-    :param str onto_info_file: path to file with ontology information
+    :param str ontology_info: a dictionary with ontology names as keys and their respective URLs and versions
     :param str output_dir: path to writable directory where ontology files will be downloaded to
 
     :rtype None
     """
-    with open(onto_info_file, "r") as f:
-        ontology_info = json.load(f)
 
     def download(_ontology: str, _url: str) -> None:
         print(f"Start Downloading {_ontology}")
@@ -177,12 +200,14 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
 
 
 def _parse_ontologies(
+    ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
-    output_json_file: str = env.PARSED_ONTOLOGIES_FILE,
+    output_path: str = env.ONTOLOGY_ASSETS_DIR,
 ) -> None:
     """
     Parse all ontology files in working_dir. Extracts information from all classes in the ontology file.
-    The extracted information is written into a gzipped a json file with the following structure:
+    The extracted information is written into a gzipped a json file with the following [schema](
+    artifact-schemas/all_ontology_schema.json):
     {
         "ontology_name":
             {
@@ -203,23 +228,29 @@ def _parse_ontologies(
             ...
             }
     }
-
+    :param ANY ontology_info: the ontology references used to download the ontology files. It follows this [schema](
+    ./artifact-schemas/ontology_info_schema.json)
     :param str working_dir: path to folder with ontology files
-    :param str output_json_file: path to output json file
+    :param str output_path: path to output json files
 
     :rtype None
     """
-    onto_dict: Dict[str, Any] = dict()
     for onto_file in os.listdir(working_dir):
+        if onto_file.startswith("."):
+            continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
-        print(f"Processing {onto.name}")
-        onto_dict[onto.name] = _extract_ontology_term_metadata(onto)
+        version = ontology_info[onto.name]["version"]
+        output_file = f"{onto.name}-ontology-{version}.json.gz"
+        print(f"Processing {output_file}")
 
-    with gzip.open(output_json_file, "wt") as output_json:
-        json.dump(onto_dict, output_json, indent=2)
+        onto_dict = _extract_ontology_term_metadata(onto)
+
+        with gzip.open(os.path.join(output_path, output_file), "wt") as output_json:
+            json.dump(onto_dict, output_json, indent=2)
 
 
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
-    _download_ontologies()
-    _parse_ontologies()
+    ontology_info = _get_ontology_info_file()
+    _download_ontologies(ontology_info)
+    _parse_ontologies(ontology_info)

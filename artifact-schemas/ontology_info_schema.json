@@ -1,18 +1,42 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Ontology Version and Source Schema",
-  "description": "A schema for the set of valid ontology reference files mapping to a CZ CellXGene Dataset Schema Version",
+  "description": "A schema for the set of valid ontology reference files mapping to a CZ CellXGene Dataset Schema Versions",
   "type": "object",
-  "properties": {
-    "CL": { "$ref": "#/definitions/ontologyEntry" },
-    "EFO": { "$ref": "#/definitions/ontologyEntry" },
-    "HANCESTRO": { "$ref": "#/definitions/ontologyEntry" },
-    "HsapDv": { "$ref": "#/definitions/ontologyEntry" },
-    "MONDO": { "$ref": "#/definitions/ontologyEntry" },
-    "MmusDv": { "$ref": "#/definitions/ontologyEntry" },
-    "NCBITaxon": { "$ref": "#/definitions/ontologyEntry" },
-    "UBERON": { "$ref": "#/definitions/ontologyEntry" },
-    "PATO": { "$ref": "#/definitions/ontologyEntry" }
+  "patternProperties": {
+    "^v[0-9]+\\.[0-9]+\\.[0-9]+$": {
+      "description": "The version of CellxGene schema that maps to this set of ontology versions",
+      "type": "object",
+      "properties": {
+        "CL": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "EFO": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "HANCESTRO": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "HsapDv": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "MONDO": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "MmusDv": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "NCBITaxon": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "UBERON": {
+          "$ref": "#/definitions/ontologyEntry"
+        },
+        "PATO": {
+          "$ref": "#/definitions/ontologyEntry"
+        }
+      }
+    }
   },
   "additionalProperties": false,
   "definitions": {
@@ -33,8 +57,13 @@
           "description": "filetype used to build generated artifacts for this ontology data release"
         }
       },
-      "required": ["version", "source", "filetype"],
+      "required": [
+        "version",
+        "source",
+        "filetype"
+      ],
       "additionalProperties": false
     }
   }
 }
+

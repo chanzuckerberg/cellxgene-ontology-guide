@@ -30,6 +30,6 @@ jobs:
       - name: install requirements
         run: |
           pip install -r tools/ontology-builder/requirements.txt
-      - name: validate curated lists
+      - name: validate json schemas
         run: |
-          python3 ./tools/ontology-builder/src/validate_curated_lists.py
+          python3 ./tools/ontology-builder/src/validate_json_schemas.py

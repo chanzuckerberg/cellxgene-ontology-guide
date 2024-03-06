@@ -1,57 +1,49 @@
 from unittest.mock import patch
 
 import pytest
-from cellxgene_ontology_guide.constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
 from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
+from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture
 def ontology_dict():
     return {
-        "CL": {
-            "CL:0000000": {"ancestors": [], "label": "cell A", "deprecated": False},
-            "CL:0000001": {
-                "ancestors": ["CL:0000000"],
-                "label": "cell B",
-                "deprecated": False,
-                "consider": ["CL:0000004"],
-            },
-            "CL:0000002": {"ancestors": ["CL:0000000"], "label": "cell C", "deprecated": False},
-            "CL:0000003": {
-                "ancestors": ["CL:0000000"],
-                "label": "obsolete cell",
-                "deprecated": True,
-                "replaced_by": "CL:0000004",
-                "comments": ["this term was deprecated in favor of a descendant term of CL:0000001"],
-                "term_tracker": "http://example.com/issue/1234",
-            },
-            "CL:0000004": {"ancestors": ["CL:0000001", "CL:0000000"], "label": "cell B2", "deprecated": False},
-        }
+        "CL:0000000": {"ancestors": [], "label": "cell A", "deprecated": False},
+        "CL:0000001": {
+            "ancestors": ["CL:0000000"],
+            "label": "cell B",
+            "deprecated": False,
+            "consider": ["CL:0000004"],
+        },
+        "CL:0000002": {"ancestors": ["CL:0000000"], "label": "cell C", "deprecated": False},
+        "CL:0000003": {
+            "ancestors": ["CL:0000000"],
+            "label": "obsolete cell",
+            "deprecated": True,
+            "replaced_by": "CL:0000004",
+            "comments": ["this term was deprecated in favor of a descendant term of CL:0000001"],
+            "term_tracker": "http://example.com/issue/1234",
+        },
+        "CL:0000004": {"ancestors": ["CL:0000001", "CL:0000000"], "label": "cell B2", "deprecated": False},
     }
 
 
-@pytest.fixture(scope="module")
-def supported_ontologies():
-    return {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
+@pytest.fixture
+def mock_CXGSchema(ontology_dict, mock_load_supported_versions, mock_load_ontology_file):
+    mock_load_supported_versions.return_value = {
+        "v5.0.0": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
+    }
+    cxg_schema = CXGSchema()
+    cxg_schema.ontology_file_names = {"CL": "CL-ontology-2024-01-01.json.gz"}
+    mock_load_ontology_file.return_value = ontology_dict
 
-
-@pytest.fixture(scope="module")
-def mock_load_artifact_by_schema(ontology_dict, supported_ontologies):
-    def get_mock_artifact_by_schema(schema_version, filename):
-        if filename == ALL_ONTOLOGY_FILENAME:
-            return ontology_dict
-        elif filename == ONTOLOGY_INFO_FILENAME:
-            return supported_ontologies
-
-    with patch(
-        "cellxgene_ontology_guide.ontology_parser.load_artifact_by_schema", side_effect=get_mock_artifact_by_schema
-    ) as mock:
+    with patch("cellxgene_ontology_guide.ontology_parser.CXGSchema", return_value=cxg_schema) as mock:
         yield mock
 
 
-@pytest.fixture(scope="module")
-def ontology_parser(mock_load_artifact_by_schema):
+@pytest.fixture
+def ontology_parser(mock_CXGSchema):
     return OntologyParser(schema_version="5.0.0")
 
 
