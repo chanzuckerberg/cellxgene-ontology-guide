@@ -37,7 +37,7 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
-          git add ./api/python/src/cellxgene_ontology_guide/artifacts/all_ontology.json.gz
+          git add ./ontology-assets/*.json.gz
       - name: Commit
         run: |
           git commit -m "AUTO: update ontologies"
