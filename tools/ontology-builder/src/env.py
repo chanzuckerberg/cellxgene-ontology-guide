@@ -5,5 +5,4 @@ RAW_ONTOLOGY_DIR = os.path.join(PACKAGE_ROOT, "raw-files")
 PROJECT_ROOT_DIR = os.path.realpath(__file__).rsplit("/", maxsplit=4)[0]
 SCHEMA_DIR = os.path.join(PROJECT_ROOT_DIR, "artifact-schemas")
 ONTOLOGY_ASSETS_DIR = os.path.join(PROJECT_ROOT_DIR, "ontology-assets")
-ONTO_INFO_FILE = os.path.join(ONTOLOGY_ASSETS_DIR, "ontology_info.json")
-PARSED_ONTOLOGIES_FILE = os.path.join(ONTOLOGY_ASSETS_DIR, "all_ontology.json.gz")
+ONTOLOGY_INFO_FILE = os.path.join(ONTOLOGY_ASSETS_DIR, "ontology_info.json")

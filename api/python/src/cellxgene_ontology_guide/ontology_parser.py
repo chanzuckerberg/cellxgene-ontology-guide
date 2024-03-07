@@ -1,9 +1,9 @@
 import re
 from typing import Any, Dict, List, Union
 
-from artifact_download import load_artifact_by_schema
-from constants import ALL_ONTOLOGY_FILENAME, ONTOLOGY_INFO_FILENAME
 from entities import Ontology, OntologyFileType, OntologyVariant
+
+from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
 class OntologyParser:
@@ -19,8 +19,7 @@ class OntologyParser:
 
         :param schema_version: str version of the schema to load ontology metadata for
         """
-        self.ontology_dict = load_artifact_by_schema(schema_version, ALL_ONTOLOGY_FILENAME)
-        self.supported_ontologies = load_artifact_by_schema(schema_version, ONTOLOGY_INFO_FILENAME)
+        self.cxg_schema = CXGSchema(version=schema_version)
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
@@ -35,7 +34,7 @@ class OntologyParser:
             raise ValueError(f"{term_id} does not conform to expected regex pattern {pattern} and cannot be queried.")
 
         ontology_name = term_id.split(":")[0]
-        if ontology_name not in self.supported_ontologies:
+        if ontology_name not in self.cxg_schema.supported_ontologies:
             raise ValueError(f"{term_id} is not part of a supported ontology, its metadata cannot be fetched.")
 
         return ontology_name
@@ -52,7 +51,7 @@ class OntologyParser:
         :return: flattened List[str] of ancestor terms
         """
         ontology_name = self._parse_ontology_name(term_id)
-        ancestors = list(self.ontology_dict[ontology_name][term_id]["ancestors"].keys())
+        ancestors = list(self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"].keys())
         return ancestors + [term_id] if include_self else ancestors
 
     def get_term_list_ancestors(self, term_ids: List[str], include_self: bool = False) -> Dict[str, List[str]]:
@@ -181,7 +180,7 @@ class OntologyParser:
             ontology_names.add(ontology_name)
 
         for ontology in ontology_names:
-            for candidate_descendant, candidate_metadata in self.ontology_dict[ontology].items():
+            for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology).items():
                 for ancestor_id in descendants_dict:
                     ancestors = candidate_metadata["ancestors"].keys()
                     if ancestor_id in ancestors:
@@ -199,7 +198,7 @@ class OntologyParser:
         :return: boolean flag indicating whether the term is deprecated
         """
         ontology_name = self._parse_ontology_name(term_id)
-        is_deprecated: bool = self.ontology_dict[ontology_name][term_id].get("deprecated")
+        is_deprecated: bool = self.cxg_schema.ontology(ontology_name)[term_id].get("deprecated")
         return is_deprecated
 
     def get_term_replacement(self, term_id: str) -> Union[str, None]:
@@ -212,7 +211,7 @@ class OntologyParser:
         :return: replacement str term ID if it exists, None otherwise
         """
         ontology_name = self._parse_ontology_name(term_id)
-        replaced_by: str = self.ontology_dict[ontology_name][term_id].get("replaced_by")
+        replaced_by: str = self.cxg_schema.ontology(ontology_name)[term_id].get("replaced_by")
         return replaced_by if replaced_by else None
 
     def get_term_metadata(self, term_id: str) -> Dict[str, Any]:
@@ -232,7 +231,7 @@ class OntologyParser:
         """
         ontology_name = self._parse_ontology_name(term_id)
         return {
-            key: self.ontology_dict[ontology_name][term_id].get(key, None)
+            key: self.cxg_schema.ontology(ontology_name)[term_id].get(key, None)
             for key in {"comments", "term_tracker", "consider"}
         }
 
@@ -246,7 +245,7 @@ class OntologyParser:
         :return: str human-readable label for the term
         """
         ontology_name = self._parse_ontology_name(term_id)
-        label: str = self.ontology_dict[ontology_name][term_id]["label"]
+        label: str = self.cxg_schema.ontology(ontology_name)[term_id]["label"]
         return label
 
     def get_ontology_download_url(
@@ -265,8 +264,8 @@ class OntologyParser:
         :param ontology_variant: OntologyVariant enum of the ontology variant to fetch
         :return: str download URL for the requested ontology file
         """
-        source_url = self.supported_ontologies[ontology.name]["source"]
-        version = self.supported_ontologies[ontology.name]["version"]
+        source_url = self.cxg_schema.supported_ontologies[ontology.name]["source"]
+        version = self.cxg_schema.supported_ontologies[ontology.name]["version"]
         return (
             f"{source_url}/{version}/{ontology.value}-{ontology_variant.value}.{ontology_filetype.value}"
             if ontology_variant

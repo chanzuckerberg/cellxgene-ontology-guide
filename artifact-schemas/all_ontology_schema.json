@@ -3,73 +3,61 @@
   "title": "Valid Ontology Term JSON Schema",
   "description": "Schema for file containing metadata for Ontology Terms accepted in dataset submissions to CZ CellXGene Data Portal.",
   "type": "object",
-  "properties": {
-    "EFO": { "$ref": "#/definitions/ontologyCategory" },
-    "UBERON": { "$ref": "#/definitions/ontologyCategory" },
-    "CL": { "$ref": "#/definitions/ontologyCategory" },
-    "HANCESTRO": { "$ref": "#/definitions/ontologyCategory" },
-    "HsapDv": { "$ref": "#/definitions/ontologyCategory" },
-    "MmusDv": { "$ref": "#/definitions/ontologyCategory" },
-    "PATO": { "$ref": "#/definitions/ontologyCategory" },
-    "NCBITaxon": { "$ref": "#/definitions/ontologyCategory" },
-    "MONDO": { "$ref": "#/definitions/ontologyCategory" }
-  },
-  "additionalProperties": false,
-  "definitions": {
-    "ontologyCategory": {
+  "patternProperties": {
+    "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7}$": {
       "type": "object",
-      "patternProperties": {
-        "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7}$": {
+      "properties": {
+        "label": {
+          "type": "string",
+          "description": "human-readable name for the ontology entry."
+        },
+        "deprecated": {
+          "type": "boolean",
+          "description": "Indicates whether the ontology entry is deprecated."
+        },
+        "ancestors": {
           "type": "object",
-          "properties": {
-            "label": {
-              "type": "string",
-              "description": "human-readable name for the ontology entry."
-            },
-            "deprecated": {
-              "type": "boolean",
-              "description": "Indicates whether the ontology entry is deprecated."
-            },
-          "ancestors": {
-            "type": "object",
-            "description": "A map of ancestor ontology terms that this term is a subclass of, keyed to the distance from the term.",
-            "patternProperties": {
-              "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7}$": {
-                "type": "integer"
-              }
-            },
-            "comments": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 0,
-              "description": "Optional comments regarding the ontology entry from ontology curators."
-            },
-            "term_tracker": {
-              "type": "string",
-              "format": "uri",
-              "description": "Optional URL to track discussion around the term's history and changes."
-            },
-            "consider": {
-              "type": "array",
-              "items": {
-                "type": "string"
-              },
-              "minItems": 0,
-              "description": "Suggests alternative IDs to consider in place of this ontology entry."
-            },
-            "replaced_by": {
-              "type": "string",
-              "pattern": "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7}$",
-              "description": "If deprecated, the ID of the ontology entry that should canonically replace this one."
+          "description": "A map of ancestor ontology terms that this term is a subclass of, keyed to the distance from the term.",
+          "patternProperties": {
+            "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7}$": {
+              "type": "integer"
             }
+          }
+        },
+        "comments": {
+          "type": "array",
+          "items": {
+            "type": "string"
           },
-          "required": ["label", "deprecated", "ancestors"],
-          "additionalProperties": false
+          "minItems": 0,
+          "description": "Optional comments regarding the ontology entry from ontology curators."
+        },
+        "term_tracker": {
+          "type": "string",
+          "format": "uri",
+          "description": "Optional URL to track discussion around the term's history and changes."
+        },
+        "consider": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "minItems": 0,
+          "description": "Suggests alternative IDs to consider in place of this ontology entry."
+        },
+        "replaced_by": {
+          "type": "string",
+          "pattern": "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7}$",
+          "description": "If deprecated, the ID of the ontology entry that should canonically replace this one."
         }
       },
+      "required": [
+        "label",
+        "deprecated",
+        "ancestors"
+      ],
       "additionalProperties": false
     }
-  }
+  },
+  "additionalProperties": false
 }
