@@ -86,7 +86,7 @@ def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
         MockOntologyObject = MagicMock()
         MockOntologyObject.name = "ontology_name"  # Must match the name of the ontology file
         mock_load_ontology.return_value = MockOntologyObject
-        mock_extract_metadata.return_value = {"term_id": {"label": "Term Label", "deprecated": False, "ancestors": []}}
+        mock_extract_metadata.return_value = {"term_id": {"label": "Term Label", "deprecated": False, "ancestors": {}}}
 
         # Mock output path
         output_path = tmpdir.mkdir("output")

@@ -98,23 +98,25 @@ class OntologyParser:
     def get_distance_between_terms(self, ontology: Ontology, term_id_1: str, term_id_2: str) -> int:
         """
         Get the distance between two ontology terms. The distance is defined as the number of edges between the
-        two terms. Terms must be from the same ontology.
+        two terms. Terms must be from the same ontology. Returns -1 if terms are disjoint.
 
         :param ontology: Ontology enum of the ontology to find distance for
         :param term_id_1: str ontology term to find distance for
         :param term_id_2: str ontology term to find distance for
         :return: int distance between the two terms, measured in number of edges between their shortest path.
         """
-        lca = self.get_lowest_common_ancestor(ontology, term_id_1, term_id_2)
+        lcas = self.get_lowest_common_ancestors(ontology, term_id_1, term_id_2)
+        if not lcas:
+            return -1
         return int(
-            self.cxg_schema.ontology(ontology.name)[term_id_1]["ancestors"][lca]
-            + self.cxg_schema.ontology(ontology.name)[term_id_2]["ancestors"][lca]
+            self.cxg_schema.ontology(ontology.name)[term_id_1]["ancestors"][lcas[0]]
+            + self.cxg_schema.ontology(ontology.name)[term_id_2]["ancestors"][lcas[0]]
         )
 
-    def get_lowest_common_ancestor(self, ontology: Ontology, term_id_1: str, term_id_2: str) -> str:
+    def get_lowest_common_ancestors(self, ontology: Ontology, term_id_1: str, term_id_2: str) -> List[str]:
         """
-        Get the lowest common ancestor between two ontology terms that is from the given ontology.
-        Terms must be from the same ontology.
+        Get the lowest common ancestors between two ontology terms that is from the given ontology.
+        Terms must be from the same ontology. Ontologies are DAGs, so there may be multiple lowest common ancestors.
 
         :param ontology: Ontology enum of the ontology to find distance for
         :param term_id_1: str ontology term to find LCA for
@@ -125,7 +127,8 @@ class OntologyParser:
         ancestors_1 = self.cxg_schema.ontology(ontology.name)[term_id_1]["ancestors"] + {term_id_1: 0}
         ancestors_2 = self.cxg_schema.ontology(ontology.name)[term_id_2]["ancestors"] + {term_id_2: 0}
         common_ancestors = set(ancestors_1.keys()) & set(ancestors_2.keys())
-        return str(min(common_ancestors, key=lambda x: ancestors_1[x] + ancestors_2[x]))
+        min_sum_distances = min(common_ancestors, key=lambda x: ancestors_1[x] + ancestors_2[x])
+        return [term for term in common_ancestors if ancestors_1[term] + ancestors_2[term] == min_sum_distances]
 
     def map_highest_level_term(
         self, term_ids: List[str], high_level_terms: List[str], include_self: bool = True
@@ -162,8 +165,8 @@ class OntologyParser:
 
     def get_terms_descendants(self, term_ids: List[str], include_self: bool = False) -> Dict[str, List[str]]:
         """
-        Get the descendant ontology terms for each term in a list. If include_self is True, the term itself will be included
-         as a descendant.
+        Get the descendant ontology terms for each term in a list. If include_self is True, the term itself will be
+         included as a descendant.
 
         Example: get_terms_descendants(["CL:0000003", "CL:0000005"], include_self=True) -> {
             "CL:0000003": ["CL:0000003", "CL:0000004", ...],
@@ -172,8 +175,8 @@ class OntologyParser:
 
         :param term_ids: list of str ontology terms to find descendants for
         :param include_self: boolean flag to include the term itself as an descendant
-        :return: Dictionary mapping str term IDs to their respective flattened List[str] of descendant terms. Maps to empty
-        list if there are no descendants.
+        :return: Dictionary mapping str term IDs to their respective flattened List[str] of descendant terms. Maps to
+        empty list if there are no descendants.
         """
         descendants_dict = dict()
         ontology_names = set()
