@@ -4,11 +4,11 @@
   "description": "A schema for mapping cell type ontology Terms to its descendant cell type ontology terms",
   "type": "object",
   "patternProperties": {
-    "^CL:[0-9]{7}$": {
+    "^CL:[0-9]{7,}$": {
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^CL:[0-9]{7}$"
+        "pattern": "^CL:[0-9]{7,}$"
       },
       "description": "An array of CL ontology term IDs that are subclasses of the key CL ontology term ID."
     }
