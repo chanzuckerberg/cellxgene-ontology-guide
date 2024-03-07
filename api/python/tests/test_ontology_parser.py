@@ -25,8 +25,16 @@ def ontology_dict():
             "comments": ["this term was deprecated in favor of a descendant term of CL:0000001"],
             "term_tracker": "http://example.com/issue/1234",
         },
-        "CL:0000004": {"ancestors": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1}, "label": "cell BC", "deprecated": False},
-        "CL:0000005": {"ancestors": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1}, "label": "cell BC2", "deprecated": False},
+        "CL:0000004": {
+            "ancestors": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1},
+            "label": "cell BC",
+            "deprecated": False,
+        },
+        "CL:0000005": {
+            "ancestors": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1},
+            "label": "cell BC2",
+            "deprecated": False,
+        },
         "CL:0000006": {"ancestors": {"CL:0000000": 2, "CL:0000001": 1}, "label": "cell B2", "deprecated": False},
         "CL:0000007": {"ancestors": {"CL:0000000": 2, "CL:0000001": 1}, "label": "cell B3", "deprecated": False},
         "CL:0000008": {"ancestors": {}, "label": "cell unrelated", "deprecated": False},
@@ -76,7 +84,11 @@ def test_get_term_ancestors(ontology_parser):
 
 
 def test_get_term_ancestors_with_distances(ontology_parser):
-    assert ontology_parser.get_term_ancestors_with_distances("CL:0000004") == {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1}
+    assert ontology_parser.get_term_ancestors_with_distances("CL:0000004") == {
+        "CL:0000000": 2,
+        "CL:0000001": 1,
+        "CL:0000002": 1,
+    }
     assert ontology_parser.get_term_ancestors_with_distances("CL:0000004", include_self=True) == {
         "CL:0000000": 2,
         "CL:0000001": 1,
@@ -92,17 +104,34 @@ def test_get_term_list_ancestors(ontology_parser):
     }
     assert ontology_parser.get_term_list_ancestors(["CL:0000000", "CL:0000004"], include_self=True) == {
         "CL:0000000": ["CL:0000000"],
-        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000002","CL:0000004"],
+        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000002", "CL:0000004"],
     }
 
 
 def test_get_terms_descendants(ontology_parser):
     assert ontology_parser.get_terms_descendants(["CL:0000000", "CL:0000004"]) == {
-        "CL:0000000": ["CL:0000001", "CL:0000002", "CL:0000003", "CL:0000004", "CL:0000005", "CL:0000006", "CL:0000007"],
+        "CL:0000000": [
+            "CL:0000001",
+            "CL:0000002",
+            "CL:0000003",
+            "CL:0000004",
+            "CL:0000005",
+            "CL:0000006",
+            "CL:0000007",
+        ],
         "CL:0000004": [],
     }
     assert ontology_parser.get_terms_descendants(["CL:0000000", "CL:0000004"], include_self=True) == {
-        "CL:0000000": ["CL:0000000", "CL:0000001", "CL:0000002", "CL:0000003", "CL:0000004", "CL:0000005", "CL:0000006", "CL:0000007"],
+        "CL:0000000": [
+            "CL:0000000",
+            "CL:0000001",
+            "CL:0000002",
+            "CL:0000003",
+            "CL:0000004",
+            "CL:0000005",
+            "CL:0000006",
+            "CL:0000007",
+        ],
         "CL:0000004": ["CL:0000004"],
     }
 
@@ -150,54 +179,36 @@ def test_map_highest_level_term(ontology_parser):
 
 def test_get_lowest_common_ancestors(ontology_parser):
     # root node LCA
-    assert ontology_parser.get_lowest_common_ancestors(
-        term_id_1="CL:0000003", term_id_2="CL:0000005"
-    ) == ["CL:0000000"]
+    assert ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000003", term_id_2="CL:0000005") == ["CL:0000000"]
 
     # sibling LCA
-    assert ontology_parser.get_lowest_common_ancestors(
-        term_id_1="CL:0000006", term_id_2="CL:0000007"
-    ) == ["CL:0000001"]
+    assert ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000006", term_id_2="CL:0000007") == ["CL:0000001"]
 
     # parent-child LCA
-    assert ontology_parser.get_lowest_common_ancestors(
-        term_id_1="CL:0000002", term_id_2="CL:0000005"
-    ) == ["CL:0000002"]
+    assert ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000002", term_id_2="CL:0000005") == ["CL:0000002"]
 
     # multiple node
-    lcas = ontology_parser.get_lowest_common_ancestors(
-        term_id_1="CL:0000004", term_id_2="CL:0000005"
-    )
+    lcas = ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000004", term_id_2="CL:0000005")
     assert len(lcas) == 2
     assert "CL:0000001" in lcas
     assert "CL:0000002" in lcas
 
     # disjoint
-    assert ontology_parser.get_lowest_common_ancestors(
-        term_id_1="CL:0000001", term_id_2="CL:0000008"
-    ) == []
+    assert ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000001", term_id_2="CL:0000008") == []
 
 
 def test_get_distance_between_terms(ontology_parser):
     # distance when root node is lca
-    assert ontology_parser.get_distance_between_terms(
-        term_id_1="CL:0000003", term_id_2="CL:0000005"
-    ) == 3
+    assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000003", term_id_2="CL:0000005") == 3
 
     # parent-child distance
-    assert ontology_parser.get_distance_between_terms(
-        term_id_1="CL:0000002", term_id_2="CL:0000005"
-    ) == 1
+    assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000002", term_id_2="CL:0000005") == 1
 
     # multiple LCAs distance
-    assert ontology_parser.get_distance_between_terms(
-        term_id_1="CL:0000004", term_id_2="CL:0000005"
-    ) == 2
+    assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000004", term_id_2="CL:0000005") == 2
 
     # disjoint distance
-    assert ontology_parser.get_distance_between_terms(
-        term_id_1="CL:0000001", term_id_2="CL:0000008"
-    ) == -1
+    assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
 
 
 def test_get_ontology_download_url(ontology_parser):

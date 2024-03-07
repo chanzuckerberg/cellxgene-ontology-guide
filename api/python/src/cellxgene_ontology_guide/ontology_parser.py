@@ -66,7 +66,7 @@ class OntologyParser:
         :return: Dict[str, int] map of ancestor terms and their respective distances from the term_id
         """
         ontology_name = self._parse_ontology_name(term_id)
-        ancestors = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"]
+        ancestors: Dict[str, int] = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"]
         if include_self:
             ancestors[term_id] = 0
         return ancestors
@@ -123,8 +123,8 @@ class OntologyParser:
         if not lcas:
             return -1
         return int(
-            self.get_term_ancestors_with_distances(term_id_1, include_self=True)[lcas[0]] +
-            self.get_term_ancestors_with_distances(term_id_2, include_self=True)[lcas[0]]
+            self.get_term_ancestors_with_distances(term_id_1, include_self=True)[lcas[0]]
+            + self.get_term_ancestors_with_distances(term_id_2, include_self=True)[lcas[0]]
         )
 
     def get_lowest_common_ancestors(self, term_id_1: str, term_id_2: str) -> List[str]:
@@ -148,7 +148,11 @@ class OntologyParser:
             sum_distances = ancestors_1[ancestors] + ancestors_2[ancestors]
             if sum_distances < min_sum_distances:
                 min_sum_distances = sum_distances
-        return [ancestor for ancestor in common_ancestors if ancestors_1[ancestor] + ancestors_2[ancestor] == min_sum_distances]
+        return [
+            ancestor
+            for ancestor in common_ancestors
+            if ancestors_1[ancestor] + ancestors_2[ancestor] == min_sum_distances
+        ]
 
     def map_highest_level_term(self, term_ids: List[str], high_level_terms: List[str]) -> Dict[str, Union[str, None]]:
         """
