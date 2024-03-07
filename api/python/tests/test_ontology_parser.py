@@ -9,25 +9,23 @@ from cellxgene_ontology_guide.supported_versions import CXGSchema
 @pytest.fixture
 def ontology_dict():
     return {
-        "CL": {
-            "CL:0000000": {"ancestors": {}, "label": "cell A", "deprecated": False},
-            "CL:0000001": {
-                "ancestors": {"CL:0000000": 1},
-                "label": "cell B",
-                "deprecated": False,
-                "consider": ["CL:0000004"],
-            },
-            "CL:0000002": {"ancestors": {"CL:0000000": 1}, "label": "cell C", "deprecated": False},
-            "CL:0000003": {
-                "ancestors": {"CL:0000000": 1},
-                "label": "obsolete cell",
-                "deprecated": True,
-                "replaced_by": "CL:0000004",
-                "comments": ["this term was deprecated in favor of a descendant term of CL:0000001"],
-                "term_tracker": "http://example.com/issue/1234",
-            },
-            "CL:0000004": {"ancestors": {"CL:0000000": 1, "CL:0000001": 2}, "label": "cell B2", "deprecated": False},
-        }
+        "CL:0000000": {"ancestors": {}, "label": "cell A", "deprecated": False},
+        "CL:0000001": {
+            "ancestors": {"CL:0000000": 1},
+            "label": "cell B",
+            "deprecated": False,
+            "consider": ["CL:0000004"],
+        },
+        "CL:0000002": {"ancestors": {"CL:0000000": 1}, "label": "cell C", "deprecated": False},
+        "CL:0000003": {
+            "ancestors": {"CL:0000000": 1},
+            "label": "obsolete cell",
+            "deprecated": True,
+            "replaced_by": "CL:0000004",
+            "comments": ["this term was deprecated in favor of a descendant term of CL:0000001"],
+            "term_tracker": "http://example.com/issue/1234",
+        },
+        "CL:0000004": {"ancestors": {"CL:0000000": 1, "CL:0000001": 2}, "label": "cell B2", "deprecated": False},
     }
 
 

@@ -107,8 +107,8 @@ class OntologyParser:
         """
         lca = self.get_lowest_common_ancestor(ontology, term_id_1, term_id_2)
         return int(
-            self.ontology_dict[ontology.name][term_id_1]["ancestors"][lca]
-            + self.ontology_dict[ontology.name][term_id_2]["ancestors"][lca]
+            self.cxg_schema.ontology(ontology.name)[term_id_1]["ancestors"][lca]
+            + self.cxg_schema.ontology(ontology.name)[term_id_2]["ancestors"][lca]
         )
 
     def get_lowest_common_ancestor(self, ontology: Ontology, term_id_1: str, term_id_2: str) -> str:
@@ -122,8 +122,8 @@ class OntologyParser:
         :return: str term ID of the lowest common ancestor term
         """
         # include path to term itself
-        ancestors_1 = self.ontology_dict[ontology.name][term_id_1]["ancestors"] + {term_id_1: 0}
-        ancestors_2 = self.ontology_dict[ontology.name][term_id_2]["ancestors"] + {term_id_2: 0}
+        ancestors_1 = self.cxg_schema.ontology(ontology.name)[term_id_1]["ancestors"] + {term_id_1: 0}
+        ancestors_2 = self.cxg_schema.ontology(ontology.name)[term_id_2]["ancestors"] + {term_id_2: 0}
         common_ancestors = set(ancestors_1.keys()) & set(ancestors_2.keys())
         return str(min(common_ancestors, key=lambda x: ancestors_1[x] + ancestors_2[x]))
 
@@ -151,7 +151,10 @@ class OntologyParser:
             ontology = self._parse_ontology_name(term_id)
             # map term_id to the high_level_term with the longest distance from term_id
             highest_level_term_map[term_id] = (
-                max(high_level_term_map[term_id], key=lambda x: self.ontology_dict[ontology][term_id]["ancestors"][x])
+                max(
+                    high_level_term_map[term_id],
+                    key=lambda x: self.cxg_schema.ontology(ontology)[term_id]["ancestors"][x],
+                )
                 if high_level_term_map[term_id]
                 else None
             )
