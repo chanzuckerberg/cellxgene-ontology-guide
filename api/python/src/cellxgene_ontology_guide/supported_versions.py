@@ -4,9 +4,9 @@ import json
 import os
 from typing import Any, Dict, List, Optional
 
-from constants import DATA_ROOT, ONTOLOGY_FILENAME_SUFFIX, ONTOLOGY_INFO_FILENAME
 from semantic_version import Version
 
+from cellxgene_ontology_guide.constants import DATA_ROOT, ONTOLOGY_FILENAME_SUFFIX, ONTOLOGY_INFO_FILENAME
 from cellxgene_ontology_guide.entities import Ontology
 
 
