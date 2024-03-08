@@ -5,7 +5,7 @@
   "type": "array",
   "items": {
     "type": "string",
-    "pattern": "^CL:[0-9]{7}$"
+    "pattern": "^CL:[0-9]{7,}$"
   },
   "minItems": 1,
   "uniqueItems": true
