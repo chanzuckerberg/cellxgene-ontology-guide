@@ -14,10 +14,12 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Generate docs
+      - name: Install dependencies
         run: |
           cd api/python
-          make docs
+          make install-docs
+      - name: Build the docsite
+        run: make docs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/

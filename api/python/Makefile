@@ -4,10 +4,9 @@ install: package-data
 install-dev: package-data
 	pip install -e .[test]
 
-docs:
+install-docs:
 	pip install .
 	pip install pdoc
-	pdoc --output-dir docs/ cellxgene_ontology_guide
 
 uninstall:
 	pip uninstall -y cellxgene-ontology-guide
