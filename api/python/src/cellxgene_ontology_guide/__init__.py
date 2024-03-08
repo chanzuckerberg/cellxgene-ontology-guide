@@ -1,3 +1,3 @@
-import _version
+import cellxgene_ontology_guide._version as version
 
-__version__ = _version.__version__
+__version__ = version.__version__

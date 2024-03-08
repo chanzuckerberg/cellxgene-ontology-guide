@@ -26,7 +26,7 @@ jobs:
       - name: lint checks
         uses: pre-commit/action@v3.0.0
 
-  unit-test-ontonolgy-builder:
+  unit-test-ontology-builder:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

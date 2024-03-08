@@ -1,8 +1,7 @@
 import re
 from typing import Any, Dict, List, Union
 
-from entities import Ontology, OntologyFileType, OntologyVariant
-
+from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
