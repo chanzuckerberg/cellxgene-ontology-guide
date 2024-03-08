@@ -14,12 +14,10 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - name: Install dependencies
+      - name: Generate docs
         run: |
           cd api/python
-          pip install pdoc
-          make install
-      - run: pdoc --output-dir docs/ cellxgene_ontology_guide
+          make docs
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/
