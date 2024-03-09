@@ -41,6 +41,16 @@ def load_prod_datasets() -> Any:
     return json.loads(response)
 
 
+def save_json(data: Any, file_name: str) -> None:
+    """
+    Save the given data to a JSON file.
+    :param data: Any data compatiblewith JSON
+    :param file_name: The name of the file to save the data to.
+    """
+    with open(file_name, "w") as f:
+        json.dump(data, f, indent=2)
+
+
 def extract_cell_types(datasets: List[Dict[str, Any]]) -> List[str]:
     """
     List the set of cell type values for the given datasets.
@@ -51,7 +61,7 @@ def extract_cell_types(datasets: List[Dict[str, Any]]) -> List[str]:
     cell_types = set()
     for dataset in datasets:
         for cell_type in dataset["cell_type"]:
-            cell_types.add(cell_type["ontology_term_id"].replace("_", ":", False))
+            cell_types.add(cell_type["ontology_term_id"].replace("_", ":"))
     return list(cell_types)
 
 
@@ -65,8 +75,8 @@ def extract_tissues(datasets: List[Dict[str, Any]]) -> List[str]:
     tissues = set()
     for dataset in datasets:
         for tissue in dataset["tissue"]:
-            formatted_entity_name = tissue["ontology_term_id"].replace("_", ":", False)
-            tissue_type = tissue.get("tissue_type")
+            formatted_entity_name = tissue["ontology_term_id"].replace("_", ":")
+            tissue_type = tissue["tissue_type"]
             tissues.add(tag_tissue_type(formatted_entity_name, tissue_type))
 
     return list(tissues)
@@ -84,10 +94,6 @@ def tag_tissue_type(entity_name: str, tissue_type: str) -> str:
     # Tissue types
     tissue_type_cell_culture = "cell culture"
     tissue_type_organoid = "organoid"
-
-    # Handle error case (possible if tissue has not been migrated to 4.0.0+ schema).
-    if tissue_type is None:
-        return entity_name
 
     if tissue_type == tissue_type_cell_culture:
         # true if the given tissue type is "cell culture".
@@ -150,7 +156,7 @@ def build_descendants_by_entity(
 
         # List descendants of entity in this set.
         for entity_name in entity_set:
-            descendants = set(ontology_parser.get_terms_descendants(entity_name)[entity_name])
+            descendants = set(ontology_parser.get_terms_descendants([entity_name])[entity_name])
             # TODO: change get_terms_descendants return an iterator or add a single term version.
 
             # Determine the set of descendants that be included.
@@ -258,16 +264,6 @@ def compare_descendant_mappings(file_1: str, file_2: str) -> None:
         decendents_2 = set(mapping_2[key])
         if decendents_1 != decendents_2:
             print(key, decendents_1 - decendents_2)
-
-
-def save_json(data: Any, file_name: str) -> None:
-    """
-    Save the given data to a JSON file.
-    :param data: Any data compatiblewith JSON
-    :param file_name: The name of the file to save the data to.
-    """
-    with open(file_name, "w") as f:
-        json.dump(data, f, indent=2)
 
 
 if __name__ == "__main__":

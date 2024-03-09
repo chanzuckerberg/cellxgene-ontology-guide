@@ -2,3 +2,4 @@ owlready2==0.45
 PyYaml==6.0.1
 jsonschema==4.21.1
 semantic-version==2.10.0
+../../api/python
