@@ -5,7 +5,7 @@ name: Generate Ontology Decendant Mappings
 on:
   schedule:
     - cron: "0 0 * * 1"
-  push:
+  pull_request:
     branches:
       - tsmith/decendant-mapping # TODO remove this line after testing
 
