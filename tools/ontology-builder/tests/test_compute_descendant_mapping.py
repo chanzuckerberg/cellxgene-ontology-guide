@@ -3,7 +3,7 @@ from unittest.mock import Mock
 
 import pytest
 from compute_descendent_mappings import (
-    build_descendants_by_entity,
+    build_descendants_by_term_id,
     extract_cell_types,
     extract_tissues,
     key_organoids_by_ontology_term_id,
@@ -81,7 +81,11 @@ def descendants_by_term_id():
 @pytest.fixture
 def mock_ontology_parser(descendants_by_term_id):
     mock_ontology_parser = Mock()
-    mock_ontology_parser.get_terms_descendants.return_value = descendants_by_term_id
+
+    def get_terms_descendants(term_ids):
+        return {term_id: descendants_by_term_id[term_id] for term_id in term_ids}
+
+    mock_ontology_parser.get_terms_descendants = get_terms_descendants
     return mock_ontology_parser
 
 
@@ -89,19 +93,18 @@ def mock_ontology_parser(descendants_by_term_id):
     "hierarchy, expected",
     [
         ([["a:3"], ["a:0", "a:1", "a:2"]], {}),
-        ([["a:3", "a:2"], ["a:0", "a:1"]], {}),
-        ([["a:3", "a:2", "a:1"], ["a:0"]], {}),
-        ([["a:3", "a:2", "a:1", "a:0"], []], {}),
-        ([["a:0"], ["a:3", "a:2", "a:1"]], {"a:0": ["a:3", "a:2", "a:1"]}),
-        ([["a:0", "a:1"], ["a:3", "a:2"]], {"a:0": ["a:2", "a:3"], "a:1": ["a:2", "a:3"]}),
+        ([["a:2", "a:3"], ["a:0", "a:1"]], {}),
+        ([["a:1", "a:2", "a:3"], ["a:0"]], {}),
+        ([["a:0", "a:1", "a:2", "a:3"], []], {}),
+        ([["a:3"]], {}),
+        ([["a:0"]], {}),
+        ([["a:0"], ["a:1", "a:2", "a:3"]], {"a:0": ["a:1", "a:2", "a:3"]}),
+        ([["a:0", "a:1"], ["a:2", "a:3"]], {"a:0": ["a:2", "a:3"], "a:1": ["a:2", "a:3"]}),
         ([["a:0", "a:1", "a:2"], ["a:3"]], {"a:0": ["a:3"], "a:1": ["a:3"], "a:2": ["a:3"]}),
     ],
 )
 def test_refine_descendants_by_term_id(hierarchy, mock_ontology_parser, expected):
-    result = build_descendants_by_entity(hierarchy, mock_ontology_parser)
-    assert result.keys() == expected.keys()
-    for key in result:
-        assert sorted(result[key]) == sorted(expected[key])
+    assert build_descendants_by_term_id(hierarchy, mock_ontology_parser) == expected
 
 
 @pytest.mark.parametrize(
@@ -113,7 +116,4 @@ def test_refine_descendants_by_term_id(hierarchy, mock_ontology_parser, expected
     ],
 )
 def test_refine_descendants_by_term_id_organoid(hierarchy, mock_ontology_parser, expected):
-    result = build_descendants_by_entity(hierarchy, mock_ontology_parser)
-    assert result.keys() == expected.keys()
-    for key in result:
-        assert sorted(result[key]) == sorted(expected[key])
+    assert build_descendants_by_term_id(hierarchy, mock_ontology_parser) == expected

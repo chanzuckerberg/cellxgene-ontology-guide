@@ -131,6 +131,16 @@ def key_organoids_by_ontology_term_id(term_ids: Iterator[str]) -> Dict[str, str]
     return organoids_by_ontology_term_id
 
 
+def untag(term_id: str) -> str:
+    """
+    Remove the tag from the given term_id name.
+
+    :param term_id: str term_id name
+    :return: str term_id name without the tag
+    """
+    return term_id.split(" ")[0]
+
+
 def build_descendants_by_term_id(
     term_id_hierarchy: List[List[str]], ontology_parser: OntologyParser
 ) -> Dict[str, List[str]]:
@@ -140,11 +150,11 @@ def build_descendants_by_term_id(
     :param term_id_hierarchy: List of lists of term_id names in a hierarchy. The first list is the top
     level of the hierarchy.
     :param ontology_parser: OntologyParser instance
-    :return: Dict of descendants by term_id
+    :return: Dict of descendants by term_id sorted in as
     """
     all_descendants = {}
     organoids_by_ontology_term_id = key_organoids_by_ontology_term_id(itertools.chain(*term_id_hierarchy))
-    for idx, term_id_set in enumerate(term_id_hierarchy):
+    for idx, term_ids in enumerate(term_id_hierarchy):
         # Create the set of descendants that can be included for this term_id set.
         # For example, systems can include organs or tissues,
         # organs can only include tissues, tissues can't have descendants.
@@ -156,8 +166,8 @@ def build_descendants_by_term_id(
 
         accept_list = list(itertools.chain.from_iterable(accept_lists))
 
-        # List descendants of term_id in this set.
-        for term_id, descendants in ontology_parser.get_terms_descendants(term_id_set).items():
+        # Remove tags and List descendants of term_ids.
+        for term_id, descendants in ontology_parser.get_terms_descendants(map(untag, term_ids)).items():
             # remove the tag from the entity name
             term_id = term_id.split(" ")[0]
             descendants = set(descendants)
@@ -181,7 +191,7 @@ def build_descendants_by_term_id(
                 continue
 
             # Add descendants to dictionary.
-            all_descendants[term_id] = descendant_accept_list
+            all_descendants[term_id] = sorted(descendant_accept_list)
     return all_descendants
 
 
@@ -291,6 +301,11 @@ if __name__ == "__main__":
     generate_tissue_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
 
     with contextlib.suppress(FileNotFoundError):
-        compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants_last.json")
+        compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants (1).json")
     with contextlib.suppress(FileNotFoundError):
-        compare_descendant_mappings("tissue_descendants.json", "tissue_descendants_last.json")
+        compare_descendant_mappings("tissue_descendants.json", "tissue_descendants (1).json")
+
+    with contextlib.suppress(FileNotFoundError):
+        compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants_cxg_2.json")
+    with contextlib.suppress(FileNotFoundError):
+        compare_descendant_mappings("tissue_descendants.json", "tissue_descendants_cxg_2.json")
