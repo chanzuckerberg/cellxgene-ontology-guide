@@ -23,10 +23,10 @@ The descendant mappings should be updated when:
 2. A new tissue or cell type is added to the production corpus, or,
 3. The hand-curated systems, organs, cell classes or cell subclasses are updated.
 """
-
+import itertools
 import json
 import os
-from typing import Any, Dict, List
+from typing import Any, Dict, Iterator, List
 from urllib.request import urlopen
 
 import env
@@ -106,7 +106,7 @@ def tag_tissue_type(entity_name: str, tissue_type: str) -> str:
     return entity_name
 
 
-def key_organoids_by_ontology_term_id(entity_names: List[str]) -> Dict[str, str]:
+def key_organoids_by_ontology_term_id(entity_names: Iterator[str]) -> Dict[str, str]:
     """
     Returns a dictionary of organoid ontology term IDs by stem ontology term ID.
 
@@ -141,6 +141,7 @@ def build_descendants_by_entity(
     :return: Dict of descendants by term_id
     """
     all_descendants = {}
+    organoids_by_ontology_term_id = key_organoids_by_ontology_term_id(itertools.chain(*entity_hierarchy))
     for idx, entity_set in enumerate(entity_hierarchy):
         # Create the set of descendants that can be included for this entity set.
         # For example, systems can include organs or tissues,
@@ -152,12 +153,12 @@ def build_descendants_by_entity(
             continue
 
         accept_list = [i for sublist in accept_lists for i in sublist]
-        organoids_by_ontology_term_id = key_organoids_by_ontology_term_id(accept_list)
 
         # List descendants of entity in this set.
         for entity_name in entity_set:
+            # remove the tag from the entity name
+            entity_name = entity_name.split(" ")[0]
             descendants = set(ontology_parser.get_terms_descendants([entity_name])[entity_name])
-            # TODO: change get_terms_descendants return an iterator or add a single term version.
 
             # Determine the set of descendants that be included.
             descendant_accept_list = []
@@ -237,6 +238,7 @@ def generate_tissue_descendant_mapping(ontology_parser: OntologyParser, datasets
 
 
 def compare_descendant_mappings(file_1: str, file_2: str) -> None:
+    print(f"\n------Comparing {file_1} and {file_2}")
     # Testing
     with open(os.path.join(env.ONTOLOGY_ASSETS_DIR, file_1), "r") as f:
         mapping_1 = json.load(f)
@@ -244,32 +246,37 @@ def compare_descendant_mappings(file_1: str, file_2: str) -> None:
     with open(os.path.join(env.ONTOLOGY_ASSETS_DIR, file_2), "r") as f:
         mapping_2 = json.load(f)
 
-    print(f"In {file_1} not in {file_2}")
-    print(mapping_1.keys() - mapping_2.keys())
-
-    print(f"In {file_2} not in {file_1}")
-    print(mapping_2.keys() - mapping_1.keys())
-
     matching_keys = mapping_1.keys() & mapping_2.keys()
-    print(f"Not in {file_2}")
+    diff1_2 = dict()
+    diff2_1 = dict()
     for key in matching_keys:
         decendents_1 = set(mapping_1[key])
         decendents_2 = set(mapping_2[key])
-        if decendents_1 != decendents_2:
-            print(key, decendents_2 - decendents_1)
+        diff1_2[key] = decendents_1 - decendents_2
+        diff2_1[key] = decendents_2 - decendents_1
+    print(f"KEYS: In {file_1} not in {file_2}")
+    print("\t", mapping_1.keys() - mapping_2.keys() or None)
+    print(f"DESCENDANT: In {file_1} not in {file_2}")
+    for key in matching_keys:
+        diff = set(mapping_1[key]) - set(mapping_2[key])
+        if diff:
+            print("\t", key, diff)
 
-    print(f"Not in {file_1}")
+    print(f"\nKEYS: In {file_2} not in {file_1}")
+    print("\t", mapping_2.keys() - mapping_1.keys() or None)
+    print(f"DESCENDANT: In {file_2} not in {file_1}")
     for key in matching_keys:
-        decendents_1 = set(mapping_1[key])
-        decendents_2 = set(mapping_2[key])
-        if decendents_1 != decendents_2:
-            print(key, decendents_1 - decendents_2)
+        diff = set(mapping_2[key]) - set(mapping_1[key])
+        if diff:
+            print("\t", key, diff)
 
 
 if __name__ == "__main__":
     ONTOLOGY_PARSER = OntologyParser("v5.0.0")  # TODO: this should default to the latest supported schema version
     PROD_DATASETS = load_prod_datasets()
     generate_cell_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
-    compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants_cxg.json")
     generate_tissue_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
-    compare_descendant_mappings("tissue_descendants.json", "tissue_descendants_cxg.json")
+    compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants (1).json")
+    compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants_cxg_2.json")
+    compare_descendant_mappings("tissue_descendants.json", "tissue_descendants (1).json")
+    compare_descendant_mappings("tissue_descendants.json", "tissue_descendants_cxg_2.json")

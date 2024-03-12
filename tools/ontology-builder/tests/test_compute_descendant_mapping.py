@@ -21,8 +21,8 @@ def test_save_json(tmpdir):
 @pytest.mark.parametrize(
     "datasets, expected",
     [
-        ([{"cell_type": {"ontology_term_id": "CL_0000000"}}], ["CL:0000000"]),
-        ([{"cell_type": {}}], []),
+        ([{"cell_type": [{"ontology_term_id": "CL_0000000"}]}], ["CL:0000000"]),
+        ([{"cell_type": []}], []),
         ([], []),
     ],
 )
@@ -68,18 +68,52 @@ def test_key_organoids_by_ontology_term_id(entity_names, expected):
     assert key_organoids_by_ontology_term_id(entity_names) == expected
 
 
-def test_build_descendants_by_entity():
-    mock_ontology_parser = Mock()
-    mock_ontology_parser.get_terms_descendants.return_value = {
-        "a:1": ["a:0", "a:2", "a:3"],
-        "A:1": ["UBERON:0000000, UBERON:0000003"],
-        "UBERON:0000003": ["UBERON:0000000"],
-        "UBERON:0000000": [],
-    }
-    heirarchy = [["UBERON:0000000"], ["UBERON:0000003", "UBERON:0000001", "UBERON:0000002"]]
-    assert build_descendants_by_entity(heirarchy, mock_ontology_parser) == {
-        "UBERON:0000001": ["UBERON:0000002", "UBERON:0000003"]
+@pytest.fixture
+def descendants_by_term_id():
+    return {
+        "a:0": ["a:1", "a:2", "a:3"],
+        "a:1": ["a:2", "a:3"],
+        "a:2": ["a:3"],
+        "a:3": [],
     }
 
-    heirarchy = [["UBERON:0000000"], ["UBERON:0000001", "UBERON:0000002", "UBERON:0000003"]]
-    assert build_descendants_by_entity(heirarchy, mock_ontology_parser) == {}
+
+@pytest.fixture
+def mock_ontology_parser(descendants_by_term_id):
+    mock_ontology_parser = Mock()
+    mock_ontology_parser.get_terms_descendants.return_value = descendants_by_term_id
+    return mock_ontology_parser
+
+
+@pytest.mark.parametrize(
+    "hierarchy, expected",
+    [
+        ([["a:3"], ["a:0", "a:1", "a:2"]], {}),
+        ([["a:3", "a:2"], ["a:0", "a:1"]], {}),
+        ([["a:3", "a:2", "a:1"], ["a:0"]], {}),
+        ([["a:3", "a:2", "a:1", "a:0"], []], {}),
+        ([["a:0"], ["a:3", "a:2", "a:1"]], {"a:0": ["a:3", "a:2", "a:1"]}),
+        ([["a:0", "a:1"], ["a:3", "a:2"]], {"a:0": ["a:2", "a:3"], "a:1": ["a:2", "a:3"]}),
+        ([["a:0", "a:1", "a:2"], ["a:3"]], {"a:0": ["a:3"], "a:1": ["a:3"], "a:2": ["a:3"]}),
+    ],
+)
+def test_refine_descendants_by_term_id(hierarchy, mock_ontology_parser, expected):
+    result = build_descendants_by_entity(hierarchy, mock_ontology_parser)
+    assert result.keys() == expected.keys()
+    for key in result:
+        assert sorted(result[key]) == sorted(expected[key])
+
+
+@pytest.mark.parametrize(
+    "hierarchy, expected",
+    [
+        ([["a:0"], ["a:3 (organoid)"]], {"a:0": ["a:3 (organoid)"]}),
+        ([["a:0"], ["a:3", "a:3 (organoid)"]], {"a:0": ["a:3", "a:3 (organoid)"]}),
+        ([["a:0 (organoid)"], ["a:0"]], {"a:0": ["a:0 (organoid)"]}),
+    ],
+)
+def test_refine_descendants_by_term_id_organoid(hierarchy, mock_ontology_parser, expected):
+    result = build_descendants_by_entity(hierarchy, mock_ontology_parser)
+    assert result.keys() == expected.keys()
+    for key in result:
+        assert sorted(result[key]) == sorted(expected[key])
