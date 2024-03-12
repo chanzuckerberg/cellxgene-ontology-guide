@@ -31,7 +31,7 @@ def test_extract_cell_types(datasets, expected):
 
 
 @pytest.mark.parametrize(
-    "entity_name, tissue_type, expected",
+    "term_id, tissue_type, expected",
     [
         ("UBERON:0000000", "tissue", "UBERON:0000000"),
         ("UBERON:0000000", "cell culture", "UBERON:0000000 (cell culture)"),
@@ -43,8 +43,8 @@ def test_extract_cell_types(datasets, expected):
         ("", "", ""),
     ],
 )
-def test_tag_tissue_type(entity_name, tissue_type, expected):
-    assert tag_tissue_type(entity_name, tissue_type) == expected
+def test_tag_tissue_type(term_id, tissue_type, expected):
+    assert tag_tissue_type(term_id, tissue_type) == expected
 
 
 @pytest.mark.parametrize(
@@ -61,11 +61,11 @@ def test_extract_tissues(datasets, expected):
 
 
 @pytest.mark.parametrize(
-    "entity_names, expected",
+    "term_ids, expected",
     [(["UBERON:0000000"], {}), (["UBERON:0000000 (organoid)"], {"UBERON:0000000": "UBERON:0000000 (organoid)"})],
 )
-def test_key_organoids_by_ontology_term_id(entity_names, expected):
-    assert key_organoids_by_ontology_term_id(entity_names) == expected
+def test_key_organoids_by_ontology_term_id(term_ids, expected):
+    assert key_organoids_by_ontology_term_id(term_ids) == expected
 
 
 @pytest.fixture

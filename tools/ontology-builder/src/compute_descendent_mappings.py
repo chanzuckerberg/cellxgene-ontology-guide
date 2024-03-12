@@ -23,6 +23,7 @@ The descendant mappings should be updated when:
 2. A new tissue or cell type is added to the production corpus, or,
 3. The hand-curated systems, organs, cell classes or cell subclasses are updated.
 """
+import contextlib
 import itertools
 import json
 import os
@@ -75,21 +76,21 @@ def extract_tissues(datasets: List[Dict[str, Any]]) -> List[str]:
     tissues = set()
     for dataset in datasets:
         for tissue in dataset["tissue"]:
-            formatted_entity_name = tissue["ontology_term_id"].replace("_", ":")
+            formatted_term_id = tissue["ontology_term_id"].replace("_", ":")
             tissue_type = tissue["tissue_type"]
-            tissues.add(tag_tissue_type(formatted_entity_name, tissue_type))
+            tissues.add(tag_tissue_type(formatted_term_id, tissue_type))
 
     return list(tissues)
 
 
-def tag_tissue_type(entity_name: str, tissue_type: str) -> str:
+def tag_tissue_type(term_id: str, tissue_type: str) -> str:
     """
-    Append the tissue type to the given entity name if the tissue type is cell
-    culture or organoid, otherwise return the entity name as is.
+    Append the tissue type to the given term_id name if the tissue type is cell
+    culture or organoid, otherwise return the term_id name as is.
 
-    :param entity_name: str entity name
+    :param term_id: str term_id name
     :param tissue_type: str tissue type
-    :return: str entity name with tissue type appended
+    :return: str term_id name with tissue type appended
     """
     # Tissue types
     tissue_type_cell_culture = "cell culture"
@@ -97,26 +98,26 @@ def tag_tissue_type(entity_name: str, tissue_type: str) -> str:
 
     if tissue_type == tissue_type_cell_culture:
         # true if the given tissue type is "cell culture".
-        return f"{entity_name} ({tissue_type_cell_culture})"
+        return f"{term_id} ({tissue_type_cell_culture})"
 
     if tissue_type == tissue_type_organoid:
         # true if the given tissue type is "organoid".
-        return f"{entity_name} ({tissue_type_organoid})"
+        return f"{term_id} ({tissue_type_organoid})"
 
-    return entity_name
+    return term_id
 
 
-def key_organoids_by_ontology_term_id(entity_names: Iterator[str]) -> Dict[str, str]:
+def key_organoids_by_ontology_term_id(term_ids: Iterator[str]) -> Dict[str, str]:
     """
     Returns a dictionary of organoid ontology term IDs by stem ontology term ID.
 
-    :param entity_names: List of entity names
+    :param term_ids: List of term_id names
     :return: Dict of organoid ontology term IDs by ontology term ID
     """
 
     organoids_by_ontology_term_id = {}
-    for entity_name in entity_names:
-        if "(organoid)" in entity_name:
+    for term_id in term_ids:
+        if "(organoid)" in term_id:
             """
             Historically (i.e. before schema 4.0.0 and the introduction of
             `tissue_type`), tissues of type "organoid" were tagged with "(organoid)"
@@ -124,41 +125,42 @@ def key_organoids_by_ontology_term_id(entity_names: Iterator[str]) -> Dict[str, 
             mapped to this tagged version in order to minimize downstream updates to
             the filter functionality.
             """
-            ontology_term_id = entity_name.replace(" (organoid)", "")
-            organoids_by_ontology_term_id[ontology_term_id] = entity_name
+            ontology_term_id = term_id.replace(" (organoid)", "")
+            organoids_by_ontology_term_id[ontology_term_id] = term_id
 
     return organoids_by_ontology_term_id
 
 
-def build_descendants_by_entity(
-    entity_hierarchy: List[List[str]], ontology_parser: OntologyParser
+def build_descendants_by_term_id(
+    term_id_hierarchy: List[List[str]], ontology_parser: OntologyParser
 ) -> Dict[str, List[str]]:
     """
-    Create descendant relationships between the given entity hierarchy.
+    Create descendant relationships between the given term_id hierarchy.
 
-    :param entity_hierarchy: List of lists of entity names
+    :param term_id_hierarchy: List of lists of term_id names in a hierarchy. The first list is the top
+    level of the hierarchy.
     :param ontology_parser: OntologyParser instance
     :return: Dict of descendants by term_id
     """
     all_descendants = {}
-    organoids_by_ontology_term_id = key_organoids_by_ontology_term_id(itertools.chain(*entity_hierarchy))
-    for idx, entity_set in enumerate(entity_hierarchy):
-        # Create the set of descendants that can be included for this entity set.
+    organoids_by_ontology_term_id = key_organoids_by_ontology_term_id(itertools.chain(*term_id_hierarchy))
+    for idx, term_id_set in enumerate(term_id_hierarchy):
+        # Create the set of descendants that can be included for this term_id set.
         # For example, systems can include organs or tissues,
         # organs can only include tissues, tissues can't have descendants.
-        accept_lists = entity_hierarchy[idx + 1 :]
+        accept_lists = term_id_hierarchy[idx + 1 :]
 
         # Tissue or cell type for example will not have any descendants.
         if not accept_lists:
             continue
 
-        accept_list = [i for sublist in accept_lists for i in sublist]
+        accept_list = list(itertools.chain.from_iterable(accept_lists))
 
-        # List descendants of entity in this set.
-        for entity_name in entity_set:
+        # List descendants of term_id in this set.
+        for term_id, descendants in ontology_parser.get_terms_descendants(term_id_set).items():
             # remove the tag from the entity name
-            entity_name = entity_name.split(" ")[0]
-            descendants = set(ontology_parser.get_terms_descendants([entity_name])[entity_name])
+            term_id = term_id.split(" ")[0]
+            descendants = set(descendants)
 
             # Determine the set of descendants that be included.
             descendant_accept_list = []
@@ -171,15 +173,15 @@ def build_descendants_by_entity(
                 if descendant in organoids_by_ontology_term_id:
                     descendant_accept_list.append(organoids_by_ontology_term_id[descendant])
 
-            # Add organoid entity, if any.
-            if entity_name in organoids_by_ontology_term_id:
-                descendant_accept_list.append(organoids_by_ontology_term_id[entity_name])
+            # Add organoid term_id, if any.
+            if term_id in organoids_by_ontology_term_id:
+                descendant_accept_list.append(organoids_by_ontology_term_id[term_id])
 
             if not descendant_accept_list:
                 continue
 
             # Add descendants to dictionary.
-            all_descendants[entity_name] = descendant_accept_list
+            all_descendants[term_id] = descendant_accept_list
     return all_descendants
 
 
@@ -204,9 +206,9 @@ def generate_cell_descendant_mapping(ontology_parser: OntologyParser, datasets: 
     # establish the hierarchy of terms
     heirarchy = [cell_classes, cell_subclasses, prod_cell_types]
     # build the descendants mapping
-    descendent_mapping = build_descendants_by_entity(heirarchy, ontology_parser)
+    descendent_mapping = build_descendants_by_term_id(heirarchy, ontology_parser)
     # save the mapping to a file
-    file_name = os.path.join(env.ONTOLOGY_ASSETS_DIR, "tissue_descendants.json")
+    file_name = os.path.join(env.ONTOLOGY_ASSETS_DIR, "cell_type_descendants.json")
     save_json(descendent_mapping, file_name)
 
 
@@ -231,7 +233,7 @@ def generate_tissue_descendant_mapping(ontology_parser: OntologyParser, datasets
     # establish the hierarchy of terms
     heirarchy = [system_tissues, organ_tissues, prod_tissues]
     # build the descendants mapping
-    descendent_mapping = build_descendants_by_entity(heirarchy, ontology_parser)
+    descendent_mapping = build_descendants_by_term_id(heirarchy, ontology_parser)
     # save the mapping to a file
     file_name = os.path.join(env.ONTOLOGY_ASSETS_DIR, "tissue_descendants.json")
     save_json(descendent_mapping, file_name)
@@ -272,6 +274,17 @@ def compare_descendant_mappings(file_1: str, file_2: str) -> None:
 
 
 if __name__ == "__main__":
+    with contextlib.suppress(FileNotFoundError):
+        os.rename(
+            os.path.join(env.ONTOLOGY_ASSETS_DIR, "cell_type_descendants.json"),
+            os.path.join(env.ONTOLOGY_ASSETS_DIR, "cell_type_descendants_last.json"),
+        )
+    with contextlib.suppress(FileNotFoundError):
+        os.rename(
+            os.path.join(env.ONTOLOGY_ASSETS_DIR, "tissue_descendants.json"),
+            os.path.join(env.ONTOLOGY_ASSETS_DIR, "tissue_descendants_last.json"),
+        )
+
     ONTOLOGY_PARSER = OntologyParser("v5.0.0")  # TODO: this should default to the latest supported schema version
     PROD_DATASETS = load_prod_datasets()
     generate_cell_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
