@@ -6,3 +6,4 @@
 /api/python/src/cellxgene_ontology_guide.egg-info/top_level.txt
 /api/python/src/cellxgene_ontology_guide.egg-info/
 !/api/python/LICENSE
+/api/python/src/cellxgene_ontology_guide/data/
