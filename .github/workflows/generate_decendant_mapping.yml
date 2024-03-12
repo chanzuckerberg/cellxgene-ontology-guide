@@ -1,0 +1,57 @@
+#This is a github actions that run every monday at 12am. It will run generate_decendant_mapping.py off the main
+#  github branch and open a pull request to commit the new ontology_decendant files to cellxgene-ontology-guide
+
+name: Generate Ontology Decendant Mappings
+on:
+  schedule:
+    - cron: "0 0 * * 1"
+  push:
+    branches:
+      - tsmith/decendant-mapping # TODO remove this line after testing
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+
+jobs:
+  generate-ontology-decendant-mappings:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@v2
+        with:
+          ref: main
+          fetch-depth: 1
+      - name: Set up Python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.10
+      - name: setup git
+        run: |
+          git config user.name github-actions
+          git config user.email
+      - name: create a new branch
+        run: |
+          git checkout -b update-ontology-decendant-mappings
+      - name: install requirements
+        run: |
+          cd ./tools/ontology-builder/
+          pip install -r requirements.txt
+      - name: generate ontology decendant mappings
+        run: |
+          python3 ./tools/ontology-builder/src/generate_decendant_mapping.py
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: |
+            ./ontology-assets/*.json
+          commit-message: "chore: update ontology decendant mappings"
+          title: "chore: update ontology decendant mappings"
+          branch: update-ontology-decendant-mappings
+          base: main
+          labels: auto-merge
+          signoff: true
+          draft: false
+          changes: auto
