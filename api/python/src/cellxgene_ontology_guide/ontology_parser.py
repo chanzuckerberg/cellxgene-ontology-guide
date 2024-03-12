@@ -1,8 +1,7 @@
 import re
-from typing import Any, Dict, List, Union
+from typing import Any, Dict, Iterable, List, Union
 
-from entities import Ontology, OntologyFileType, OntologyVariant
-
+from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
@@ -184,7 +183,7 @@ class OntologyParser:
             )
         return highest_level_term_map
 
-    def get_terms_descendants(self, term_ids: List[str], include_self: bool = False) -> Dict[str, List[str]]:
+    def get_terms_descendants(self, term_ids: Iterable[str], include_self: bool = False) -> Dict[str, List[str]]:
         """
         Get the descendant ontology terms for each term in a list. If include_self is True, the term itself will be
          included as a descendant.
