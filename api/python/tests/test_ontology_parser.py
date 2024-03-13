@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
+from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
@@ -44,7 +44,7 @@ def ontology_dict():
 @pytest.fixture
 def mock_CXGSchema(ontology_dict, mock_load_supported_versions, mock_load_ontology_file):
     mock_load_supported_versions.return_value = {
-        "v5.0.0": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
+        "v5.0.0": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
     }
     cxg_schema = CXGSchema()
     cxg_schema.ontology_file_names = {"CL": "CL-ontology-2024-01-01.json.gz"}
@@ -213,10 +213,6 @@ def test_get_distance_between_terms(ontology_parser):
 
 def test_get_ontology_download_url(ontology_parser):
     assert (
-        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OWL)
+        ontology_parser.get_ontology_download_url(Ontology.CL)
         == "http://example.com/2024-01-01/cl.owl"
-    )
-    assert (
-        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OBO, OntologyVariant.BASE)
-        == "http://example.com/2024-01-01/cl-base.obo"
     )

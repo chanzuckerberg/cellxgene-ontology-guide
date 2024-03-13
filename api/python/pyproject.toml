@@ -11,7 +11,7 @@ authors = [
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = "~= 3.11"
+requires-python = "~= 3.10"
 dependencies = ["semantic_version==2.10.0"]
 
 [project.optional-dependencies]
