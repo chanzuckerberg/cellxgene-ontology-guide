@@ -150,7 +150,7 @@ def build_descendants_by_term_id(
     :param term_id_hierarchy: List of lists of term_id names in a hierarchy. The first list is the top
     level of the hierarchy.
     :param ontology_parser: OntologyParser instance
-    :return: Dict of descendants by term_id sorted in as
+    :return: Dict of descendants by term_id sorted in ascending order.
     """
     all_descendants = {}
     organoids_by_ontology_term_id = key_organoids_by_ontology_term_id(itertools.chain(*term_id_hierarchy))
