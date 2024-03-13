@@ -37,8 +37,7 @@ jobs:
           git checkout -b update-ontology-decendant-mappings
       - name: install requirements
         run: |
-          cd ./tools/ontology-builder/
-          pip install -r requirements.txt
+          cd ./tools/ontology-builder/ && pip install -r requirements.txt
       - name: generate ontology decendant mappings
         run: |
           python3 ./tools/ontology-builder/src/generate_decendant_mapping.py
