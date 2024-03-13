@@ -7,7 +7,7 @@ on:
     - cron: "0 0 * * 1"
   pull_request:
     branches:
-      - tsmith/decendent-mapping # TODO remove this line after testing
+      - tsmith/decendent-mappings # TODO remove this line after testing
 
 permissions:
   id-token: write
