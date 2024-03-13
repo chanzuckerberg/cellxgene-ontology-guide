@@ -212,7 +212,4 @@ def test_get_distance_between_terms(ontology_parser):
 
 
 def test_get_ontology_download_url(ontology_parser):
-    assert (
-        ontology_parser.get_ontology_download_url(Ontology.CL)
-        == "http://example.com/2024-01-01/cl.owl"
-    )
+    assert ontology_parser.get_ontology_download_url(Ontology.CL) == "http://example.com/2024-01-01/cl.owl"
