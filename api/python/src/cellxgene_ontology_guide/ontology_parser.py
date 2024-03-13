@@ -1,7 +1,7 @@
 import re
 from typing import Any, Dict, Iterable, List, Union
 
-from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
+from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
@@ -274,26 +274,17 @@ class OntologyParser:
         label: str = self.cxg_schema.ontology(ontology_name)[term_id]["label"]
         return label
 
-    def get_ontology_download_url(
-        self, ontology: Ontology, ontology_filetype: OntologyFileType, ontology_variant: OntologyVariant = None
-    ) -> str:
+    def get_ontology_download_url(self, ontology: Ontology) -> str:
         """
-        Get the download URL for a given ontology file. If the ontology_variant is not provided, the default ontology
-        file will be returned.
+        Get the download URL for a given ontology file.
 
         Examples:
-        get_ontology_download_url("CL", "owl") -> "http://example.com/2024-01-01/cl.owl"
-        get_ontology_download_url("CL", "obo", "base") -> "http://example.com/2024-01-01/cl-base.obo"
+        get_ontology_download_url("CL") -> "http://example.com/2024-01-01/cl.owl"
 
         :param ontology: Ontology enum of the ontology to fetch
-        :param ontology_filetype: OntologyFileType enum of the ontology file type to fetch
-        :param ontology_variant: OntologyVariant enum of the ontology variant to fetch
         :return: str download URL for the requested ontology file
         """
         source_url = self.cxg_schema.supported_ontologies[ontology.name]["source"]
         version = self.cxg_schema.supported_ontologies[ontology.name]["version"]
-        return (
-            f"{source_url}/{version}/{ontology.value}-{ontology_variant.value}.{ontology_filetype.value}"
-            if ontology_variant
-            else f"{source_url}/{version}/{ontology.value}.{ontology_filetype.value}"
-        )
+        filename = self.cxg_schema.supported_ontologies[ontology.name]["filename"]
+        return f"{source_url}/{version}/{filename}"
