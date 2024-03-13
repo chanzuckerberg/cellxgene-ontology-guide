@@ -31,7 +31,7 @@ jobs:
       - name: setup git
         run: |
           git config user.name github-actions
-          git config user.email
+          git config user.email github-actions@github.com
       - name: create a new branch
         run: |
           git checkout -b update-ontology-decendant-mappings
