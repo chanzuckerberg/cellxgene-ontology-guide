@@ -52,15 +52,15 @@
           "format": "uri",
           "description": "Source to find and download canonical ontology version for this data release"
         },
-        "filetype": {
+        "filename": {
           "type": "string",
-          "description": "filetype used to build generated artifacts for this ontology data release"
+          "description": "name of ontology file used to build generated artifacts for this ontology data release"
         }
       },
       "required": [
         "version",
         "source",
-        "filetype"
+        "filename"
       ],
       "additionalProperties": false
     }
