@@ -24,7 +24,7 @@ jobs:
           fetch-depth: 2
       - uses: actions/setup-python@v5
       - name: lint checks
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@v3.0.1
 
   unit-test-ontonolgy-builder:
     runs-on: ubuntu-latest
