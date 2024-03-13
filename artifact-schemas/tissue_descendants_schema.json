@@ -8,7 +8,7 @@
       "type": "array",
       "items": {
         "type": "string",
-        "pattern": "^UBERON:[0-9]{7,}$"
+        "pattern": "^UBERON:[0-9]{7,}( \\(organoid\\))?$"
       },
       "description": "An array of UBERON ontology term IDs that are subclasses of the key UBERON ontology term ID."
     }
