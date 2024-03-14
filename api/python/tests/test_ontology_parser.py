@@ -116,7 +116,9 @@ def map_term_ancestors_with_distances(ontology_parser):
         "CL:0000000": {},
         "CL:0000004": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1},
     }
-    assert ontology_parser.map_term_ancestors_with_distances(["CL:0000000", "CL:0000004", "unknown"], include_self=True) == {
+    assert ontology_parser.map_term_ancestors_with_distances(
+        ["CL:0000000", "CL:0000004", "unknown"], include_self=True
+    ) == {
         "CL:0000000": {"CL:0000000": 0},
         "CL:0000004": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1, "CL:0000004": 0},
         "unknown": {},
