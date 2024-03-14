@@ -13,7 +13,7 @@ def mock_ontology_info():
         "ontology_name": {
             "source": "http://example.com",
             "version": "v1",
-            "filetype": "owl",
+            "filename": "ontology_name.owl",
         }
     }
 
@@ -50,7 +50,9 @@ def test_get_ontology_info_file_default(mock_ontology_info_file):
     ontology_info = _get_ontology_info_file(ontology_info_file=mock_ontology_info_file)
 
     # Assertion
-    assert ontology_info == {"ontology_name": {"source": "http://example.com", "version": "v1", "filetype": "owl"}}
+    assert ontology_info == {
+        "ontology_name": {"source": "http://example.com", "version": "v1", "filename": "ontology_name.owl"}
+    }
 
 
 def test_get_ontology_info_file_version(mock_ontology_info_file):

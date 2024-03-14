@@ -62,7 +62,7 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     def _build_url(_ontology: str) -> str:
         onto_ref_data = ontology_info[_ontology]
-        return f"{onto_ref_data['source']}/{onto_ref_data['version']}/{ontology.lower()}.{onto_ref_data['filetype']}"
+        return f"{onto_ref_data['source']}/{onto_ref_data['version']}/{onto_ref_data['filename']}"
 
     threads = []
     for ontology, _ in ontology_info.items():
