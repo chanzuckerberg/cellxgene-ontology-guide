@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "**/ontology-assets/**.json"
+      - "**/ontology-assets/**.gz"
       - "**/artifact-schemas/**.json"
     branches-ignore:
       - main
