@@ -203,6 +203,7 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
             if onto_term.IAO_0100001:
                 # url --> term
                 ontology_term = re.findall(r"[^\W_]+", str(onto_term.IAO_0100001[0]))
+                # It is accepted that this term may not be in the same ontology as the original term.
                 term_dict[term_id]["replaced_by"] = f"{ontology_term[-2]}:{ontology_term[-1]}"
             elif getattr(onto_term, "consider", None):
                 term_dict[term_id]["consider"] = [str(c) for c in onto_term.consider]
