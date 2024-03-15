@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.0.1...ontology-assets-v0.1.0) (2024-03-15)
+
+
+### Features
+
+* load GH Release Assets for schema version in memory ([#72](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/72)) ([58bad0a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/58bad0a698f262f167ba821ff00a4a7ca254d13a))
+* refactor ancestry mapping to include distance from descendant node + implement functions to support curated list term mapping ([#96](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/96)) ([7fc3562](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/7fc3562b040f7c2962c0a6e751996933727d9206))
+* refer to ontology source filenames in ontology_info and return that in get_ontology_download_url ([#106](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/106)) ([ff9d826](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/ff9d82646413b3153daf8e6e60a9c8a1f32a0f61))
+* **release:** generate descendant mapping for tissues and cells ([#100](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/100)) ([841fddf](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/841fddf59abbaf1cb3bc823bdfb52b9e71371d92))
+* remove all-ontology.json.gz ([83fefd6](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/83fefd68c7845d2a4d0299d958082820fd0f4fb3))
+* split all_ontology into individual files. ([#93](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/93)) ([ead59e5](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/ead59e5c0fe56c8f1feab9959d75965372c1316e))
+
+
+### BugFixes
+
+* lint errors ([f5e4583](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f5e45838e3c99dc3785ffc12f5e72aecc1ceeb29))
+* Schema format and validation fixes.  ([#113](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/113)) ([0465ee7](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0465ee75468fb5e0169e6ec4b5a40f1b875ecdd1))
+
 ## 0.0.1 (2024-02-26)
 
 ### Features
