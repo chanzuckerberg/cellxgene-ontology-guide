@@ -32,6 +32,7 @@ from urllib.request import urlopen
 
 import env
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
+from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
 def load_prod_datasets() -> Any:
@@ -295,7 +296,8 @@ if __name__ == "__main__":
             os.path.join(env.ONTOLOGY_ASSETS_DIR, "tissue_descendants_last.json"),
         )
 
-    ONTOLOGY_PARSER = OntologyParser("v5.0.0")  # TODO: this should default to the latest supported schema version
+    ONTOLOGY_PARSER = OntologyParser(CXGSchema().version)
+    # version
     PROD_DATASETS = load_prod_datasets()
     generate_cell_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
     generate_tissue_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
