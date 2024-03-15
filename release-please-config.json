@@ -3,6 +3,7 @@
   "bump-minor-pre-major": true,
   "initial-version": "0.0.1",
   "include-v-in-tag": true,
+  "\tseparate-pull-requests": true,
   "changelog-sections": [
     {
       "type": "feat",
@@ -22,11 +23,7 @@
   ],
   "packages": {
     "api/python": {
-      "package-name": "python-api",
-      "prerelease": true,
-      "versioning": "prerelease",
-      "release-type": "python",
-      "draft": true
+      "package-name": "python-api"
     },
     "ontology-assets": {
       "package-name": "ontology-assets"
