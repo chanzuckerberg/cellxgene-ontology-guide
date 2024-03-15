@@ -82,10 +82,10 @@ def descendants_by_term_id():
 def mock_ontology_parser(descendants_by_term_id):
     mock_ontology_parser = Mock()
 
-    def get_terms_descendants(term_ids):
+    def map_term_descendants(term_ids):
         return {term_id: descendants_by_term_id[term_id] for term_id in term_ids}
 
-    mock_ontology_parser.get_terms_descendants = get_terms_descendants
+    mock_ontology_parser.map_term_descendants = map_term_descendants
     return mock_ontology_parser
 
 

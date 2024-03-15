@@ -71,7 +71,5 @@ jobs:
           title: "chore: update ontology decendant mappings"
           branch: update-ontology-decendant-mappings
           base: main
-          labels: auto-merge
           signoff: true
           draft: false
-          changes: auto
