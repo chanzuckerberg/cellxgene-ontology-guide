@@ -23,7 +23,6 @@
   "packages": {
     "api/python": {
       "package-name": "python-api",
-      "prerelease-type": "rc",
       "prerelease": true,
       "versioning": "prerelease",
       "release-type": "python",
