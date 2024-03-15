@@ -301,11 +301,9 @@ if __name__ == "__main__":
     generate_tissue_descendant_mapping(ONTOLOGY_PARSER, PROD_DATASETS)
 
     with contextlib.suppress(FileNotFoundError):
-        compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants (1).json")
+        compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants_last.json")
     with contextlib.suppress(FileNotFoundError):
-        compare_descendant_mappings("tissue_descendants.json", "tissue_descendants (1).json")
+        compare_descendant_mappings("tissue_descendants.json", "tissue_descendants_last.json")
 
-    with contextlib.suppress(FileNotFoundError):
-        compare_descendant_mappings("cell_type_descendants.json", "cell_type_descendants_cxg_2.json")
-    with contextlib.suppress(FileNotFoundError):
-        compare_descendant_mappings("tissue_descendants.json", "tissue_descendants_cxg_2.json")
+    os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, "cell_type_descendants_last.json"))
+    os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, "tissue_descendants_last.json"))
