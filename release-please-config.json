@@ -3,7 +3,7 @@
   "bump-minor-pre-major": true,
   "initial-version": "0.0.1",
   "include-v-in-tag": true,
-  "\tseparate-pull-requests": true,
+  "separate-pull-requests": true,
   "changelog-sections": [
     {
       "type": "feat",
