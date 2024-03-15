@@ -3,13 +3,19 @@
 
 name: Generate Ontology Decendant Mappings
 on:
-  #    schedule:
-  #      - cron: "0 0 * * 1"
-  # TODO undo
+  schedule:
+    - cron: "0 0 * * 1"
+
+  push:
+    paths:
+      - "**/ontology-assets/**.json"
+      - "**/ontology-assets/**.gz"
+    branches:
+      - main
+  workflow_dispatch:
   pull_request: # TODO remove
     branches:
       - "*"
-  workflow_dispatch:
 
 permissions:
   id-token: write

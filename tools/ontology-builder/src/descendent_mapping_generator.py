@@ -168,7 +168,7 @@ def build_descendants_by_term_id(
         accept_list = list(itertools.chain.from_iterable(accept_lists))
 
         # Remove tags and List descendants of term_ids.
-        for term_id, descendants in ontology_parser.get_terms_descendants(map(untag, term_ids)).items():
+        for term_id, descendants in ontology_parser.map_term_descendants(map(untag, term_ids)).items():
             # remove the tag from the entity name
             term_id = term_id.split(" ")[0]
             descendants = set(descendants)
