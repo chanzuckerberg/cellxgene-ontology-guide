@@ -4,12 +4,13 @@ import os
 import re
 import urllib.request
 from threading import Thread
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Iterator, List, Optional
 from urllib.error import HTTPError, URLError
 
 import env
 import owlready2
 import semantic_version
+from validate_json_schemas import register_schemas, verify_json
 
 
 def _get_latest_version(versions: List[str]) -> str:
@@ -210,7 +211,7 @@ def _parse_ontologies(
     ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
     output_path: str = env.ONTOLOGY_ASSETS_DIR,
-) -> None:
+) -> Iterator[str]:
     """
     Parse all ontology files in working_dir. Extracts information from all classes in the ontology file.
     The extracted information is written into a gzipped a json file with the following [schema](
@@ -240,24 +241,32 @@ def _parse_ontologies(
     :param str working_dir: path to folder with ontology files
     :param str output_path: path to output json files
 
-    :rtype None
+    :rtype str
+    :return: path to the output json file
     """
     for onto_file in os.listdir(working_dir):
         if onto_file.startswith("."):
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
         version = ontology_info[onto.name]["version"]
-        output_file = f"{onto.name}-ontology-{version}.json.gz"
+        output_file = os.path.join(output_path, f"{onto.name}-ontology-{version}.json.gz")
         print(f"Processing {output_file}")
 
         onto_dict = _extract_ontology_term_metadata(onto)
 
-        with gzip.open(os.path.join(output_path, output_file), "wt") as output_json:
-            json.dump(onto_dict, output_json, indent=2)
+        with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
+            fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
+        yield output_file
 
 
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
     ontology_info = _get_ontology_info_file()
-    _download_ontologies(ontology_info)
+    # _download_ontologies(ontology_info)
     _parse_ontologies(ontology_info)
+    # validate against the schema
+    schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
+    registry = register_schemas()
+    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontology_info)]
+    if not all(result):
+        raise Exception("Some ontology files do not match the schema")
