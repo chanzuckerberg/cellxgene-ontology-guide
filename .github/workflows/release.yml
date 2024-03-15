@@ -2,9 +2,6 @@ on:
   push:
     branches:
       - main
-  pull_request: # TODO remove
-    branches:
-      - "*"
 
 permissions:
   contents: write
@@ -21,7 +18,7 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: "tsmith/api_rc_version" # TODO revert to main
+          target-branch: "main"
     outputs:
       ontology_assets_upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
       paths_released: ${{ steps.release.outputs.paths_released }}
