@@ -265,7 +265,7 @@ def _parse_ontologies(
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     ontology_info = _get_ontology_info_file()
-    # _download_ontologies(ontology_info)
+    _download_ontologies(ontology_info)
     _parse_ontologies(ontology_info)
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
