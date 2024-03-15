@@ -184,10 +184,6 @@ def build_descendants_by_term_id(
                 if descendant in organoids_by_ontology_term_id:
                     descendant_accept_list.append(organoids_by_ontology_term_id[descendant])
 
-            # Add organoid term_id, if any.
-            if term_id in organoids_by_ontology_term_id:
-                descendant_accept_list.append(organoids_by_ontology_term_id[term_id])
-
             if not descendant_accept_list:
                 continue
 

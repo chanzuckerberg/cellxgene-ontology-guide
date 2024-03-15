@@ -112,7 +112,7 @@ def test_refine_descendants_by_term_id(hierarchy, mock_ontology_parser, expected
     [
         ([["a:0"], ["a:3 (organoid)"]], {"a:0": ["a:3 (organoid)"]}),
         ([["a:0"], ["a:3", "a:3 (organoid)"]], {"a:0": ["a:3", "a:3 (organoid)"]}),
-        ([["a:0 (organoid)"], ["a:0"]], {"a:0": ["a:0 (organoid)"]}),
+        ([["a:0 (organoid)"], []], {}),
     ],
 )
 def test_refine_descendants_by_term_id_organoid(hierarchy, mock_ontology_parser, expected):
