@@ -5,7 +5,8 @@ name: Generate Ontology Decendant Mappings
 on:
   #    schedule:
   #      - cron: "0 0 * * 1"
-  pull_request:
+  # TODO undo
+  pull_request: # TODO remove
     branches:
       - "*"
   workflow_dispatch:
@@ -22,12 +23,12 @@ jobs:
       - name: Checkout main
         uses: actions/checkout@v4
         with:
-          ref: main
+          #          ref: main # TODO undo
           fetch-depth: 1
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: 3.11
       - name: Python cache
         uses: actions/cache@v4
         with:
@@ -39,9 +40,6 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
-      - name: create a new branch
-        run: |
-          git checkout -b update-ontology-decendant-mappings
       - name: install requirements
         run: |
           cd ./tools/ontology-builder/ 
