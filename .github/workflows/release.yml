@@ -13,7 +13,7 @@ jobs:
     runs-on: [self-hosted, ARM64]
     steps:
       - name: release please
-        uses: google-github-actions/release-please-action@v4.0.2
+        uses: google-github-actions/release-please-action@v4.1.0
         id: release
         with:
           manifest-file: ".release-please-manifest.json"
@@ -46,7 +46,7 @@ jobs:
             content_type: "application/json"
     steps:
       - name: Checkout main branch
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 1
