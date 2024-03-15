@@ -1,5 +1,47 @@
 # Changelog
 
+## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/v0.0.1...v0.1.0) (2024-03-15)
+
+
+### Features
+
+* add data to the python package  ([#87](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/87)) ([0eb6831](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0eb68314345e641218b8bae243cff417271dca1b))
+* add is_valid_term_id method to OntologyParser ([#115](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/115)) ([72c2073](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/72c2073f0a466d86e4cd40307dc53e3f9e31489f))
+* include license file with python package ([#85](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/85)) ([2be3d81](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2be3d817041a4fbb6d5ab8b169a69b2fd8086e38))
+* load GH Release Assets for schema version in memory ([#72](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/72)) ([58bad0a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/58bad0a698f262f167ba821ff00a4a7ca254d13a))
+* refactor ancestry mapping to include distance from descendant node + implement functions to support curated list term mapping ([#96](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/96)) ([7fc3562](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/7fc3562b040f7c2962c0a6e751996933727d9206))
+* refer to ontology source filenames in ontology_info and return that in get_ontology_download_url ([#106](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/106)) ([ff9d826](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/ff9d82646413b3153daf8e6e60a9c8a1f32a0f61))
+* **release:** generate descendant mapping for tissues and cells ([#100](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/100)) ([841fddf](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/841fddf59abbaf1cb3bc823bdfb52b9e71371d92))
+* remove all-ontology.json.gz ([83fefd6](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/83fefd68c7845d2a4d0299d958082820fd0f4fb3))
+* split all_ontology into individual files. ([#93](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/93)) ([ead59e5](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/ead59e5c0fe56c8f1feab9959d75965372c1316e))
+* Support getting download link for ontology from source repo ([#86](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/86)) ([fd55b76](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/fd55b760e655d419adcea94ade948347fa95ca6e))
+* validate all json against their defined schemas. ([#91](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/91)) ([2512163](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/25121636ac65cb2f77996f44feb42f8e95847145))
+
+
+### Misc
+
+* clean-up ontology_parser single fetch and bulk fetch methods + account for acceptable non-ontology terms ([#112](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/112)) ([2ef7435](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2ef7435df62a75261fd75c819a76e7dd8f42cb99))
+* **deps-dev:** bump semantic-version from 2.8.5 to 2.10.0 in /api/python ([#98](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/98)) ([dfe0b39](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/dfe0b397667cc8c4c6076cd293df576cbff3815f))
+* **deps:** bump actions/cache from 1 to 4 in /.github/workflows ([#109](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/109)) ([b168bf2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b168bf2dd64b891a8b4fa217e471f56df5222b8d))
+* **deps:** bump actions/checkout from 2 to 4 in /.github/workflows ([#108](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/108)) ([caa835f](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/caa835fcd7b5a66846d7f189884c11fea6c6df48))
+* **deps:** bump actions/setup-python from 1 to 5 in /.github/workflows ([#107](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/107)) ([b390ae4](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b390ae487b809273ec7aa3546af0d97edec0c620))
+* **deps:** bump google-github-actions/release-please-action from 4.0.2 to 4.1.0 in /.github/workflows ([#110](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/110)) ([a45f34e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a45f34ea9fb4fdda54282d344ef6dc078ca19e1d))
+* **deps:** bump pre-commit/action from 3.0.0 to 3.0.1 in /.github/workflows ([#111](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/111)) ([a2c9bd1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a2c9bd1c170c09fac7d2a38deacc3a6211872618))
+* **deps:** bump semantic-version from 2.8.5 to 2.10.0 in /tools/ontology-builder ([#97](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/97)) ([1ee8b7e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/1ee8b7ec440906c7a3b2a5c9bea3107bda0455ee))
+
+
+### BugFixes
+
+* dependabot for github actions ([341d418](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/341d4186c0a8da00c6c6eee11f598b682345d3e0))
+* exclude CHANGELOG.md from prettier ([968a17e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/968a17eb52edee20f7d816c9449c25542b645dae))
+* imports for api ([4cd3386](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/4cd33864fa59b3bd5e565a05b5b74414989566a8))
+* lint errors ([f5e4583](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f5e45838e3c99dc3785ffc12f5e72aecc1ceeb29))
+* python api releases ([bf0477e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/bf0477edcc36a96ff72ce05c7a0081d4f4dd9d37))
+* run schema validator when *.json.gz updates ([886c855](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/886c85594b7b406a64048b3a6758b328dd5508b7))
+* Schema format and validation fixes.  ([#113](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/113)) ([0465ee7](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0465ee75468fb5e0169e6ec4b5a40f1b875ecdd1))
+* update gitignore ([15b9937](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/15b99376435d8c961ddc84e92aa821d5fe0bd5a2))
+* update requirements ([#114](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/114)) ([9888f3d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/9888f3dad04e26ffd2bc5434a45645390a8eec01))
+
 ## 0.0.1 (2024-02-26)
 
 ### Features
