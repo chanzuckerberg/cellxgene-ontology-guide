@@ -2,6 +2,7 @@ import gzip
 import json
 import os
 import re
+import sys
 import urllib.request
 from threading import Thread
 from typing import Any, Dict, Iterator, List, Optional
@@ -269,4 +270,4 @@ if __name__ == "__main__":
     registry = register_schemas()
     result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontology_info)]
     if not all(result):
-        raise Exception("Some ontology files do not match the schema")
+        sys.exit(1)
