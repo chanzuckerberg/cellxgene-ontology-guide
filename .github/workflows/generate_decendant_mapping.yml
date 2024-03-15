@@ -20,11 +20,15 @@ jobs:
   generate-ontology-decendant-mappings:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout main
+      #      - name: Checkout main # TODO undo
+      #        uses: actions/checkout@v4
+      #        with:
+      #          ref: main
+      #          fetch-depth: 1
+      - name: Checkout
         uses: actions/checkout@v4
         with:
-          #          ref: main # TODO undo
-          fetch-depth: 1
+          ref: ${{ github.event.pull_request.head.ref }}
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
