@@ -2,3 +2,4 @@ owlready2==0.45
 jsonschema>=4.21.1, <5
 semantic-version>=2.10.0, <3
 referencing>=0.33
+../../api/python
