@@ -75,6 +75,7 @@ def test_parse_ontology_name__not_supported(ontology_parser):
 
 def test_is_valid_term_id(ontology_parser):
     assert ontology_parser.is_valid_term_id("CL:0000001")
+    assert ontology_parser.is_valid_term_id("CL:0000003")   # test deprecated term is valid
     assert not ontology_parser.is_valid_term_id("CL:0000009")
     assert not ontology_parser.is_valid_term_id("GO:0000001")
 

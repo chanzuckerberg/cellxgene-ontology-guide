@@ -41,7 +41,8 @@ class OntologyParser:
 
     def is_valid_term_id(self, term_id: str) -> bool:
         """
-        Check if an ontology term ID is valid and defined in a supported ontology
+        Check if an ontology term ID is valid and defined in a supported ontology. If deprecated but defined
+        in the ontology, it is considered valid.
 
         :param term_id: str ontology term to check
         :return: boolean flag indicating whether the term is supported
