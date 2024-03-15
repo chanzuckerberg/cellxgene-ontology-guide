@@ -89,11 +89,11 @@ def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:
             for file in files
             if file.endswith(".json")
         )
-        # and all(
-        #     verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file), registry)
-        #     for file in files
-        #     if file.endswith(".json.gz")
-        # )
+        and all(
+            verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file), registry)
+            for file in files
+            if file.endswith(".json.gz")
+        )
         # TODO ren-enable
     ):
         sys.exit(1)

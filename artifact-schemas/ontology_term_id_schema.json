@@ -4,39 +4,39 @@
   "definitions": {
     "CL_term_id": {
       "type": "string",
-      "pattern": "^CL+:[0-9]+$"
+      "pattern": "^CL+:[0-9]{7,}$"
     },
     "EFO_term_id": {
       "type": "string",
-      "pattern": "^EFO+:[0-9]+$"
+      "pattern": "^EFO+:[0-9]{7,}$"
     },
     "HANCESTRO_term_id": {
       "type": "string",
-      "pattern": "^HANCESTRO+:[0-9]+$"
+      "pattern": "^HANCESTRO+:[0-9]{7,}$"
     },
     "HsapDv_term_id": {
       "type": "string",
-      "pattern": "^HsapDv+:[0-9]+$"
+      "pattern": "^HsapDv+:[0-9]{7,}$"
     },
     "MmusDv_term_id": {
       "type": "string",
-      "pattern": "^MmusDv+:[0-9]+$"
+      "pattern": "^MmusDv+:[0-9]{7,}$"
     },
     "MONDO_term_id": {
       "type": "string",
-      "pattern": "^MONDO+:[0-9]+$"
+      "pattern": "^MONDO+:[0-9]{7,}$"
     },
     "NCBITaxon_term_id": {
       "type": "string",
-      "pattern": "^NCBITaxon+:[0-9]+$"
+      "pattern": "^NCBITaxon+:[0-9]{6,}$"
     },
     "PATO_term_id": {
       "type": "string",
-      "pattern": "^PATO+:[0-9]+$"
+      "pattern": "^PATO+:[0-9]{7,}$"
     },
     "UBERON_term_id": {
       "type": "string",
-      "pattern": "^UBERON+:[0-9]+$"
+      "pattern": "^UBERON+:[0-9]{7,}$"
     },
     "any_term_id": {
       "anyOf": [
