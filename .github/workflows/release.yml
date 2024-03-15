@@ -4,7 +4,7 @@ on:
       - main
   pull_request: # TODO remove
     branches:
-      - "tsmith/api_rc_version"
+      - "*"
 
 permissions:
   contents: write
