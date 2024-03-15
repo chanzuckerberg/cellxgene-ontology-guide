@@ -70,6 +70,6 @@ jobs:
           commit-message: "chore: update ontology decendant mappings"
           title: "chore: update ontology decendant mappings"
           branch: update-ontology-decendant-mappings
-          base: tsmith/descenent-mappings # TODO: change to main
+          base: tsmith/descendent-mappings # TODO: change to main
           signoff: true
           draft: false
