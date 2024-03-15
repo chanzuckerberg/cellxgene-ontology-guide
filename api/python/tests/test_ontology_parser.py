@@ -73,6 +73,13 @@ def test_parse_ontology_name__not_supported(ontology_parser):
         ontology_parser._parse_ontology_name("GO:0000001")
 
 
+@pytest.mark.parametrize(
+    "term_id,expected", [("CL:0000001", True), ("CL:0000003", True), ("CL:0000009", False), ("GO:0000001", False)]
+)
+def test_is_valid_term_id(ontology_parser, term_id, expected):
+    assert ontology_parser.is_valid_term_id(term_id) == expected
+
+
 def test_get_term_ancestors(ontology_parser):
     assert ontology_parser.get_term_ancestors("CL:0000004") == ["CL:0000000", "CL:0000001", "CL:0000002"]
     assert ontology_parser.get_term_ancestors("CL:0000004", include_self=True) == [
