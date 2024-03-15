@@ -71,7 +71,7 @@ jobs:
       - name: Checkout main branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref }}
           fetch-depth: 1
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
