@@ -4,7 +4,7 @@
   "description": "Schema for file containing metadata for Ontology Terms accepted in dataset submissions to CZ CellXGene Data Portal.",
   "type": "object",
   "propertyNames": {
-    "$ref": "ontology_term_id_schema.json#/definitions/any_term_id"
+    "$ref": "ontology_term_id_schema.json#/definitions/supported_term_id"
   },
   "additionalProperties": {
     "type": "object",
@@ -21,7 +21,7 @@
         "type": "object",
         "description": "A map of ancestor ontology terms that this term is a subclass of, keyed to the distance from the term.",
         "propertyNames": {
-          "$ref": "ontology_term_id_schema.json#/definitions/any_term_id"
+          "$ref": "ontology_term_id_schema.json#/definitions/supported_term_id"
         },
         "additionalProperties": {
           "type": "integer"
@@ -49,7 +49,7 @@
         "description": "Suggests alternative IDs to consider in place of this ontology entry."
       },
       "replaced_by": {
-        "$ref": "ontology_term_id_schema.json#/definitions/any_term_id",
+        "$ref": "ontology_term_id_schema.json#/definitions/generic_term_id",
         "description": "If deprecated, the ID of the ontology entry that should canonically replace this one."
       }
     },
