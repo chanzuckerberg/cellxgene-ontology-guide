@@ -49,7 +49,8 @@
         "description": "Suggests alternative IDs to consider in place of this ontology entry."
       },
       "replaced_by": {
-        "$ref": "ontology_term_id_schema.json#/definitions/generic_term_id",
+        "type": "string",
+        "pattern": "^\\w+:\\w+$",
         "description": "If deprecated, the ID of the ontology entry that should canonically replace this one."
       }
     },

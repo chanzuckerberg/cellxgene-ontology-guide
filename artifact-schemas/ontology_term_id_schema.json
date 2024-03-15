@@ -38,11 +38,6 @@
       "type": "string",
       "pattern": "^UBERON+:[0-9]+$"
     },
-    "generic_term_id": {
-      "type": "string",
-      "pattern": "^[A-Za-z0-9_]+:[0-9]+$",
-      "description": "A term id in the form of prefix:identifier"
-    },
     "supported_term_id": {
       "anyOf": [
         {
