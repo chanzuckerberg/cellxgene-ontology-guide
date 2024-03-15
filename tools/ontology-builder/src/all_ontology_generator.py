@@ -1,5 +1,6 @@
 import gzip
 import json
+import logging
 import os
 import re
 import sys
@@ -262,6 +263,7 @@ def _parse_ontologies(
 
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
     ontology_info = _get_ontology_info_file()
     # _download_ontologies(ontology_info)
     _parse_ontologies(ontology_info)
