@@ -1,4 +1,5 @@
 import gzip
+import json
 import logging
 import os.path
 import sys
@@ -6,13 +7,10 @@ from typing import Iterable, Tuple
 
 import env
 from jsonschema import validate
+from referencing import Registry, Resource
 
 logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
-
-import json
-
-from referencing import Registry, Resource
 
 
 def get_schema_file_name(json_file_name: str, schema_dir: str = env.SCHEMA_DIR) -> str:
