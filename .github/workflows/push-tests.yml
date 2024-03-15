@@ -46,8 +46,9 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          pip install -r tools/ontology-builder/requirements.txt
-          pip install -r tools/ontology-builder/requirements-dev.txt
+          cd ./tools/ontology-builder
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
       - name: Ontology builder unit tests
         run: |
           cd tools/ontology-builder && make unit-tests

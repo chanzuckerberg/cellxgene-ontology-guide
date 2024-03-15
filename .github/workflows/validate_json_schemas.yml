@@ -30,7 +30,8 @@ jobs:
             ${{ runner.os }}-pip-
       - name: install requirements
         run: |
-          pip install -r tools/ontology-builder/requirements.txt
+          cd ./tools/ontology-builder/
+          pip install -r requirements.txt
       - name: validate json schemas
         run: |
           python3 ./tools/ontology-builder/src/validate_json_schemas.py

@@ -9,8 +9,9 @@
   "additionalProperties": {
     "type": "array",
     "items": {
-      "$ref": "ontology_term_id_schema.json#/definitions/UBERON_term_id"
-    },
+        "type": "string",
+        "pattern": "^UBERON:[0-9]+( \\(organoid\\))?$"
+      },
     "description": "An array of UBERON ontology term IDs that are subclasses of the key UBERON ontology term ID."
   }
 }
