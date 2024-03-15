@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ontology Version and Source Schema",
+  "definitions": {
+    "CL_term_id": {
+      "type": "string",
+      "pattern": "^CL+:[0-9]+$"
+    },
+    "EFO_term_id": {
+      "type": "string",
+      "pattern": "^EFO+:[0-9]+$"
+    },
+    "HANCESTRO_term_id": {
+      "type": "string",
+      "pattern": "^HANCESTRO+:[0-9]+$"
+    },
+    "HsapDv_term_id": {
+      "type": "string",
+      "pattern": "^HsapDv+:[0-9]+$"
+    },
+    "MmusDv_term_id": {
+      "type": "string",
+      "pattern": "^MmusDv+:[0-9]+$"
+    },
+    "MONDO_term_id": {
+      "type": "string",
+      "pattern": "^MONDO+:[0-9]+$"
+    },
+    "NCBITaxon_term_id": {
+      "type": "string",
+      "pattern": "^NCBITaxon+:[0-9]+$"
+    },
+    "PATO_term_id": {
+      "type": "string",
+      "pattern": "^PATO+:[0-9]+$"
+    },
+    "UBERON_term_id": {
+      "type": "string",
+      "pattern": "^UBERON+:[0-9]+$"
+    },
+    "supported_term_id": {
+      "anyOf": [
+        {
+          "$ref": "#/definitions/CL_term_id"
+        },
+        {
+          "$ref": "#/definitions/EFO_term_id"
+        },
+        {
+          "$ref": "#/definitions/HANCESTRO_term_id"
+        },
+        {
+          "$ref": "#/definitions/HsapDv_term_id"
+        },
+        {
+          "$ref": "#/definitions/MmusDv_term_id"
+        },
+        {
+          "$ref": "#/definitions/MONDO_term_id"
+        },
+        {
+          "$ref": "#/definitions/NCBITaxon_term_id"
+        },
+        {
+          "$ref": "#/definitions/PATO_term_id"
+        },
+        {
+          "$ref": "#/definitions/UBERON_term_id"
+        }
+      ]
+    }
+  }
+}
