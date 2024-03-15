@@ -13,7 +13,7 @@ jobs:
     runs-on: [self-hosted, ARM64]
     steps:
       - name: release please
-        uses: google-github-actions/release-please-action@v4.0.2
+        uses: google-github-actions/release-please-action@v4.1.0
         id: release
         with:
           manifest-file: ".release-please-manifest.json"
