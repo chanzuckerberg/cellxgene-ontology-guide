@@ -2,7 +2,7 @@ import os.path
 from unittest.mock import Mock
 
 import pytest
-from compute_descendent_mappings import (
+from descendent_mapping_generator import (
     build_descendants_by_term_id,
     extract_cell_types,
     extract_tissues,
