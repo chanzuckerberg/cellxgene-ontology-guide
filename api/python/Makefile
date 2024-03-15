@@ -15,5 +15,17 @@ package-data:
 	cp -r ../../ontology-assets/ ./src/cellxgene_ontology_guide/data
 	touch ./src/cellxgene_ontology_guide/data/__init__.py
 
+build: package-data
+	python -m pip install --upgrade pip
+	pip install build twine
+	python -m build
+
+test/publish: build
+	python -m twine upload --repository testpypi dist/*
+
+publish: build
+	python -m twine upload dist/*
+
 unit-tests:
 	python -m pytest tests
+
