@@ -15,10 +15,6 @@ permissions:
   contents: write
   pull-requests: write
 
-concurrency:
-  group: generate-ontology-decendant-mappings
-  cancel-in-progress: true
-
 jobs:
   generate-ontology-decendant-mappings:
     runs-on: ubuntu-latest
