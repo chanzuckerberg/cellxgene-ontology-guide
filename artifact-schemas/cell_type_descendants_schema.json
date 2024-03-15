@@ -7,8 +7,7 @@
     "^CL:[0-9]{7,}$": {
       "type": "array",
       "items": {
-        "type": "string",
-        "pattern": "^CL:[0-9]{7,}$"
+        "$ref": "ontology_term_id_schema.json#/definitions/CL_term_id"
       },
       "description": "An array of CL ontology term IDs that are subclasses of the key CL ontology term ID."
     }

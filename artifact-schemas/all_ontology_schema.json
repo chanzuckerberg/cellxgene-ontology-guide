@@ -1,8 +1,11 @@
 {
-  "$schema": "http://json-schema.org/draft-07,/schema#",
+  "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Valid Ontology Term JSON Schema",
   "description": "Schema for file containing metadata for Ontology Terms accepted in dataset submissions to CZ CellXGene Data Portal.",
   "type": "object",
+  "propertyNames": {
+    "pattern": "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7,}$"
+  },
   "patternProperties": {
     "^(EFO|UBERON|CL|HANCESTRO|HsapDv|MmusDv|PATO|NCBITaxon|MONDO):[0-9]{7,}$": {
       "type": "object",

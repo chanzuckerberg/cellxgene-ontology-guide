@@ -6,10 +6,7 @@
   "patternProperties": {
     "^UBERON:[0-9]{7,}$": {
       "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^UBERON:[0-9]{7,}$"
-      },
+      "items": {"$ref": "ontology_term_id_schema.json#/definitions/UBERON_term_id"},
       "description": "An array of UBERON ontology term IDs that are subclasses of the key UBERON ontology term ID."
     }
   },
