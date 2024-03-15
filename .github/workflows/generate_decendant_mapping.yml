@@ -48,6 +48,10 @@ jobs:
         run: |
           cd ./tools/ontology-builder/ 
           pip install -r requirements.txt
+      - name: install local cellxgene-ontology-guide api version #TODO: this or the pypi version?
+        run: |
+          cd ./api/python
+          make install
       - name: generate ontology decendant mappings
         run: |
           python3 tools/ontology-builder/src/descendent_mapping_generator.py
