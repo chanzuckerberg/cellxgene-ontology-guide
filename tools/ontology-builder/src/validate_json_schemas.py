@@ -52,8 +52,8 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
     try:
         with open(schema_file_name) as f:
             schema = json.load(f)
-    except Exception as e:
-        logger.exception(f"Error loading {schema_file_name}: {e}")
+    except Exception:
+        logger.exception(f"Error loading {schema_file_name}")
         return False
 
     try:
@@ -63,14 +63,14 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
         else:
             with open(json_file_name) as f:
                 data = json.load(f)
-    except Exception as e:
-        logger.exception(f"Error loading {json_file_name}: {e}")
+    except Exception:
+        logger.exception(f"Error loading {json_file_name}")
         return False
 
     try:
         validate(instance=data, schema=schema, registry=registry)
-    except Exception as e:
-        logger.exception(f"Error validating {json_file_name} against {schema_file_name}: {e}")
+    except Exception:
+        logger.exception(f"Error validating {json_file_name} against {schema_file_name}")
         return False
     return True
 
@@ -83,19 +83,17 @@ def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:
     """
     registry = register_schemas()
     files = os.listdir(path)
-    if not (
-        all(
-            verify_json(get_schema_file_name(file), os.path.join(path, file), registry)
-            for file in files
-            if file.endswith(".json")
-        )
-        and all(
-            verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file), registry)
-            for file in files
-            if file.endswith(".json.gz")
-        )
-        # TODO ren-enable
-    ):
+    _json = [
+        verify_json(get_schema_file_name(file), os.path.join(path, file), registry)
+        for file in files
+        if file.endswith(".json")
+    ]
+    _json_gz = [
+        verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file), registry)
+        for file in files
+        if file.endswith(".json.gz")
+    ]
+    if not all(_json + _json_gz):
         sys.exit(1)
 
 
