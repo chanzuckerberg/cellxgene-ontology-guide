@@ -68,12 +68,6 @@
           "$ref": "#/definitions/UBERON_term_id"
         }
       ]
-    },
-    "all_term_ids": {
-      "type": "array",
-      "items": {
-        "$ref": "#/definitions/any_term_id"
-      }
     }
   }
 }
