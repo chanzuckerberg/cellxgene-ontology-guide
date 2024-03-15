@@ -41,7 +41,7 @@ jobs:
           pip install -r requirements.txt
       - name: generate ontology decendant mappings
         run: |
-          python3 ./tools/ontology-builder/src/generate_decendant_mapping.py
+          python3 tools/ontology-builder/src/generate_decendant_mapping.py
       - name: Create Pull Request
         uses: peter-evans/create-pull-request@v6
         with:
