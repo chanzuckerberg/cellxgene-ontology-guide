@@ -73,6 +73,12 @@ def test_parse_ontology_name__not_supported(ontology_parser):
         ontology_parser._parse_ontology_name("GO:0000001")
 
 
+def test_is_valid_term_id(ontology_parser):
+    assert ontology_parser.is_valid_term_id("CL:0000001")
+    assert not ontology_parser.is_valid_term_id("CL:0000009")
+    assert not ontology_parser.is_valid_term_id("GO:0000001")
+
+
 def test_get_term_ancestors(ontology_parser):
     assert ontology_parser.get_term_ancestors("CL:0000004") == ["CL:0000000", "CL:0000001", "CL:0000002"]
     assert ontology_parser.get_term_ancestors("CL:0000004", include_self=True) == [

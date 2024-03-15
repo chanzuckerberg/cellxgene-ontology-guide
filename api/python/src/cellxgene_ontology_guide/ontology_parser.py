@@ -39,6 +39,21 @@ class OntologyParser:
 
         return ontology_name
 
+    def is_valid_term_id(self, term_id: str) -> bool:
+        """
+        Check if an ontology term ID is valid and defined in a supported ontology
+
+        :param term_id: str ontology term to check
+        :return: boolean flag indicating whether the term is supported
+        """
+        try:
+            ontology_name = self._parse_ontology_name(term_id)
+            if term_id in self.cxg_schema.ontology(ontology_name):
+                return True
+        except ValueError:
+            return False
+        return False
+
     def get_term_ancestors(self, term_id: str, include_self: bool = False) -> List[str]:
         """
         Get the ancestor ontology terms for a given term. If include_self is True, the term itself will be included as
