@@ -31,9 +31,7 @@ jobs:
       matrix:
         include:
           - file_name: "ontology_info.json"
-            content_type: "application/yml"
-          - file_name: "all_ontology.json.gz"
-            content_type: "application/zip"
+            content_type: "application/json"
           - file_name: "cell_class_list.json"
             content_type: "application/json"
           - file_name: "cell_subclass_list.json"
