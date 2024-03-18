@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.1.0...python-api-v0.1.1) (2024-03-18)
+
+
+### BugFixes
+
+* python-api release version ([#131](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/131)) ([3237651](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/32376519536cfa38e1889e2d185d713d5a46d013))
+
 ## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.0.2...python-api-v0.1.0) (2024-03-15)
 
 
