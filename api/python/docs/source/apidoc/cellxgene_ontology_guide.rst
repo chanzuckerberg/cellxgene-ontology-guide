@@ -1,11 +1,7 @@
 cellxgene\_ontology\_guide package
 ==================================
 
-
-cellxgene\_ontology\_guide.constants module
--------------------------------------------
-
-.. automodule:: cellxgene_ontology_guide.constants
+.. automodule:: cellxgene_ontology_guide
    :members:
    :undoc-members:
    :show-inheritance:
@@ -30,14 +26,6 @@ cellxgene\_ontology\_guide.supported\_versions module
 -----------------------------------------------------
 
 .. automodule:: cellxgene_ontology_guide.supported_versions
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-Module contents
----------------
-
-.. automodule:: cellxgene_ontology_guide
    :members:
    :undoc-members:
    :show-inheritance:

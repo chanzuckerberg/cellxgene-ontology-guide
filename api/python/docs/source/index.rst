@@ -5,12 +5,14 @@
 
 Welcome to cellxgene-ontology-guide's documentation!
 ====================================================
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
+   README
    api
-
+   CHANGELOG
 
 Indices and tables
 ==================

@@ -16,6 +16,7 @@ dependencies = ["semantic_version>=2.10.0,<3"]
 
 [project.optional-dependencies]
 test = ["pytest"]
+docs = ["sphinx", "livereload", "myst-parser", "sphinx-autodoc-typehints"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
