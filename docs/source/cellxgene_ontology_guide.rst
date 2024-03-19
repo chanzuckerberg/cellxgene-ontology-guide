@@ -1,16 +1,6 @@
 cellxgene\_ontology\_guide package
 ==================================
 
-Subpackages
------------
-
-.. toctree::
-   :maxdepth: 4
-
-   cellxgene_ontology_guide.data
-
-Submodules
-----------
 
 cellxgene\_ontology\_guide.constants module
 -------------------------------------------

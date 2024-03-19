@@ -29,7 +29,5 @@ exclude_patterns = []
 html_theme = 'alabaster'
 html_static_path = ['_static']
 
-autosummary_generate = True
-autosummary_imported_members = True
 autodoc_typehints = "signature"
 autoclass_content = "both"
