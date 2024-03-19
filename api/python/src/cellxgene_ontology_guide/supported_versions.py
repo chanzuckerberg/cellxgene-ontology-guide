@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from semantic_version import Version
 
-from cellxgene_ontology_guide.constants import DATA_ROOT, ONTOLOGY_FILENAME_SUFFIX, ONTOLOGY_INFO_FILENAME
+from cellxgene_ontology_guide._constants import DATA_ROOT, ONTOLOGY_FILENAME_SUFFIX, ONTOLOGY_INFO_FILENAME
 from cellxgene_ontology_guide.entities import Ontology
 
 

@@ -1,7 +1,7 @@
 import re
 from typing import Any, Dict, Iterable, List, Union
 
-from cellxgene_ontology_guide.constants import VALID_NON_ONTOLOGY_TERMS
+from cellxgene_ontology_guide._constants import VALID_NON_ONTOLOGY_TERMS
 from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
