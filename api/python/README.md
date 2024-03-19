@@ -6,6 +6,12 @@
 make install
 ```
 
+# Uninstall
+
+```bash
+make uninstall
+```
+
 # Run Unit Tests
 
 ```bash

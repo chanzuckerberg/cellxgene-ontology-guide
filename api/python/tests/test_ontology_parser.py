@@ -1,7 +1,7 @@
 from unittest.mock import patch
 
 import pytest
-from cellxgene_ontology_guide.entities import Ontology, OntologyFileType, OntologyVariant
+from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
@@ -44,7 +44,7 @@ def ontology_dict():
 @pytest.fixture
 def mock_CXGSchema(ontology_dict, mock_load_supported_versions, mock_load_ontology_file):
     mock_load_supported_versions.return_value = {
-        "v5.0.0": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filetype": "owl"}}
+        "v5.0.0": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
     }
     cxg_schema = CXGSchema()
     cxg_schema.ontology_file_names = {"CL": "CL-ontology-2024-01-01.json.gz"}
@@ -73,6 +73,13 @@ def test_parse_ontology_name__not_supported(ontology_parser):
         ontology_parser._parse_ontology_name("GO:0000001")
 
 
+@pytest.mark.parametrize(
+    "term_id,expected", [("CL:0000001", True), ("CL:0000003", True), ("CL:0000009", False), ("GO:0000001", False)]
+)
+def test_is_valid_term_id(ontology_parser, term_id, expected):
+    assert ontology_parser.is_valid_term_id(term_id) == expected
+
+
 def test_get_term_ancestors(ontology_parser):
     assert ontology_parser.get_term_ancestors("CL:0000004") == ["CL:0000000", "CL:0000001", "CL:0000002"]
     assert ontology_parser.get_term_ancestors("CL:0000004", include_self=True) == [
@@ -81,6 +88,19 @@ def test_get_term_ancestors(ontology_parser):
         "CL:0000002",
         "CL:0000004",
     ]
+    assert ontology_parser.get_term_ancestors("unknown", include_self=True) == []
+
+
+def test_map_term_ancestors(ontology_parser):
+    assert ontology_parser.map_term_ancestors(["CL:0000000", "CL:0000004"]) == {
+        "CL:0000000": [],
+        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000002"],
+    }
+    assert ontology_parser.map_term_ancestors(["CL:0000000", "CL:0000004", "unknown"], include_self=True) == {
+        "CL:0000000": ["CL:0000000"],
+        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000002", "CL:0000004"],
+        "unknown": [],
+    }
 
 
 def test_get_term_ancestors_with_distances(ontology_parser):
@@ -95,21 +115,40 @@ def test_get_term_ancestors_with_distances(ontology_parser):
         "CL:0000002": 1,
         "CL:0000004": 0,
     }
+    assert ontology_parser.get_term_ancestors_with_distances("unknown", include_self=True) == {}
 
 
-def test_get_term_list_ancestors(ontology_parser):
-    assert ontology_parser.get_term_list_ancestors(["CL:0000000", "CL:0000004"]) == {
-        "CL:0000000": [],
-        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000002"],
+def map_term_ancestors_with_distances(ontology_parser):
+    assert ontology_parser.map_term_ancestors_with_distances(["CL:0000000", "CL:0000004"]) == {
+        "CL:0000000": {},
+        "CL:0000004": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1},
     }
-    assert ontology_parser.get_term_list_ancestors(["CL:0000000", "CL:0000004"], include_self=True) == {
-        "CL:0000000": ["CL:0000000"],
-        "CL:0000004": ["CL:0000000", "CL:0000001", "CL:0000002", "CL:0000004"],
+    assert ontology_parser.map_term_ancestors_with_distances(
+        ["CL:0000000", "CL:0000004", "unknown"], include_self=True
+    ) == {
+        "CL:0000000": {"CL:0000000": 0},
+        "CL:0000004": {"CL:0000000": 2, "CL:0000001": 1, "CL:0000002": 1, "CL:0000004": 0},
+        "unknown": {},
     }
 
 
-def test_get_terms_descendants(ontology_parser):
-    assert ontology_parser.get_terms_descendants(["CL:0000000", "CL:0000004"]) == {
+def test_get_term_descendants(ontology_parser):
+    assert ontology_parser.get_term_descendants("CL:0000000") == [
+        "CL:0000001",
+        "CL:0000002",
+        "CL:0000003",
+        "CL:0000004",
+        "CL:0000005",
+        "CL:0000006",
+        "CL:0000007",
+    ]
+    assert ontology_parser.get_term_descendants("CL:0000004") == []
+    assert ontology_parser.get_term_descendants("CL:0000004", include_self=True) == ["CL:0000004"]
+    assert ontology_parser.get_term_descendants("na") == []
+
+
+def test_map_term_descendants(ontology_parser):
+    assert ontology_parser.map_term_descendants(["CL:0000000", "CL:0000004"]) == {
         "CL:0000000": [
             "CL:0000001",
             "CL:0000002",
@@ -121,7 +160,7 @@ def test_get_terms_descendants(ontology_parser):
         ],
         "CL:0000004": [],
     }
-    assert ontology_parser.get_terms_descendants(["CL:0000000", "CL:0000004"], include_self=True) == {
+    assert ontology_parser.map_term_descendants(["CL:0000000", "CL:0000004", "unknown"], include_self=True) == {
         "CL:0000000": [
             "CL:0000000",
             "CL:0000001",
@@ -133,6 +172,7 @@ def test_get_terms_descendants(ontology_parser):
             "CL:0000007",
         ],
         "CL:0000004": ["CL:0000004"],
+        "unknown": [],
     }
 
 
@@ -163,11 +203,36 @@ def test_get_term_label(ontology_parser):
     assert ontology_parser.get_term_label("CL:0000004") == "cell BC"
 
 
+def test_map_term_labels(ontology_parser):
+    assert ontology_parser.map_term_labels(["CL:0000000", "CL:0000004", "unknown", "na"]) == {
+        "CL:0000000": "cell A",
+        "CL:0000004": "cell BC",
+        "unknown": "unknown",
+        "na": "na",
+    }
+
+
+def test_get_high_level_terms(ontology_parser):
+    high_level_terms = ["CL:0000000", "CL:0000001"]
+    assert ontology_parser.get_high_level_terms("CL:0000004", high_level_terms) == ["CL:0000000", "CL:0000001"]
+    assert ontology_parser.get_high_level_terms("CL:0000008", high_level_terms) == []
+    assert ontology_parser.get_high_level_terms("CL:0000000", high_level_terms) == ["CL:0000000"]
+    assert ontology_parser.get_high_level_terms("na", high_level_terms) == []
+
+
 def test_map_high_level_terms(ontology_parser):
     assert ontology_parser.map_high_level_terms(
-        term_ids=["CL:0000000", "CL:0000008", "CL:0000004"],
+        term_ids=["CL:0000000", "CL:0000008", "CL:0000004", "unknown"],
         high_level_terms=["CL:0000000", "CL:0000001"],
-    ) == {"CL:0000000": ["CL:0000000"], "CL:0000008": [], "CL:0000004": ["CL:0000000", "CL:0000001"]}
+    ) == {"CL:0000000": ["CL:0000000"], "CL:0000008": [], "CL:0000004": ["CL:0000000", "CL:0000001"], "unknown": []}
+
+
+def test_get_highest_level_term(ontology_parser):
+    high_level_terms = ["CL:0000000", "CL:0000001"]
+    assert ontology_parser.get_highest_level_term("CL:0000004", high_level_terms) == "CL:0000000"
+    assert ontology_parser.get_highest_level_term("CL:0000000", high_level_terms) == "CL:0000000"
+    assert ontology_parser.get_highest_level_term("CL:0000008", high_level_terms) is None
+    assert ontology_parser.get_highest_level_term("na", high_level_terms) is None
 
 
 def test_map_highest_level_term(ontology_parser):
@@ -212,11 +277,4 @@ def test_get_distance_between_terms(ontology_parser):
 
 
 def test_get_ontology_download_url(ontology_parser):
-    assert (
-        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OWL)
-        == "http://example.com/2024-01-01/cl.owl"
-    )
-    assert (
-        ontology_parser.get_ontology_download_url(Ontology.CL, OntologyFileType.OBO, OntologyVariant.BASE)
-        == "http://example.com/2024-01-01/cl-base.obo"
-    )
+    assert ontology_parser.get_ontology_download_url(Ontology.CL) == "http://example.com/2024-01-01/cl.owl"

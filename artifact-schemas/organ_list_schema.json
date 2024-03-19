@@ -3,10 +3,7 @@
   "title": "Curated 'Organ' Ontology Terms Schema",
   "description": "A schema for validating an array of UBERON ontology term IDs representing 'Organ' ontology terms, curated for CZ CellxGene use.",
   "type": "array",
-  "items": {
-    "type": "string",
-    "pattern": "^UBERON:[0-9]{7,}$"
-  },
+  "items": {"$ref": "ontology_term_id_schema.json#/definitions/UBERON_term_id"},
   "minItems": 1,
   "uniqueItems": true
 }

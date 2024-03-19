@@ -2,13 +2,15 @@ import gzip
 import json
 
 import pytest
-from validate_json_schemas import get_schema_file_name, verify_json
+from referencing import Resource
+from validate_json_schemas import get_schema_file_name, register_schemas, verify_json
 
 
 @pytest.fixture
-def schema_file(tmpdir):
+def schema_file_fixture(tmpdir):
     # Create a temporary schema file
     schema_data = {
+        "$schema": "http://json-schema.org/draft-07/schema#",
         "type": "object",
         "properties": {"name": {"type": "string"}, "age": {"type": "number"}},
         "required": ["name", "age"],
@@ -19,6 +21,11 @@ def schema_file(tmpdir):
     return str(schema_file)
 
 
+@pytest.fixture
+def registry_fixture(schema_file_fixture, tmpdir):
+    return register_schemas(tmpdir)
+
+
 def test_get_schema_file_name(tmpdir):
     # Create a temporary JSON file
     json_file = "test.json"
@@ -27,8 +34,24 @@ def test_get_schema_file_name(tmpdir):
     assert get_schema_file_name(str(json_file), tmpdir) == str(tmpdir.join("test_schema.json"))
 
 
+def test_register_schemas(schema_file_fixture, tmpdir):
+    registry = register_schemas(tmpdir)
+    assert isinstance(registry["schema.json"], Resource)
+
+
+def test_register_schema_invalid_json(tmpdir):
+    # Create an invalid schema file
+    schema_file = tmpdir.join("invalid_schema.json")
+    with open(str(schema_file), "w") as f:
+        f.write("invalid_schema")
+
+    # Assert an exception is raised
+    with pytest.raises(json.decoder.JSONDecodeError):
+        register_schemas(tmpdir)
+
+
 class TestVerifyJson:
-    def test_valid_json(self, schema_file, tmpdir):
+    def test_valid_json(self, schema_file_fixture, tmpdir, registry_fixture):
         # Create a valid JSON file
         json_data = {"name": "John", "age": 30}
         json_file = tmpdir.join("valid.json")
@@ -36,9 +59,9 @@ class TestVerifyJson:
             json.dump(json_data, f)
 
         # Assert validation passes
-        assert verify_json(schema_file, str(json_file)) is True
+        assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is True
 
-    def test_valid_json_gz(self, schema_file, tmpdir):
+    def test_valid_json_gz(self, schema_file_fixture, tmpdir, registry_fixture):
         # Create a valid JSON GZ file
         json_data = {"name": "John", "age": 30}
         json_file = tmpdir.join("valid.json.gz")
@@ -46,9 +69,9 @@ class TestVerifyJson:
             json.dump(json_data, f)
 
         # Assert validation passes
-        assert verify_json(schema_file, str(json_file)) is True
+        assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is True
 
-    def test_invalid_json(self, schema_file, tmpdir):
+    def test_invalid_json(self, schema_file_fixture, tmpdir, registry_fixture):
         # Create an invalid JSON file
         json_data = {"name": "John"}
         json_file = tmpdir.join("invalid.json")
@@ -56,9 +79,9 @@ class TestVerifyJson:
             json.dump(json_data, f)
 
         # Assert validation fails
-        assert verify_json(schema_file, str(json_file)) is False
+        assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is False
 
-    def test_missing_schema_file(self, tmpdir):
+    def test_missing_schema_file(self, tmpdir, registry_fixture):
         # Create a JSON file
         json_data = {"name": "John", "age": 30}
         json_file = tmpdir.join("missing_schema.json")
@@ -66,15 +89,15 @@ class TestVerifyJson:
             json.dump(json_data, f)
 
         # Assert validation fails due to missing schema file
-        assert verify_json("nonexistent_schema.json", str(json_file)) is False
+        assert verify_json("nonexistent_schema.json", str(json_file), registry_fixture) is False
 
-    def test_missing_json_file(self, schema_file):
+    def test_missing_json_file(self, schema_file_fixture, registry_fixture):
         # Assert validation fails due to missing JSON file
-        assert verify_json(schema_file, "nonexistent_json.json") is False
+        assert verify_json(schema_file_fixture, "nonexistent_json.json", registry_fixture) is False
 
-    def test_invalid_schema(self, schema_file, tmpdir):
+    def test_invalid_schema(self, schema_file_fixture, tmpdir, registry_fixture):
         # Create an invalid schema file
-        with open(schema_file, "w") as f:
+        with open(schema_file_fixture, "w") as f:
             f.write("invalid_schema")
 
         # Create a JSON file
@@ -84,4 +107,4 @@ class TestVerifyJson:
             json.dump(json_data, f)
 
         # Assert validation fails due to invalid schema
-        assert verify_json(schema_file, str(json_file)) is False
+        assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is False

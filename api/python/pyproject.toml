@@ -11,8 +11,8 @@ authors = [
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
-requires-python = "~= 3.11"
-dependencies = ["semantic_version==2.10.0"]
+requires-python = "~= 3.10"
+dependencies = ["semantic_version>=2.10.0,<3"]
 
 [project.optional-dependencies]
 test = ["pytest"]
@@ -28,8 +28,6 @@ where = ["src"]
 version_file = "src/cellxgene_ontology_guide/_version.py"
 version_scheme = "python-simplified-semver"
 root = "../.."  # relative to the location of the pyproject.toml file
-tag_regex = "^python-api-(?P<version>[vV]?\\d+(?:\\.\\d+){0,2}[^\\+]*)(?:\\+.*)?$"
 
 [tool.pytest.ini_options]
 pythonpath = ["src/cellxgene_ontology_guide"]
-
