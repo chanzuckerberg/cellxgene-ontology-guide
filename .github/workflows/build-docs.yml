@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - nayib/docsite # TODO: remove this line after testing
 
 jobs:
   build:
