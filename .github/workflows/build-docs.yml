@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - "*"
 
 jobs:
   build:
@@ -18,10 +21,12 @@ jobs:
           cd api/python
           make install-docs
       - name: Build the docsite
-        run: make docs
+        run: |
+          cd api/python
+          make docs/build
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: docs/
+          path: api/python/docs/
 
   # Deploy the artifact to GitHub pages.
   deploy:
