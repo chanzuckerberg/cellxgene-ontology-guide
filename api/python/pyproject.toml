@@ -14,6 +14,22 @@ readme = "README.md"
 requires-python = "~= 3.10"
 dependencies = ["semantic_version>=2.10.0,<3"]
 
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Build Tools",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12"
+]
+
+[project.urls]
+Documentation = "https://chanzuckerberg.github.io/cellxgene-ontology-guide/cellxgene_ontology_guide.html"
+Repository = "https://github.com/chanzuckerberg/cellxgene-ontology-guide.git"
+Issues = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues"
+Changelog = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/blob/main/api/python/CHANGELOG.md"
+
 [project.optional-dependencies]
 test = ["pytest"]
 docs = ["pdoc"]
