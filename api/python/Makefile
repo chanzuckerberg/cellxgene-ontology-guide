@@ -11,7 +11,7 @@ docs/local:
 	pdoc src/cellxgene_ontology_guide
 
 docs/build:
-	pdoc --html --output-dir docs/ src/cellxgene_ontology_guide
+	pdoc --output-dir docs/ src/cellxgene_ontology_guide
 
 uninstall:
 	pip uninstall -y cellxgene-ontology-guide
