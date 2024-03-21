@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.1.3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.1.2...python-api-v0.1.3) (2024-03-21)
+
+
+### BugFixes
+
+* make constant.py private ([46d04a4](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/46d04a450f07e7a45e607d379a061f237df2e771))
+* typos ([76ae9fa](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/76ae9fa17862e6087e327892396c3e31905a452a))
+
 ## [0.1.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.1.1...python-api-v0.1.2) (2024-03-18)
 
 
