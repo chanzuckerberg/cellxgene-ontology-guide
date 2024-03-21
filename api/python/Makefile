@@ -20,10 +20,11 @@ build: package-data
 	pip install build twine
 	python -m build
 
-test/publish: build
+release/testpypi: build
 	python -m twine upload --repository testpypi dist/*
 
-publish: build
+release/pypi: build
+	# Manually release in case CI/CD pipeline is not working in ./.github/workflows/release.yml
 	python -m twine upload dist/*
 
 unit-tests:
