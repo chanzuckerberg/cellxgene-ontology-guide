@@ -19,7 +19,7 @@ jobs:
       - name: Install dependencies
         run: |
           cd api/python
-          make install-docs
+          make docs/install
       - name: Build the docsite
         run: |
           cd api/python
