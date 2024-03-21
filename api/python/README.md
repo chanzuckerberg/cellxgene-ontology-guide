@@ -24,3 +24,12 @@ make uninstall
 make install-dev
 make unit-tests
 ```
+
+## Release
+
+The [release.yml](../../.github/workflows/release.yml) GHA should handle the release process for the pypi package.
+However if you need to manually release the package, you can use the following commands:
+
+```bash
+make release/pypi
+```
