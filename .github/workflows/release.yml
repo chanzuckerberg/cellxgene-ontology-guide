@@ -83,7 +83,7 @@ jobs:
           python-version: 3.11
       - name: build
         run: |
-          make build
+          make build -C api/python
       - name: Publish distribution 📦 to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
         with:
