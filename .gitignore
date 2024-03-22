@@ -3,6 +3,6 @@
 /api/python/LICENSE
 /api/python/src/cellxgene_ontology_guide/data/
 /api/python/dist/
-.coverage
+.coverage*
 /htmlcov/
 /api/python/docs/
