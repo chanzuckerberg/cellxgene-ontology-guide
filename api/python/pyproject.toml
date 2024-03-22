@@ -15,7 +15,7 @@ requires-python = "~= 3.10"
 dependencies = ["semantic_version>=2.10.0,<3"]
 
 [project.optional-dependencies]
-test = ["pytest"]
+test = ["pytest", "coverage"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -30,3 +30,4 @@ root = "../.."  # relative to the location of the pyproject.toml file
 
 [tool.pytest.ini_options]
 pythonpath = ["src/cellxgene_ontology_guide"]
+
