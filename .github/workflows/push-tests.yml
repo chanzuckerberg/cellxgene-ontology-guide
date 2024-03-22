@@ -51,7 +51,8 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Ontology builder unit tests
         run: |
-          cd tools/ontology-builder && make unit-tests
+          cd tools/ontology-builder 
+          make coverage/run
       - name: Upload coverage results as an artifact
         uses: actions/upload-artifact@v3
         with:
@@ -84,7 +85,7 @@ jobs:
       - name: Python API unit tests
         run: |
           cd api/python
-          make unit-tests
+          make coverage/run
       - name: Upload coverage results as an artifact
         uses: actions/upload-artifact@v3
         with:
