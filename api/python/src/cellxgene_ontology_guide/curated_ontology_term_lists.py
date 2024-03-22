@@ -1,7 +1,6 @@
 import functools
 import json
 import os
-
 from typing import List
 
 from cellxgene_ontology_guide._constants import DATA_ROOT
@@ -18,4 +17,4 @@ def get_curated_ontology_term_list(curated_ontology_term_list: CuratedOntologyTe
     """
     filename = f"{curated_ontology_term_list.value}_list.json"
     with open(os.path.join(DATA_ROOT, filename)) as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore

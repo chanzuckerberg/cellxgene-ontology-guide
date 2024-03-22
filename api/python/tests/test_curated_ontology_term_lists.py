@@ -1,10 +1,9 @@
 import json
-import pytest
-
 from unittest.mock import patch
 
-from cellxgene_ontology_guide.entities import CuratedOntologyTermList
+import pytest
 from cellxgene_ontology_guide.curated_ontology_term_lists import get_curated_ontology_term_list
+from cellxgene_ontology_guide.entities import CuratedOntologyTermList
 
 MODULE_PATH = "cellxgene_ontology_guide.curated_ontology_term_lists"
 
