@@ -1,5 +1,5 @@
 import re
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Optional, Union
 
 from cellxgene_ontology_guide._constants import VALID_NON_ONTOLOGY_TERMS
 from cellxgene_ontology_guide.entities import Ontology
@@ -39,16 +39,20 @@ class OntologyParser:
 
         return ontology_name
 
-    def is_valid_term_id(self, term_id: str) -> bool:
+    def is_valid_term_id(self, term_id: str, ontology: Optional[str] = None) -> bool:
         """
         Check if an ontology term ID is valid and defined in a supported ontology. If deprecated but defined
-        in the ontology, it is considered valid.
+        in the ontology, it is considered valid. Optionally, specify an ontology to check against, and determine
+        if the term is defined in that particular ontology. Otherwise, checks if term is valid in any supported ontology
 
         :param term_id: str ontology term to check
+        :param ontology: str name of ontology to check against
         :return: boolean flag indicating whether the term is supported
         """
         try:
             ontology_name = self._parse_ontology_name(term_id)
+            if ontology and ontology_name != ontology:
+                return False
             if term_id in self.cxg_schema.ontology(ontology_name):
                 return True
         except ValueError:
