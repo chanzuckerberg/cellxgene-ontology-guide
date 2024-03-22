@@ -99,9 +99,15 @@ jobs:
       - unit-test-python-api
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: install coverage
+        run: pip install coverage
       - uses: actions/download-artifact@v3
         with:
           name: coverage
