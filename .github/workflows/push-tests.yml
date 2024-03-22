@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/tools/ontology-builder/.coverage*
+          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
           retention-days: 3
 
   unit-test-python-api:
@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: coverage
-          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/api/python/.coverage*
+          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
           retention-days: 3
 
   submit-codecoverage:

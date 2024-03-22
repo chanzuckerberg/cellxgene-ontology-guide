@@ -1,7 +1,7 @@
 # shared coverage targets
-
+REPO_ROOT := $(shell git rev-parse --show-toplevel)
 COVERAGE_DATA_FILE=.coverage.$(shell git rev-parse --short HEAD)
-export COVERAGE_RUN_ARGS:=--data-file=$(COVERAGE_DATA_FILE) --branch --parallel-mode
+export COVERAGE_RUN_ARGS:=--data-file=$(REPO_ROOT)/$(COVERAGE_DATA_FILE) --branch --parallel-mode
 
 
 coverage/run:
