@@ -42,6 +42,8 @@ jobs:
             content_type: "application/json"
           - file_name: "system_list.json"
             content_type: "application/json"
+          - file_name: "uberon_development_stage.json"
+            content_type: "application/json"
     steps:
       - name: Checkout main branch
         uses: actions/checkout@v4
