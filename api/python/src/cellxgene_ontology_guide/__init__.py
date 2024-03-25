@@ -1,5 +1,9 @@
 """
 .. include:: ../../../../README.md
+## Notebooks
+Notebooks on how to use the ontology guide can be found in the
+[notebooks directory](https://github.com/chanzuckerberg/cellxgene-ontology-guide/tree/main/api/python/notebooks) of the
+repository.
 .. include:: ../../CHANGELOG.md
 """
 

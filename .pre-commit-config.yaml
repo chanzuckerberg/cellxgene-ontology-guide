@@ -36,3 +36,12 @@ repos:
         args: [--strict, --ignore-missing-imports]
         additional_dependencies: [types-PyYAML]
         files: ^(api/python/src|tools/ontology-builder/src)/
+  - repo: https://github.com/nbQA-dev/nbQA
+    rev: 1.7.0
+    hooks:
+      - id: nbqa-black
+        stages: [commit]
+        args: ["--config=pyproject.toml"]
+      - id: nbqa-ruff
+        args: ["--config=pyproject.toml", "--fix"]
+        stages: [commit]

@@ -81,9 +81,10 @@ def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
 
 def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
     # Mocking _load_ontology_object and _extract_ontology_term_metadata
-    with patch("all_ontology_generator._load_ontology_object") as mock_load_ontology, patch(
-        "all_ontology_generator._extract_ontology_term_metadata"
-    ) as mock_extract_metadata:
+    with (
+        patch("all_ontology_generator._load_ontology_object") as mock_load_ontology,
+        patch("all_ontology_generator._extract_ontology_term_metadata") as mock_extract_metadata,
+    ):
         # Mock return values
         MockOntologyObject = MagicMock()
         MockOntologyObject.name = "ontology_name"  # Must match the name of the ontology file
