@@ -1,3 +1,8 @@
+![PyPI](https://img.shields.io/pypi/v/cellxgene-ontology-guide?label=pypi%20package)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/cellxgene-ontology-guide)
+[![codecov](https://codecov.io/gh/chanzuckerberg/cellxgene-ontology-guide/graph/badge.svg?token=ceXxNPx22I)](https://codecov.io/gh/chanzuckerberg/cellxgene-ontology-guide)
+![example workflow](https://github.com/chanzuckerberg/cellxgene-ontology-guide/actions/workflows/push-tests.yml/badge.svg?branch=main)
+
 # CellxGene Ontology Guide
 
 CellxGene Ontology Guide is a filtered and currated collection of ontological metadata from different public sources.
