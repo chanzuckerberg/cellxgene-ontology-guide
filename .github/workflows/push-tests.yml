@@ -51,7 +51,14 @@ jobs:
           pip install -r requirements-dev.txt
       - name: Ontology builder unit tests
         run: |
-          cd tools/ontology-builder && make unit-tests
+          cd tools/ontology-builder 
+          make coverage/run
+      - name: Upload coverage results as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
+          retention-days: 3
 
   unit-test-python-api:
     runs-on: ubuntu-latest
@@ -78,7 +85,44 @@ jobs:
       - name: Python API unit tests
         run: |
           cd api/python
-          make unit-tests
+          make coverage/run
+      - name: Upload coverage results as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
+          retention-days: 3
+
+  submit-codecoverage:
+    needs:
+      - unit-test-ontology-builder
+      - unit-test-python-api
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: install coverage
+        run: pip install coverage
+      - uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: .
+      - name: coverage report
+        run: |
+          make coverage/report-xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella
 
   test-doc-generation:
     runs-on: ubuntu-latest

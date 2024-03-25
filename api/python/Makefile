@@ -1,3 +1,5 @@
+include ../../tools/coverage.mk
+
 install: package-data
 	pip install .
 
