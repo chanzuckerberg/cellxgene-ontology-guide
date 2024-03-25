@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.2.0...python-api-v0.3.0) (2024-03-25)
+
+
+### Features
+
+* write python API demo notebook ([#101](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/101)) ([bfae292](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/bfae292139b94e1f2d46a3d6c7c73774541882b6))
+
 ## [0.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.1.2...python-api-v0.2.0) (2024-03-25)
 
 
