@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.1.0...ontology-assets-v0.2.0) (2024-03-25)
+
+
+### Features
+
+* add function to fetch curated ontology term lists ([#141](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/141)) ([5c7db62](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5c7db62672512f1b00b1380db77b8f06dbbfb000))
+
+
+### Misc
+
+* update ontology decendant mappings ([#142](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/142)) ([fb23618](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/fb2361810c227427a5ba50156328aeee74796aac))
+
 ## [0.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.0.1...ontology-assets-v0.1.0) (2024-03-15)
 
 
