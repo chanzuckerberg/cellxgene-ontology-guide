@@ -4,7 +4,7 @@ import nbformat
 import pytest
 from nbconvert.preprocessors import ExecutePreprocessor
 
-NOTEBOOKS_PATH = "../../notebooks/"
+NOTEBOOKS_PATH = "./notebooks"
 
 
 @pytest.mark.parametrize("notebook", [nb for nb in os.listdir(NOTEBOOKS_PATH) if nb.endswith(".ipynb")])
