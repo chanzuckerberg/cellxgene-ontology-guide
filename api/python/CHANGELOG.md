@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.1.2...python-api-v0.2.0) (2024-03-25)
+
+
+### Features
+
+* add function to fetch curated ontology term lists ([#141](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/141)) ([5c7db62](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5c7db62672512f1b00b1380db77b8f06dbbfb000))
+* set-up docsite ([#99](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/99)) ([b7591bc](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b7591bc03df28567e26569dda01b2c36fb266455))
+
+
+### Misc
+
+* enable code coverage ([#143](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/143)) ([c52c436](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c52c436de8b7c919bcf063dc2c4be79a146ad0f4))
+* use trusted publisher to publish pypi package. ([#137](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/137)) ([5fc917b](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5fc917bc49211acb3c4988e1729a6610b111ffe3))
+
+
+### BugFixes
+
+* make constant.py private ([46d04a4](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/46d04a450f07e7a45e607d379a061f237df2e771))
+* typos ([76ae9fa](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/76ae9fa17862e6087e327892396c3e31905a452a))
+
 ## [0.1.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.1.1...python-api-v0.1.2) (2024-03-18)
 
 

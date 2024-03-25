@@ -44,6 +44,13 @@ def load_supported_versions() -> Any:
 class CXGSchema:
     """A class to represent the ontology information used by a cellxgene schema version."""
 
+    version: str
+    """The schema version used by the class instance."""
+    supported_ontologies: Dict[str, Any]
+    """A dictionary of supported ontologies for the schema version."""
+    ontology_file_names: Dict[str, str]
+    """A dictionary of ontology names and their corresponding file names."""
+
     def __init__(self, version: Optional[str] = None):
         """
 
