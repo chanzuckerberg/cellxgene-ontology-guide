@@ -11,6 +11,9 @@ class OntologyParser:
     An object to parse ontology term metadata from ontologies corresponding to a given CellxGene Schema Version.
     """
 
+    cxg_schema: CXGSchema
+    """ CXGSchema object to fetch ontology metadata from """
+
     def __init__(self, schema_version: str):
         """
         Initialize an OntologyParser object with the ontology metadata corresponding to the given CellxGene schema

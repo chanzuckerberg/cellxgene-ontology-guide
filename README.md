@@ -5,7 +5,7 @@
 
 # CellxGene Ontology Guide
 
-CellxGene Ontology Guide is a filtered and currated collection of ontological metadata from different public sources.
+CellxGene Ontology Guide is a filtered and curated collection of ontological metadata from different public sources.
 The primary goal is to serve the ontology needs of the [CellxGene](https://cellxgene.cziscience.com/) project and its
 associated tools. An [API](./api) for querying the data is also provided.
 
