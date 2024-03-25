@@ -1,3 +1,5 @@
+include ../coverage.mk
+
 unit-tests:
 	python -m pytest tests
 
