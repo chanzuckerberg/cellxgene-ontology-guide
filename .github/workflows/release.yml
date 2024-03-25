@@ -42,7 +42,7 @@ jobs:
             content_type: "application/json"
           - file_name: "system_list.json"
             content_type: "application/json"
-          - file_name: "uberon_development_stage.json"
+          - file_name: "uberon_development_stage_list.json"
             content_type: "application/json"
     steps:
       - name: Checkout main branch
