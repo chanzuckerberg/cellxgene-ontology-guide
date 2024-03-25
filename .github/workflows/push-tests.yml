@@ -19,26 +19,26 @@ jobs:
   lint:
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 2
       - uses: actions/setup-python@v5
       - name: lint checks
-        uses: pre-commit/action@v3.0.0
+        uses: pre-commit/action@v3.0.1
 
-  unit-test-ontonolgy-builder:
+  unit-test-ontology-builder:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
       - name: Python cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -46,25 +46,33 @@ jobs:
             ${{ runner.os }}-pip-
       - name: Install dependencies
         run: |
-          pip install -r tools/ontology-builder/requirements.txt
-          pip install -r tools/ontology-builder/requirements-dev.txt
+          cd ./tools/ontology-builder
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
       - name: Ontology builder unit tests
         run: |
-          cd tools/ontology-builder && make unit-tests
+          cd tools/ontology-builder 
+          make coverage/run
+      - name: Upload coverage results as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
+          retention-days: 3
 
   unit-test-python-api:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Set up Python
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
       - name: Python cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/api/python/pyproject.toml') }}
@@ -77,4 +85,41 @@ jobs:
       - name: Python API unit tests
         run: |
           cd api/python
-          make unit-tests
+          make coverage/run
+      - name: Upload coverage results as an artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage
+          path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
+          retention-days: 3
+
+  submit-codecoverage:
+    needs:
+      - unit-test-ontology-builder
+      - unit-test-python-api
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: install coverage
+        run: pip install coverage
+      - uses: actions/download-artifact@v3
+        with:
+          name: coverage
+          path: .
+      - name: coverage report
+        run: |
+          make coverage/report-xml
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          env_vars: OS,PYTHON
+          files: ./coverage.xml
+          flags: unittests
+          name: codecov-umbrella

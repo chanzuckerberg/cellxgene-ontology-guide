@@ -13,5 +13,5 @@ jobs:
   lint-PR-title:
     runs-on: [self-hosted, ARM64]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: chanzuckerberg/github-actions/.github/actions/conventional-commits@conventional-commits-v1.4.0

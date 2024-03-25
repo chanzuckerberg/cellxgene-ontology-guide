@@ -3,15 +3,14 @@
   "title": "Cell Type Ontology Descendants Schema",
   "description": "A schema for mapping cell type ontology Terms to its descendant cell type ontology terms",
   "type": "object",
-  "patternProperties": {
-    "^CL:[0-9]{7,}$": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^CL:[0-9]{7,}$"
-      },
-      "description": "An array of CL ontology term IDs that are subclasses of the key CL ontology term ID."
-    }
+  "propertyNames": {
+    "$ref": "ontology_term_id_schema.json#/definitions/CL_term_id"
   },
-  "additionalProperties": false
+  "additionalProperties": {
+    "type": "array",
+    "items": {
+      "$ref": "ontology_term_id_schema.json#/definitions/CL_term_id"
+    },
+    "description": "An array of CL ontology term IDs that are subclasses of the key CL ontology term ID."
+  }
 }

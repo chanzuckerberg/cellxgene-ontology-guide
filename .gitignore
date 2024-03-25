@@ -1,9 +1,8 @@
 /api/python/src/cellxgene_ontology_guide/_version.py
-/api/python/src/cellxgene_ontology_guide.egg-info/dependency_links.txt
-/api/python/src/cellxgene_ontology_guide.egg-info/PKG-INFO
-/api/python/src/cellxgene_ontology_guide.egg-info/requires.txt
-/api/python/src/cellxgene_ontology_guide.egg-info/SOURCES.txt
-/api/python/src/cellxgene_ontology_guide.egg-info/top_level.txt
 /api/python/src/cellxgene_ontology_guide.egg-info/
-!/api/python/LICENSE
+/api/python/LICENSE
 /api/python/src/cellxgene_ontology_guide/data/
+/api/python/dist/
+.coverage*
+/htmlcov/
+/api/python/docs/

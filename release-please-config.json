@@ -26,7 +26,6 @@
     },
     "ontology-assets": {
       "package-name": "ontology-assets"
-    },
-    ".": {}
+    }
   }
 }

@@ -3,15 +3,15 @@
   "title": "Tissue Ontology Descendants Schema",
   "description": "A schema for mapping Tissue ontology terms to its descendant Tissue ontology terms",
   "type": "object",
-  "patternProperties": {
-    "^UBERON:[0-9]{7,}$": {
-      "type": "array",
-      "items": {
-        "type": "string",
-        "pattern": "^UBERON:[0-9]{7,}$"
-      },
-      "description": "An array of UBERON ontology term IDs that are subclasses of the key UBERON ontology term ID."
-    }
+  "propertyNames": {
+    "$ref": "ontology_term_id_schema.json#/definitions/UBERON_term_id"
   },
-  "additionalProperties": false
+  "additionalProperties": {
+    "type": "array",
+    "items": {
+        "type": "string",
+        "pattern": "^UBERON:[0-9]+( \\(organoid\\))?$"
+      },
+    "description": "An array of UBERON ontology term IDs that are subclasses of the key UBERON ontology term ID."
+  }
 }

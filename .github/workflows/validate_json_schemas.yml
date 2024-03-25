@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - "**/ontology-assets/**.json"
+      - "**/ontology-assets/**.gz"
       - "**/artifact-schemas/**.json"
     branches-ignore:
       - main
@@ -13,15 +14,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
       - name: Set up Python 3.11
-        uses: actions/setup-python@v1
+        uses: actions/setup-python@v5
         with:
           python-version: 3.11
       - name: Python cache
-        uses: actions/cache@v1
+        uses: actions/cache@v4
         with:
           path: ~/.cache/pip
           key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
@@ -29,7 +30,8 @@ jobs:
             ${{ runner.os }}-pip-
       - name: install requirements
         run: |
-          pip install -r tools/ontology-builder/requirements.txt
+          cd ./tools/ontology-builder/
+          pip install -r requirements.txt
       - name: validate json schemas
         run: |
           python3 ./tools/ontology-builder/src/validate_json_schemas.py

@@ -93,10 +93,12 @@ def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
         # Mock output path
         output_path = tmpdir.mkdir("output")
         # Call the function
-        _parse_ontologies(ontology_info=mock_ontology_info, working_dir=mock_raw_ontology_dir, output_path=output_path)
+        output_files = _parse_ontologies(
+            ontology_info=mock_ontology_info, working_dir=mock_raw_ontology_dir, output_path=output_path
+        )
 
         # Assert the output file is created
-        assert os.path.exists(os.path.join(output_path, "ontology_name-ontology-v1.json.gz"))
+        assert all(os.path.isfile(file) for file in output_files)
 
         # Assert output_path has the same number of files as mock_raw_ontology_dir.
         assert len(os.listdir(output_path)) == len(os.listdir(mock_raw_ontology_dir))
