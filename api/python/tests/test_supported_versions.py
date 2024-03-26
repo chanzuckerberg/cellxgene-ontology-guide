@@ -3,6 +3,7 @@ import json
 from unittest.mock import patch
 
 import pytest
+from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.supported_versions import (
     CXGSchema,
     get_latest_schema_version,
@@ -15,7 +16,9 @@ MODULE_PATH = "cellxgene_ontology_guide.supported_versions"
 
 @pytest.fixture
 def initialized_CXGSchemaInfo(mock_load_supported_versions):
-    mock_load_supported_versions.return_value = {"v5.0.0": {"CL": {"version": "v2024-01-04"}}}
+    mock_load_supported_versions.return_value = {
+        "v5.0.0": {"CL": {"version": "v2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
+    }
     return CXGSchema()
 
 
@@ -100,3 +103,7 @@ class TestCXGSchema:
         ontology_file_contents = {"CL:1234": "efgh"}
         mock_load_ontology_file.return_value = ontology_file_contents
         assert initialized_CXGSchemaInfo.ontology("CL") == {"CL:1234": "efgh"}
+
+
+def test_get_ontology_download_url(initialized_CXGSchemaInfo, mock_load_ontology_file):
+    assert initialized_CXGSchemaInfo.get_ontology_download_url(Ontology.CL) == "http://example.com/v2024-01-01/cl.owl"

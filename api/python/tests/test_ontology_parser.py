@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
@@ -282,7 +281,3 @@ def test_get_distance_between_terms(ontology_parser):
 
     # disjoint distance
     assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
-
-
-def test_get_ontology_download_url(ontology_parser):
-    assert ontology_parser.get_ontology_download_url(Ontology.CL) == "http://example.com/2024-01-01/cl.owl"

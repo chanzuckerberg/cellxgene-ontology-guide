@@ -82,3 +82,18 @@ class CXGSchema:
             file_name = f"{name}-ontology-{onto_version}{ONTOLOGY_FILENAME_SUFFIX}"
             self.ontology_file_names[name] = file_name  # save to file name to access from cache
         return load_ontology_file(self.ontology_file_names[name])
+
+    def get_ontology_download_url(self, ontology: Ontology) -> str:
+        """
+        Get the download URL for a given ontology file.
+
+        Examples:
+        get_ontology_download_url("CL") -> "http://example.com/2024-01-01/cl.owl"
+
+        :param ontology: Ontology enum of the ontology to fetch
+        :return: str download URL for the requested ontology file
+        """
+        source_url = self.supported_ontologies[ontology.name]["source"]
+        version = self.supported_ontologies[ontology.name]["version"]
+        filename = self.supported_ontologies[ontology.name]["filename"]
+        return f"{source_url}/{version}/{filename}"

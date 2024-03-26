@@ -2,7 +2,6 @@ import re
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from cellxgene_ontology_guide._constants import VALID_NON_ONTOLOGY_TERMS
-from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
@@ -380,18 +379,3 @@ class OntologyParser:
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels
         """
         return {term_id: self.get_term_label(term_id) for term_id in term_ids}
-
-    def get_ontology_download_url(self, ontology: Ontology) -> str:
-        """
-        Get the download URL for a given ontology file.
-
-        Examples:
-        get_ontology_download_url("CL") -> "http://example.com/2024-01-01/cl.owl"
-
-        :param ontology: Ontology enum of the ontology to fetch
-        :return: str download URL for the requested ontology file
-        """
-        source_url = self.cxg_schema.supported_ontologies[ontology.name]["source"]
-        version = self.cxg_schema.supported_ontologies[ontology.name]["version"]
-        filename = self.cxg_schema.supported_ontologies[ontology.name]["filename"]
-        return f"{source_url}/{version}/{filename}"
