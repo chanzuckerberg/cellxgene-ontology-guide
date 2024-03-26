@@ -54,7 +54,7 @@ jobs:
           cd tools/ontology-builder 
           make coverage/run
       - name: Upload coverage results as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
@@ -87,7 +87,7 @@ jobs:
           cd api/python
           make coverage/run
       - name: Upload coverage results as an artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
@@ -108,7 +108,7 @@ jobs:
           python-version: 3.11
       - name: install coverage
         run: pip install coverage
-      - uses: actions/download-artifact@v3
+      - uses: actions/download-artifact@v4
         with:
           name: coverage
           path: .
