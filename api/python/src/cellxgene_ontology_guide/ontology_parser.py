@@ -304,7 +304,8 @@ class OntologyParser:
 
     def get_term_subtree(self, term_id: str) -> Dict[str, List[Dict[str, List[Any]]]]:
         """
-        Get the ontology subtree, with the given term as the root node.
+        Get the ontology subtree, with the given term as the root node. Only includes terms from the same ontology as
+        the term ID.
 
         Example: get_term_subtree("CL:0000000") -> {
             "CL:0000000": [
