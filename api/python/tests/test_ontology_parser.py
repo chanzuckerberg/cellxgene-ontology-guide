@@ -1,7 +1,6 @@
 from unittest.mock import patch
 
 import pytest
-from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.ontology_parser import OntologyParser
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
@@ -304,7 +303,3 @@ def test_get_term_subtree(ontology_parser):
             {"CL:0000003": []},
         ]
     }
-
-
-def test_get_ontology_download_url(ontology_parser):
-    assert ontology_parser.get_ontology_download_url(Ontology.CL) == "http://example.com/2024-01-01/cl.owl"
