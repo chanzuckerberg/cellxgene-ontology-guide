@@ -13,15 +13,15 @@ class OntologyParser:
     cxg_schema: CXGSchema
     """ CXGSchema object to fetch ontology metadata from """
 
-    def __init__(self, schema_version: str):
+    def __init__(self, schema_version: Optional[str] = None):
         """
         Initialize an OntologyParser object with the ontology metadata corresponding to the given CellxGene schema
         version. If not cached, it will make a network call to GitHub Release Assets to load in memory and
         parse the corresponding ontology metadata.
 
-        :param schema_version: str version of the schema to load ontology metadata for
+        :param schema_version: str version of the schema to load ontology metadata for. If not provided, the latest is loaded.
         """
-        self.cxg_schema = CXGSchema(version=schema_version)
+        self.cxg_schema = CXGSchema(version=schema_version) if schema_version else CXGSchema()
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
