@@ -56,7 +56,7 @@ jobs:
       - name: Upload coverage results as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-builder
           path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
           retention-days: 3
 
@@ -89,7 +89,7 @@ jobs:
       - name: Upload coverage results as an artifact
         uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage-api
           path: /home/runner/work/cellxgene-ontology-guide/cellxgene-ontology-guide/.coverage*
           retention-days: 3
 
@@ -110,7 +110,8 @@ jobs:
         run: pip install coverage
       - uses: actions/download-artifact@v4
         with:
-          name: coverage
+          pattern: coverage-*
+          merge-multiple: true
           path: .
       - name: coverage report
         run: |
