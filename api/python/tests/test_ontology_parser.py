@@ -284,5 +284,27 @@ def test_get_distance_between_terms(ontology_parser):
     assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
 
 
+def test_get_term_subtree(ontology_parser):
+    assert ontology_parser.get_term_subtree("CL:0000000") == {
+        "CL:0000000": [
+            {
+                "CL:0000001": [
+                    {"CL:0000004": []},
+                    {"CL:0000005": []},
+                    {"CL:0000006": []},
+                    {"CL:0000007": []},
+                ]
+            },
+            {
+                "CL:0000002": [
+                    {"CL:0000004": []},
+                    {"CL:0000005": []},
+                ]
+            },
+            {"CL:0000003": []},
+        ]
+    }
+
+
 def test_get_ontology_download_url(ontology_parser):
     assert ontology_parser.get_ontology_download_url(Ontology.CL) == "http://example.com/2024-01-01/cl.owl"

@@ -302,6 +302,37 @@ class OntologyParser:
 
         return descendants_dict
 
+    def get_term_subtree(self, term_id: str) -> Dict[str, List[Dict[str, List[Any]]]]:
+        """
+        Get the ontology subtree, with the given term as the root node.
+
+        Example: get_term_subtree("CL:0000000") -> {
+            "CL:0000000": [
+                {"CL:0000001": [
+                    {"CL:0000004": []},
+                    {"CL:0000005": []},
+                    {"CL:0000006": []},
+                    {"CL:0000007": []},
+                ]},
+                {"CL:0000002": [
+                    {"CL:0000004": []},
+                    {"CL:0000005": []},
+                ]},
+                {"CL:0000003": []},
+            ]
+        }
+
+        :param term_id: str ontology term to build subtree for
+        :return: Dict representation of tree, where each key points to a dict of its children nodes
+        """
+        ontology_name = self._parse_ontology_name(term_id)
+        subtree: Dict[str, List[Any]] = {term_id: []}
+        for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
+            for ancestor, distance in candidate_metadata["ancestors"].items():
+                if ancestor == term_id and distance == 1:
+                    subtree[term_id].append(self.get_term_subtree(candidate_descendant))
+        return subtree
+
     def is_term_deprecated(self, term_id: str) -> bool:
         """
         Check if an ontology term is deprecated.
