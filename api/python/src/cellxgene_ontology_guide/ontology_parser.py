@@ -368,7 +368,8 @@ class OntologyParser:
         {"CL:0000000": 1, "CL:0000001": 1, "CL:0000004": 2, ...}
 
         :param term_id: str ontology term to build subtree for
-        :return: OntologyTreeNode representation of tree with term_id as root. Includes term_counter to track term frequency
+        :return: OntologyTreeNode representation of tree with term_id as root. Includes term_counter to track term
+        frequency in subtree
         """
         ontology_name = self._parse_ontology_name(term_id)
         root = OntologyTreeNode(term_id)

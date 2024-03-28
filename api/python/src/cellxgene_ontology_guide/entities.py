@@ -1,6 +1,6 @@
 from collections import Counter
 from enum import Enum
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 
 class Ontology(Enum):
@@ -37,7 +37,12 @@ class OntologyTreeNode:
     Class to represent a node in an ontology term tree.
     """
 
-    def __init__(self, term_id: str, children: List["OntologyTreeNode"] = None, term_counter: Dict[str, int] = None):
+    def __init__(
+        self,
+        term_id: str,
+        children: Optional[List["OntologyTreeNode"]] = None,
+        term_counter: Optional[Dict[str, int]] = None,
+    ):
         self.term_id = term_id
         self.children = children if children else []
         self.term_counter = term_counter if term_counter else Counter({self.term_id: 1})
