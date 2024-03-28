@@ -66,7 +66,11 @@ class OntologyParser:
         Get the ancestor ontology terms for a given term. If include_self is True, the term itself will be included as
         an ancestor.
 
-         Example: get_term_ancestors("CL:0000005") -> ["CL:0000000", ...]
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_ancestors("CL:0000005")
+        ["CL:0000000", ...]
 
         :param term_id: str ontology term to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -83,7 +87,11 @@ class OntologyParser:
         Get the ancestor ontology terms for each term in a list. If include_self is True, the term itself will be
         included as an ancestor.
 
-         Example: get_term_list_ancestors(["CL:0000003", "CL:0000005"], include_self=True) -> {
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_list_ancestors(["CL:0000003", "CL:0000005"], include_self=True)
+        {
             "CL:0000003": ["CL:0000003"],
             "CL:0000005": ["CL:0000005", "CL:0000000", ...]
         }
@@ -100,7 +108,11 @@ class OntologyParser:
         Get the ancestor ontology terms for a given term, and their distance from the term_id. If include_self is True,
         the term itself will be included as an ancestor.
 
-         Example: get_term_ancestors_with_distances("CL:0000005") -> {"CL:0000000": 1, ...}
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005")
+        {"CL:0000000": 1, ...}
 
         :param term_id: str ontology term to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -121,7 +133,11 @@ class OntologyParser:
         Get the ancestor ontology terms for each term in a list, and their distance from the term_id. If include_self is
         True, the term itself will be included as an ancestor.
 
-         Example: get_term_list_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True) -> {
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_list_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
+        {
             "CL:0000003": {"CL:0000003": 0, ...},
             "CL:0000005": {"CL:0000005": 0, "CL:0000000": 1, ...}
         }
@@ -182,7 +198,11 @@ class OntologyParser:
         Get the high-level ontology terms for a given term. High-level terms are defined as the ancestors of the term
         that are part of the high-level ontology terms supported by cellxgene-ontology-guide.
 
-        Example: get_high_level_terms("CL:0000005") -> ["CL:0000000", ...]
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_high_level_terms("CL:0000005")
+        ["CL:0000000", ...]
 
         :param term_id: str ontology term to find high-level terms for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -215,7 +235,11 @@ class OntologyParser:
         Get the highest level ontology term for a given term. The highest level term is defined as the ancestor of the
         term that is part of the high-level ontology terms supported by cellxgene-ontology-guide.
 
-        Example: get_highest_level_term("CL:0000005") -> "CL:0000000"
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_highest_level_term("CL:0000005")
+        "CL:0000000"
 
         :param term_id: str ontology term to find highest level term for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -251,7 +275,11 @@ class OntologyParser:
         Get the descendant ontology terms for a given term. If include_self is True, the term itself will be included as
         a descendant.
 
-        Example: get_term_descendant("CL:0000005") -> ["CL:0000005", "CL:0002363", ...]
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_descendant("CL:0000005")
+        ["CL:0000005", "CL:0002363", ...]
 
         :param term_id: str ontology term to find descendants for
         :param include_self: boolean flag to include the term itself as a descendant
@@ -272,7 +300,11 @@ class OntologyParser:
         Get the descendant ontology terms for each term in a list. If include_self is True, the term itself will be
          included as a descendant.
 
-        Example: get_terms_descendants(["CL:0000003", "CL:0000005"], include_self=True) -> {
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_terms_descendants(["CL:0000003", "CL:0000005"], include_self=True)
+         {
             "CL:0000003": ["CL:0000003", "CL:0000004", ...],
             "CL:0000005": ["CL:0000005", "CL:0002363", ...]
         }
@@ -337,7 +369,11 @@ class OntologyParser:
         """
         Check if an ontology term is deprecated.
 
-        Example: is_term_deprecated("CL:0000003") -> True
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.is_term_deprecated("CL:0000003")
+        True
 
         :param term_id: str ontology term to check for deprecation
         :return: boolean flag indicating whether the term is deprecated
@@ -352,7 +388,11 @@ class OntologyParser:
         """
         Fetch the replacement term for a deprecated ontology term, if a replacement exists. Return None otherwise.
 
-        Example: get_term_replacement("CL:0000003") -> "CL:0000000"
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_replacement("CL:0000003")
+        "CL:0000000"
 
         :param term_id: str ontology term to check a replacement term for
         :return: replacement str term ID if it exists, None otherwise
@@ -390,7 +430,11 @@ class OntologyParser:
         """
         Fetch the human-readable label for a given ontology term.
 
-        Example: get_term_label("CL:0000005") -> "fibroblast neural crest derived"
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_label("CL:0000005")
+        "fibroblast neural crest derived"
 
         :param term_id: str ontology term to fetch label for
         :return: str human-readable label for the term
@@ -405,7 +449,11 @@ class OntologyParser:
         """
         Fetch the human-readable label for a given list of ontology terms.
 
-        Example: map_term_label(["CL:0000005", "CL:0000003"]) -> {"CL:0000005": "fibroblast neural crest derived", "CL:0000003": "fibroblast"}
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.map_term_label(["CL:0000005", "CL:0000003"])
+        {"CL:0000005": "fibroblast neural crest derived", "CL:0000003": "fibroblast"}
 
         :param term_ids: list of str ontology terms to fetch label for
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels
