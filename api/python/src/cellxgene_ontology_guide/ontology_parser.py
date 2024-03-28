@@ -2,6 +2,7 @@ import re
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from cellxgene_ontology_guide._constants import VALID_NON_ONTOLOGY_TERMS
+from cellxgene_ontology_guide.entities import OntologyTreeNode
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
@@ -333,37 +334,51 @@ class OntologyParser:
 
         return descendants_dict
 
-    def get_term_subtree(self, term_id: str) -> Dict[str, List[Dict[str, List[Any]]]]:
+    def get_term_subtree(self, term_id: str) -> OntologyTreeNode:
         """
         Get the ontology subtree, with the given term as the root node. Only includes terms from the same ontology as
         the term ID.
 
-        Example: get_term_subtree("CL:0000000") -> {
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> root_node = ontology_parser.get_term_subtree("CL:0000000")
+        >>> root_node.term_id
+        "CL:0000000"
+        >>> root_node.to_dict()
+        {
             "CL:0000000": [
                 {"CL:0000001": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                    {"CL:0000006": []},
-                    {"CL:0000007": []},
+                    {"CL:0000004": [...]},
+                    {"CL:0000005": [...]},
+                    {"CL:0000006": [...]},
+                    {"CL:0000007": [...]},
+                    ...
                 ]},
                 {"CL:0000002": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
+                    {"CL:0000004": [...]},
+                    {"CL:0000005": [...]},
+                    ...
                 ]},
                 {"CL:0000003": []},
+                ...
             ]
         }
+        >>> root_node.term_counter
+        {"CL:0000000": 1, "CL:0000001": 1, "CL:0000004": 2, ...}
 
         :param term_id: str ontology term to build subtree for
-        :return: Dict representation of tree, where each key points to a dict of its children nodes
+        :return: OntologyTreeNode representation of tree with term_id as root. Includes term_counter to track term frequency
         """
         ontology_name = self._parse_ontology_name(term_id)
-        subtree: Dict[str, List[Any]] = {term_id: []}
+        root = OntologyTreeNode(term_id)
         for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
             for ancestor, distance in candidate_metadata["ancestors"].items():
                 if ancestor == term_id and distance == 1:
-                    subtree[term_id].append(self.get_term_subtree(candidate_descendant))
-        return subtree
+                    child = self.get_term_subtree(candidate_descendant)
+                    root.children.append(child)
+                    root.term_counter.update(child.term_counter)
+        return root
 
     def is_term_deprecated(self, term_id: str) -> bool:
         """
