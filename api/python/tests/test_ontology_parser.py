@@ -283,9 +283,9 @@ def test_get_distance_between_terms(ontology_parser):
     assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
 
 
-def test_get_term_subtree(ontology_parser):
-    subtree = ontology_parser.get_term_subtree("CL:0000000")
-    assert subtree.to_dict() == {
+def test_get_term_graph(ontology_parser):
+    graph = ontology_parser.get_term_graph("CL:0000000")
+    assert graph.to_dict() == {
         "CL:0000000": [
             {
                 "CL:0000001": [
@@ -305,7 +305,7 @@ def test_get_term_subtree(ontology_parser):
         ]
     }
 
-    assert subtree.term_counter == {
+    assert graph.term_counter == {
         "CL:0000000": 1,
         "CL:0000001": 1,
         "CL:0000002": 1,

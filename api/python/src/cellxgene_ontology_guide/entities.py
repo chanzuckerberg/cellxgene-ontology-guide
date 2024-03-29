@@ -1,6 +1,6 @@
 from collections import Counter
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 
 class Ontology(Enum):
@@ -32,20 +32,42 @@ class CuratedOntologyTermList(Enum):
     UBERON_DEVELOPMENT_STAGE = "uberon_development_stage"
 
 
-class OntologyTreeNode:
+class OntologyNode:
     """
-    Class to represent a node in an ontology term tree.
+    Class to represent an ontology term and its subclasses
     """
 
-    def __init__(
-        self,
-        term_id: str,
-        children: Optional[List["OntologyTreeNode"]] = None,
-        term_counter: Optional[Dict[str, int]] = None,
-    ):
-        self.term_id = term_id
-        self.children = children if children else []
-        self.term_counter = term_counter if term_counter else Counter({self.term_id: 1})
+    def __init__(self, term_id: str):
+        self._term_id = term_id
+        self._children: List["OntologyNode"] = []
+        self._term_counter: Counter[str, int] = Counter({self.term_id: 1})
+
+    @property
+    def term_id(self) -> str:
+        """
+        Returns the str ontology term ID represented by this OntologyNode.
+        """
+        return self._term_id
+
+    @property
+    def children(self) -> List["OntologyNode"]:
+        """
+        Returns the list of children OntologyNode of this OntologyNode.
+        """
+        return self._children
+
+    @property
+    def term_counter(self) -> Counter[str, int]:
+        """
+        Returns mapping of unique ontology term ID descendants of this OntologyNode to the number of times each term
+        appears in the graph rooted at this node.
+        :return:
+        """
+        return self._term_counter
+
+    def add_child(self, child: "OntologyNode") -> None:
+        self._children.append(child)
+        self._term_counter.update(child.term_counter)
 
     def to_dict(self) -> Dict[str, Any]:
         return {self.term_id: [child.to_dict() for child in self.children]}
