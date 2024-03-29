@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.4.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.3.1...python-api-v0.4.0) (2024-03-29)
+
+
+### Features
+
+* build subgraph from term ID ([#156](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/156)) ([3f4cd4b](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/3f4cd4b8daf914457e8395bee4b0b21d88ea3abf))
+
 ## [0.3.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.3.0...python-api-v0.3.1) (2024-03-27)
 
 
