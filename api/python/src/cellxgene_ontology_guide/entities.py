@@ -40,7 +40,7 @@ class OntologyNode:
     def __init__(self, term_id: str):
         self._term_id = term_id
         self._children: List["OntologyNode"] = []
-        self._term_counter: Counter[str, int] = Counter({self.term_id: 1})
+        self._term_counter: Counter[str] = Counter({self.term_id: 1})
 
     @property
     def term_id(self) -> str:
@@ -57,7 +57,7 @@ class OntologyNode:
         return self._children
 
     @property
-    def term_counter(self) -> Counter[str, int]:
+    def term_counter(self) -> Counter[str]:
         """
         Returns mapping of unique ontology term ID descendants of this OntologyNode to the number of times each term
         appears in the graph rooted at this node.
