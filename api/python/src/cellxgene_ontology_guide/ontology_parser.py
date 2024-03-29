@@ -2,6 +2,7 @@ import re
 from typing import Any, Dict, Iterable, List, Optional, Union
 
 from cellxgene_ontology_guide._constants import VALID_NON_ONTOLOGY_TERMS
+from cellxgene_ontology_guide.entities import OntologyNode
 from cellxgene_ontology_guide.supported_versions import CXGSchema
 
 
@@ -332,6 +333,50 @@ class OntologyParser:
                         descendants_dict[ancestor_id].append(candidate_descendant)
 
         return descendants_dict
+
+    def get_term_graph(self, term_id: str) -> OntologyNode:
+        """
+        Get the DAG of OntologyNode relationships, with the input term as the root node. Only includes terms from the
+        same ontology as the root term ID.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> root_node = ontology_parser.get_term_graph("CL:0000000")
+        >>> root_node.term_id
+        "CL:0000000"
+        >>> root_node.to_dict()
+        {
+            "CL:0000000": [
+                {"CL:0000001": [
+                    {"CL:0000004": [...]},
+                    {"CL:0000005": [...]},
+                    {"CL:0000006": [...]},
+                    {"CL:0000007": [...]},
+                    ...
+                ]},
+                {"CL:0000002": [
+                    {"CL:0000004": [...]},
+                    {"CL:0000005": [...]},
+                    ...
+                ]},
+                {"CL:0000003": []},
+                ...
+            ]
+        }
+        >>> root_node.term_counter
+        {"CL:0000000": 1, "CL:0000001": 1, "CL:0000004": 2, ...}
+
+        :param term_id: str ontology term to build subtree for
+        :return: OntologyNode representation of graph with term_id as root.
+        """
+        ontology_name = self._parse_ontology_name(term_id)
+        root = OntologyNode(term_id)
+        for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
+            for ancestor, distance in candidate_metadata["ancestors"].items():
+                if ancestor == term_id and distance == 1:
+                    root.add_child(self.get_term_graph(candidate_descendant))
+        return root
 
     def is_term_deprecated(self, term_id: str) -> bool:
         """
