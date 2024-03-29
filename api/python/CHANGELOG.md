@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.3.0...python-api-v0.3.1) (2024-03-27)
+
+
+### Misc
+
+* reformat examples in docstrings ([#157](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/157)) ([e5528e1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/e5528e195cceacff33c46c008230c13cccce641e))
+
+
+### BugFixes
+
+* move get_ontology_download_url. ([#152](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/152)) ([8365411](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/83654113156a1fbcd5bf3fb3df3ddab7428266b5))
+* ontology_parser.py defaults to latest ([#153](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/153)) ([5b94d6e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5b94d6e5b3ed815e772e10f64c6e8fd684ce095c))
+
 ## [0.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.2.0...python-api-v0.3.0) (2024-03-25)
 
 
