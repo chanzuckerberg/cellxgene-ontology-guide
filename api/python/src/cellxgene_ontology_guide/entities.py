@@ -45,21 +45,21 @@ class OntologyNode:
     @property
     def term_id(self) -> str:
         """
-        Returns the str ontology term ID represented by this OntologyNode.
+        Ontology term ID represented by this OntologyNode.
         """
         return self._term_id
 
     @property
     def children(self) -> List["OntologyNode"]:
         """
-        Returns the list of children OntologyNode of this OntologyNode.
+        List of children OntologyNode of this OntologyNode.
         """
         return self._children
 
     @property
     def term_counter(self) -> Counter[str]:
         """
-        Returns mapping of unique ontology term ID descendants of this OntologyNode to the number of times each term
+        Mapping of unique ontology term ID descendants of this OntologyNode to the number of times each term
         appears in the graph rooted at this node.
         :return:
         """
