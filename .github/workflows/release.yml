@@ -104,4 +104,3 @@ jobs:
         run: |
           git tag -f latest
           git push origin latest
-      
