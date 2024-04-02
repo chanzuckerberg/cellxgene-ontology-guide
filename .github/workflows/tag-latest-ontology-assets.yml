@@ -8,6 +8,7 @@ on:
       - "**/ontology-assets/ontology_info.json"
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   tag-latest-release:
@@ -21,4 +22,4 @@ jobs:
       - name: Reassign 'latest' tag
         run: |
           git tag -f latest
-          git push origin latest
+          git push origin latest -f
