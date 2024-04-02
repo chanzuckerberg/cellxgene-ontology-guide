@@ -3,8 +3,9 @@ name: Tag 'Latest' Ontology Assets
 on:
   push:
     paths:
-      - "**/ontology-assets/**.json"
-      - "**/ontology-assets/**.gz"
+      - "**/ontology-assets/**descendants.json"
+      - "**/ontology-assets/**list.json"
+      - "**/ontology-assets/ontology_info.json"
     branches:
       - main
 
