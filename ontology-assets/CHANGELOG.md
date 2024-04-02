@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.2.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.2.0...ontology-assets-v0.2.1) (2024-04-02)
+
+
+### Misc
+
+* update ontology decendant mappings ([#162](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/162)) ([12def74](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/12def746eebb3d0273bb826be569ebfa1739d5ed))
+* update ontology descendant mappings ([#167](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/167)) ([5d3d097](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5d3d0979798c78a8874bcca945986f809b76a825))
+
 ## [0.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.1.0...ontology-assets-v0.2.0) (2024-03-25)
 
 
