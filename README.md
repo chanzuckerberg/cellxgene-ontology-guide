@@ -65,6 +65,3 @@ The `latest` tag is use to idenitfy the latest version of the descendant mapping
 #### Release Process
 
 The GHA workflow [tag-latest-ontology-assets.yml](.github/workflows/tag-latest-ontology-assets.yml) will automatically update the `latest` tag when the appropriate.
-
-- move scripts out of CLI
--
