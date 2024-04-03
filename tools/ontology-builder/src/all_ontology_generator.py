@@ -232,7 +232,7 @@ def _parse_ontologies(
     """
     Parse all ontology files in working_dir. Extracts information from all classes in the ontology file.
     The extracted information is written into a gzipped a json file with the following [schema](
-    artifact-schemas/all_ontology_schema.json):
+    asset-schemas/all_ontology_schema.json):
     {
         "ontology_name":
             {
@@ -254,7 +254,7 @@ def _parse_ontologies(
             }
     }
     :param ANY ontology_info: the ontology references used to download the ontology files. It follows this [schema](
-    ./artifact-schemas/ontology_info_schema.json)
+    ./asset-schemas/ontology_info_schema.json)
     :param str working_dir: path to folder with ontology files
     :param str output_path: path to output json files
 

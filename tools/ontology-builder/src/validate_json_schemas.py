@@ -75,7 +75,7 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
 
 def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:
     """
-    Verify the curated JSON lists match their respective JSON schema in artifact-schemas
+    Verify the curated JSON lists match their respective JSON schema in asset-schemas
     :param path: The destination path for the json files
     :return:
     """
