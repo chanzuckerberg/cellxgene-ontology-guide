@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/chanzuckerberg/cellxgene-ontology-guide/graph/badge.svg?token=ceXxNPx22I)](https://codecov.io/gh/chanzuckerberg/cellxgene-ontology-guide)
 ![example workflow](https://github.com/chanzuckerberg/cellxgene-ontology-guide/actions/workflows/push-tests.yml/badge.svg?branch=main)
 ![GitHub](https://img.shields.io/github/license/chanzuckerberg/cellxgene-ontology-guide)
+
 # cellxgene-ontology-guide
 A Python package to help with ontology term mapping in for projects in the [cellxgene](https://cellxgene.cziscience.com/) ecosystem.
 
