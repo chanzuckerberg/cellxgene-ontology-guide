@@ -5,7 +5,7 @@ on:
     paths:
       - "**/ontology-assets/**.json"
       - "**/ontology-assets/**.gz"
-      - "**/artifact-schemas/**.json"
+      - "**/asset-schemas/**.json"
     branches-ignore:
       - main
 
