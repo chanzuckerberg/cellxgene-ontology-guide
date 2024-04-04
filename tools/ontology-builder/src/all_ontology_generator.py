@@ -344,8 +344,8 @@ if __name__ == "__main__":
     ontology_info = get_ontology_info_file()
     current_version = _get_latest_version(ontology_info.keys())
     latest_ontology_version = ontology_info[current_version]
-    _download_ontologies(latest_ontology_version)
-    _parse_ontologies(latest_ontology_version)
+    _download_ontologies(latest_ontology_version["ontologies"])
+    _parse_ontologies(latest_ontology_version["ontologies"])
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
