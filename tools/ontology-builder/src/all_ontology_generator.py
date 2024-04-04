@@ -344,8 +344,9 @@ if __name__ == "__main__":
     ontology_info = get_ontology_info_file()
     current_version = _get_latest_version(ontology_info.keys())
     latest_ontology_version = ontology_info[current_version]
-    _download_ontologies(latest_ontology_version["ontologies"])
-    _parse_ontologies(latest_ontology_version["ontologies"])
+    latest_ontologies = latest_ontology_version["ontologies"]
+    _download_ontologies(latest_ontologies)
+    _parse_ontologies(latest_ontologies)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
@@ -355,6 +356,6 @@ if __name__ == "__main__":
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
     registry = register_schemas()
-    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontology_info)]
+    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(latest_ontologies)]
     if not all(result):
         sys.exit(1)
