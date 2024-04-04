@@ -275,9 +275,9 @@ def _parse_ontologies(
 
 def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
     """
-    Update the ontology_info.json file by removing expired versions and returning a list of the ontology files that
-    can be removed
-    :param ontology_info:
+    Update ontology_info in place by removing expired versions and returning a list of the ontology files that
+    can be removed.
+    :param ontology_info: the ontology information from ontology_info.json
     :return: a list of ontology files that can be removed
     """
     expired = list_expired_cellxgene_schema_version(ontology_info)  # find expired cellxgene schema versions
@@ -288,8 +288,8 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
         """
         find all ontologies that are in the list of schema_versions
 
-        :param schema_versions:
-        :return: ontology_files
+        :param schema_versions: list of schema versions
+        :return: ontology_files: set of ontology files
         """
 
         ontology_files = set()
@@ -308,10 +308,22 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
     return remove_files
 
 
+def deprecate_previous_cellxgene_schema_versions(ontology_info: Dict[str, Any], current_version: str) -> None:
+    """
+    Deprecate previous versions of the cellxgene schema. This modifies the ontology_info.json file in place.
+    :param ontology_info: the ontology information from ontology_info.json
+    :param current_version: the current cellxgene schema version
+    :return:
+    """
+    for schema_version in ontology_info:
+        if schema_version != current_version and "deprecated_on" not in ontology_info[schema_version]:
+            ontology_info[schema_version]["deprecated_on"] = datetime.now().strftime("%Y-%m-%d")
+
+
 def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List[str]:
     """
     Lists cellxgene schema version that are deprecated and should be removed from the ontology_info.json file
-    :param ontology_info:
+    :param ontology_info: the ontology information from ontology_info.json
     :return: a list of expired schema versions
     """
     expired_versions = []
@@ -330,9 +342,11 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     ontology_info = get_ontology_info_file()
-    latest_ontology_version = ontology_info[_get_latest_version(ontology_info.keys())]
+    current_version = _get_latest_version(ontology_info.keys())
+    latest_ontology_version = ontology_info[current_version]
     _download_ontologies(latest_ontology_version)
     _parse_ontologies(latest_ontology_version)
+    deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
     for file in expired_files:

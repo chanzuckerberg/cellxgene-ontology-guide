@@ -9,6 +9,7 @@ from all_ontology_generator import (
     _download_ontologies,
     _get_latest_version,
     _parse_ontologies,
+    deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
     list_expired_cellxgene_schema_version,
     update_ontology_info,
@@ -212,3 +213,23 @@ def test_update_ontology_info(mock_datetime):
     # Assert the result matches the expected expired versions
     assert ontology_info == expected_ontology_info
     assert removed_files == expected_removed_files
+
+
+def test_deprecate_previous_cellxgene_schema_versions(mock_datetime):
+    ontology_info = {
+        "v1": {},  # current version
+        "v2": {},  # not deprecated
+        "v3": {},  # multiple versions to deprecate
+        "v4": {"deprecated_on": "2023-01-01"},  # already deprecated
+    }
+    expected_ontology_info = {
+        "v1": {},  # unchanged
+        "v2": {"deprecated_on": "2024-01-01"},  # added deprecated_on
+        "v3": {"deprecated_on": "2024-01-01"},  # added deprecated_on
+        "v4": {"deprecated_on": "2023-01-01"},  # unchanged
+    }
+
+    # Call the function
+    deprecate_previous_cellxgene_schema_versions(ontology_info, "v1")
+
+    assert ontology_info == expected_ontology_info
