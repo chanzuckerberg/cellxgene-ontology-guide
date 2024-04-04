@@ -1,10 +1,18 @@
 import json
 import os
 import urllib.request
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from all_ontology_generator import _download_ontologies, _get_latest_version, _get_ontology_info_file, _parse_ontologies
+from all_ontology_generator import (
+    _download_ontologies,
+    _get_latest_version,
+    _parse_ontologies,
+    get_ontology_info_file,
+    list_expired_cellxgene_schema_version,
+    update_ontology_info,
+)
 
 
 @pytest.fixture
@@ -47,22 +55,11 @@ def test_get_latest_version():
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):
     # Call the function
-    ontology_info = _get_ontology_info_file(ontology_info_file=mock_ontology_info_file)
+    ontology_info = get_ontology_info_file(ontology_info_file=mock_ontology_info_file)
 
     # Assertion
-    assert ontology_info == {
-        "ontology_name": {"source": "http://example.com", "version": "v1", "filename": "ontology_name.owl"}
-    }
-
-
-def test_get_ontology_info_file_version(mock_ontology_info_file):
-    # Call the function
-    ontology_info = _get_ontology_info_file(
-        ontology_info_file=mock_ontology_info_file, cellxgene_schema_version="v1.0.0"
-    )
-
-    # Assertion
-    assert ontology_info is True
+    assert "v1.0.0" in ontology_info
+    assert "v2.0.0" in ontology_info
 
 
 def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
@@ -133,3 +130,85 @@ def test_download_ontologies_url_error(mock_ontology_info, mock_raw_ontology_dir
         with pytest.raises(Exception) as exc_info:
             _download_ontologies(ontology_info=mock_ontology_info, output_dir=mock_raw_ontology_dir)
         assert "fails due to Connection refused" in str(exc_info.value)
+
+
+@pytest.fixture
+def mock_datetime():
+    with patch("all_ontology_generator.datetime") as mock_datetime:
+        mock_datetime.strptime = datetime.strptime
+        mock_datetime.now.return_value = datetime(2024, 1, 1)
+        yield mock_datetime
+
+
+def test_list_expired_cellxgene_schema_version(mock_datetime):
+    ontology_info = {
+        "v1": {"deprecated_on": "2022-01-01"},  # Expired
+        "v2": {"deprecated_on": "2023-07-05"},  # Not expired
+        "v3": {"deprecated_on": "2024-01-01"},  # Now, Not expired
+    }
+    # Expected expired versions based on the mock data
+    expected_expired_versions = ["v1"]
+
+    # Call the function
+    expired_versions = list_expired_cellxgene_schema_version(ontology_info)
+
+    # Assert the result matches the expected expired versions
+    assert expired_versions == expected_expired_versions
+
+
+def test_list_expired_cellxgene_schema_version_no_deprecated_on(mock_datetime):
+    # If no 'deprecated_on' field is provided, the version should not be considered expired
+    ontology_info_no_deprecated_on = {
+        "v1": {},  # No 'deprecated_on' field, Not expired
+    }
+
+    # Call the function
+    expired_versions = list_expired_cellxgene_schema_version(ontology_info_no_deprecated_on)
+
+    # Assert no versions are considered expired
+    assert expired_versions == []
+
+
+def test_list_expired_cellxgene_schema_version_future_date(mock_datetime):
+    # If 'deprecated_on' is in the future, it should not be considered expired
+    ontology_info_future_date = {
+        "v1": {"deprecated_on": "2030-01-01"},  # Future date, Not expired
+    }
+
+    # Call the function
+    expired_versions = list_expired_cellxgene_schema_version(ontology_info_future_date)
+
+    # Assert no versions are considered expired
+    assert expired_versions == []
+
+
+def test_list_expired_cellxgene_schema_version_now(mock_datetime):
+    # If 'deprecated_on' is today, it should be considered expired
+    now = datetime(2024, 1, 1).strftime("%Y-%m-%d")
+    ontology_info_today = {
+        "v1": {"deprecated_on": now},  # Today's date, Not expired
+    }
+
+    # Call the function
+    expired_versions = list_expired_cellxgene_schema_version(ontology_info_today)
+
+    # Assert the version with 'deprecated_on' as now is not considered expired
+    assert expired_versions == []
+
+
+def test_update_ontology_info(mock_datetime):
+    ontology_info = {
+        "v1": {"deprecated_on": "2022-01-01", "ontologies": {"A": {"version": 1}, "B": {"version": 1}}},  # Expired
+        "v2": {"deprecated_on": "2023-07-05", "ontologies": {"A": {"version": 2}, "B": {"version": 1}}},  # Not expired
+    }
+    expected_ontology_info = {
+        "v2": {"deprecated_on": "2023-07-05", "ontologies": {"A": {"version": 2}, "B": {"version": 1}}},  # Not expired
+    }
+    expected_removed_files = {"A-ontology-1.json.gz"}
+
+    # Call the function
+    removed_files = update_ontology_info(ontology_info)
+
+    # Assert the result matches the expected expired versions
+    assert ontology_info == expected_ontology_info
+    assert removed_files == expected_removed_files
