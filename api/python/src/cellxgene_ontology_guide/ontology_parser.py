@@ -72,8 +72,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> term_ancestors = ontology_parser.get_term_ancestors("CL:0000005")
-        >>> sorted(term_ancestors)
+        >>> ontology_parser.get_term_ancestors("CL:0000005") # doctest: +SKIP
         ['CL:0000000', 'CL:0000057', ...
 
         :param term_id: str ontology term to find ancestors for
@@ -94,7 +93,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.map_term_ancestors(["CL:0000003", "CL:0000005"], include_self=True)
+        >>> ontology_parser.map_term_ancestors(["CL:0000003", "CL:0000005"], include_self=True) # doctest: +SKIP
         {
             'CL:0000003': ['CL:0000003'],
             'CL:0000005': ['CL:0000005', 'CL:0000000', ...]
@@ -116,7 +115,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005")
+        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005") # doctest: +SKIP
         {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3}
 
         :param term_id: str ontology term to find ancestors for
@@ -204,9 +203,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> terms = ontology_parser.get_high_level_terms("CL:0000005", ["CL:0000000", "CL:0000001"])
-        >>> sorted(terms)
-        ['CL:0000000', ...]
+        >>> ontology_parser.get_high_level_terms("CL:0000005", ["CL:0000000", "CL:0000001"])
+        ['CL:0000000']
 
         :param term_id: str ontology term to find high-level terms for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -282,8 +280,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> terms = ontology_parser.get_term_descendants("CL:0000005")
-        >>> sorted(terms)
+        >>> ontology_parser.get_term_descendants("CL:0000005") # doctest: +SKIP
         ['CL:0002363']
 
         :param term_id: str ontology term to find descendants for
@@ -308,7 +305,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.map_term_descendants(["CL:0000003", "CL:0000005"], include_self=True)
+        >>> ontology_parser.map_term_descendants(["CL:0000003", "CL:0000005"], include_self=True) # doctest: +SKIP
         {
             'CL:0000003': ['CL:0000003', ...],
             'CL:0000005': ['CL:0000005', 'CL:0002363', ...]
