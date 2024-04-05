@@ -22,10 +22,21 @@
   ],
   "packages": {
     "api/python": {
-      "package-name": "python-api"
+      "package-name": "python-api",
+      "component": "python-api"
     },
     "ontology-assets": {
-      "package-name": "ontology-assets"
+      "package-name": "ontology-assets",
+      "component": "assets",
+      "extra-files": [
+        {
+          "type": "toml",
+          "path": "api/python/pyproject.toml",
+          "jsonpath": "$.project.ontology-assets-version"
+        }
+      ]
     }
   }
 }
+
+
