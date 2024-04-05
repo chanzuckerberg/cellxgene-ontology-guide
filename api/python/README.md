@@ -29,9 +29,10 @@ make unit-tests
 
 A new version of the PyPi package will be released for the following reasons (not an exhaustive list):
 
-- A release will be created when functionality is added, changed, or removed.
+- A new version will be created when functionality is added, changed, or removed.
 - A new version of the API will likely be needed if the shape of the ontology asset release changes.
 - A new version will be created when cellxgene schema change to reflect its compatibility with the new version of the CellxGene schema.
+- A new version will be created when any of the ontology versions associated with a [cellxgene-schema](https://github.com/chanzuckerberg/single-cell-curation/tree/main/schema) definition changes.
 
 To release a new version of API, merge a pull request to main. Release-please will automatically create a PR with the a version bump if needed. Merging the release-please PR will create a new release in github and a new version will be uploaded to pypi. If no changes were made that affect the API, the API will not be release. Closing the PR will skip the release of these changes and they will be included in the next release.
 
