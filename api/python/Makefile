@@ -39,5 +39,5 @@ release/pypi: build
 	python -m twine upload dist/*
 
 unit-tests:
-	python -m pytest tests
+	python -m pytest
 
