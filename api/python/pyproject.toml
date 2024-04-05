@@ -47,3 +47,7 @@ root = "../.."  # relative to the location of the pyproject.toml file
 
 [tool.pytest.ini_options]
 pythonpath = ["src/cellxgene_ontology_guide"]
+testpaths = [
+    "tests",
+]
+
