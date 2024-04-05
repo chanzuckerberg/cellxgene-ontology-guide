@@ -51,6 +51,6 @@ addopts = "--doctest-modules"
 doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL", "ELLIPSIS"]
 testpaths = [
     "tests",
-    "src/cellxgene_ontology_guide",
+    "src/cellxgene_ontology_guide"
 ]
 
