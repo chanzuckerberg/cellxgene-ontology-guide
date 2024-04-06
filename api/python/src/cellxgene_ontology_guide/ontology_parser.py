@@ -20,13 +20,15 @@ class OntologyParser:
         version. If not cached, it will make a network call to GitHub Release Assets to load in memory and
         parse the corresponding ontology metadata.
 
-        :param schema_version: str version of the schema to load ontology metadata for. If not provided, the latest is loaded.
+        :param schema_version: str version of the schema to load ontology metadata for. If not provided, the latest
+        is loaded.
         """
         self.cxg_schema = CXGSchema(version=schema_version) if schema_version else CXGSchema()
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
-        Parse the ontology name from a given term ID. If the term ID does not conform to the expected term format or is not
+        Parse the ontology name from a given term ID. If the term ID does not conform to the expected term format or
+        is not
         from an ontology supported by cellxgene-ontology-guide, raise a ValueError.
 
         :param term_id: str ontology term to parse
@@ -70,8 +72,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_ancestors("CL:0000005")
-        ["CL:0000000", ...]
+        >>> ontology_parser.get_term_ancestors("CL:0000005") # doctest: +SKIP
+        ['CL:0000000', 'CL:0000057', ...
 
         :param term_id: str ontology term to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -91,15 +93,16 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_list_ancestors(["CL:0000003", "CL:0000005"], include_self=True)
+        >>> ontology_parser.map_term_ancestors(["CL:0000003", "CL:0000005"], include_self=True) # doctest: +SKIP
         {
-            "CL:0000003": ["CL:0000003"],
-            "CL:0000005": ["CL:0000005", "CL:0000000", ...]
+            'CL:0000003': ['CL:0000003'],
+            'CL:0000005': ['CL:0000005', 'CL:0000000', ...]
         }
 
         :param term_ids: list of str ontology terms to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
-        :return: Dictionary mapping str term IDs to their respective flattened List[str] of ancestor terms. Maps to empty
+        :return: Dictionary mapping str term IDs to their respective flattened List[str] of ancestor terms. Maps to
+        empty
         list if there are no ancestors.
         """
         return {term_id: self.get_term_ancestors(term_id, include_self) for term_id in term_ids}
@@ -112,8 +115,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005")
-        {"CL:0000000": 1, ...}
+        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005") # doctest: +SKIP
+        {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3}
 
         :param term_id: str ontology term to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -137,11 +140,9 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_list_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
-        {
-            "CL:0000003": {"CL:0000003": 0, ...},
-            "CL:0000005": {"CL:0000005": 0, "CL:0000000": 1, ...}
-        }
+        >>> ontology_parser.map_term_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
+        {'CL:0000003': {'CL:0000003': 0}, 'CL:0000005': {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3,
+        'CL:0000005': 0}}
 
         :param term_ids: list of str ontology terms to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -202,8 +203,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_high_level_terms("CL:0000005")
-        ["CL:0000000", ...]
+        >>> ontology_parser.get_high_level_terms("CL:0000005", ["CL:0000000", "CL:0000001"])
+        ['CL:0000000']
 
         :param term_id: str ontology term to find high-level terms for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -239,8 +240,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_highest_level_term("CL:0000005")
-        "CL:0000000"
+        >>> ontology_parser.get_highest_level_term("CL:0000005", ["CL:0000000", "CL:0000001"])
+        'CL:0000000'
 
         :param term_id: str ontology term to find highest level term for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -279,8 +280,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_descendant("CL:0000005")
-        ["CL:0000005", "CL:0002363", ...]
+        >>> ontology_parser.get_term_descendants("CL:0000005") # doctest: +SKIP
+        ['CL:0002363']
 
         :param term_id: str ontology term to find descendants for
         :param include_self: boolean flag to include the term itself as a descendant
@@ -304,10 +305,10 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_terms_descendants(["CL:0000003", "CL:0000005"], include_self=True)
-         {
-            "CL:0000003": ["CL:0000003", "CL:0000004", ...],
-            "CL:0000005": ["CL:0000005", "CL:0002363", ...]
+        >>> ontology_parser.map_term_descendants(["CL:0000003", "CL:0000005"], include_self=True) # doctest: +SKIP
+        {
+            'CL:0000003': ['CL:0000003', ...],
+            'CL:0000005': ['CL:0000005', 'CL:0002363', ...]
         }
 
         :param term_ids: list of str ontology terms to find descendants for
@@ -344,28 +345,28 @@ class OntologyParser:
         >>> ontology_parser = OntologyParser()
         >>> root_node = ontology_parser.get_term_graph("CL:0000000")
         >>> root_node.term_id
-        "CL:0000000"
-        >>> root_node.to_dict()
+        'CL:0000000'
+        >>> root_node.to_dict() # doctest: +SKIP
         {
-            "CL:0000000": [
-                {"CL:0000001": [
-                    {"CL:0000004": [...]},
-                    {"CL:0000005": [...]},
-                    {"CL:0000006": [...]},
-                    {"CL:0000007": [...]},
+            'CL:0000000': [
+                {'CL:0000001': [
+                    {'CL:0000004': [...]},
+                    {'CL:0000005': [...]},
+                    {'CL:0000006': [...]},
+                    {'CL:0000007': [...]},
                     ...
                 ]},
-                {"CL:0000002": [
-                    {"CL:0000004": [...]},
-                    {"CL:0000005": [...]},
+                {'CL:0000002': [
+                    {'CL:0000004': [...]},
+                    {'CL:0000005': [...]},
                     ...
                 ]},
-                {"CL:0000003": []},
+                {'CL:0000003': []},
                 ...
             ]
         }
-        >>> root_node.term_counter
-        {"CL:0000000": 1, "CL:0000001": 1, "CL:0000004": 2, ...}
+        >>> root_node.term_counter # doctest: +SKIP
+        Counter({'CL:0002058': 48, 'CL:0002471': 48, ...
 
         :param term_id: str ontology term to build subtree for
         :return: OntologyNode representation of graph with term_id as root.
@@ -405,7 +406,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_replacement("CL:0000003")
-        "CL:0000000"
+        'CL:0000000'
 
         :param term_id: str ontology term to check a replacement term for
         :return: replacement str term ID if it exists, None otherwise
@@ -447,7 +448,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_label("CL:0000005")
-        "fibroblast neural crest derived"
+        'fibroblast neural crest derived'
 
         :param term_id: str ontology term to fetch label for
         :return: str human-readable label for the term
@@ -465,8 +466,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.map_term_label(["CL:0000005", "CL:0000003"])
-        {"CL:0000005": "fibroblast neural crest derived", "CL:0000003": "fibroblast"}
+        >>> ontology_parser.map_term_labels(["CL:0000005", "CL:0000003"])
+        {'CL:0000005': 'fibroblast neural crest derived', 'CL:0000003': 'obsolete native cell'}
 
         :param term_ids: list of str ontology terms to fetch label for
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels
