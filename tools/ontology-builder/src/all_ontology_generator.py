@@ -5,8 +5,9 @@ import os
 import re
 import sys
 import urllib.request
+from datetime import datetime, timedelta
 from threading import Thread
-from typing import Any, Dict, Iterator, List, Optional
+from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
 
 import env
@@ -19,9 +20,7 @@ def _get_latest_version(versions: List[str]) -> str:
     return "v" + str(sorted([semantic_version.Version.coerce(version[1:]) for version in versions])[-1])
 
 
-def _get_ontology_info_file(
-    ontology_info_file: str = env.ONTOLOGY_INFO_FILE, cellxgene_schema_version: Optional[str] = None
-) -> Any:
+def get_ontology_info_file(ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> Any:
     """
     Read ontology information from file
 
@@ -31,12 +30,20 @@ def _get_ontology_info_file(
     :return ontology information
     """
     with open(ontology_info_file, "r") as f:
-        ontology_info = json.load(f)
-        if cellxgene_schema_version:
-            ontology_info_version = ontology_info[cellxgene_schema_version]
-        else:
-            ontology_info_version = ontology_info[_get_latest_version(ontology_info.keys())]
-        return ontology_info_version
+        return json.load(f)
+
+
+def save_ontology_info(ontology_info: Dict[str, Any], ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> None:
+    """
+    Save ontology information to file
+
+    :param Dict[str, Any] ontology_info: ontology information to save
+    :param str ontology_info_file: path to file to save ontology information
+
+    :rtype None
+    """
+    with open(ontology_info_file, "w") as f:
+        json.dump(ontology_info, f, indent=2)
 
 
 def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
@@ -50,7 +57,7 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     """
 
     def download(_ontology: str, _url: str) -> None:
-        print(f"Start Downloading {_ontology}")
+        logging.info(f"Start Downloading {_ontology}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
 
@@ -61,7 +68,7 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             os.remove(output_file + ".gz")
         else:
             urllib.request.urlretrieve(_url, output_file)
-        print(f"Finish Downloading {_ontology}")
+        logging.info(f"Finish Downloading {_ontology}")
 
     def _build_url(_ontology: str) -> str:
         onto_ref_data = ontology_info[_ontology]
@@ -210,6 +217,10 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
     return term_dict
 
 
+def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
+    return f"{ontology_name}-ontology-{ontology_version}.json.gz"
+
+
 def _parse_ontologies(
     ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
@@ -252,8 +263,8 @@ def _parse_ontologies(
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
         version = ontology_info[onto.name]["version"]
-        output_file = os.path.join(output_path, f"{onto.name}-ontology-{version}.json.gz")
-        print(f"Processing {output_file}")
+        output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
+        logging.info(f"Processing {output_file}")
 
         onto_dict = _extract_ontology_term_metadata(onto)
 
@@ -262,15 +273,89 @@ def _parse_ontologies(
         yield output_file
 
 
+def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
+    """
+    Update ontology_info in place by removing expired versions and returning a list of the ontology files that
+    can be removed.
+    :param ontology_info: the ontology information from ontology_info.json
+    :return: a list of ontology files that can be removed
+    """
+    expired = list_expired_cellxgene_schema_version(ontology_info)  # find expired cellxgene schema versions
+    current = set(ontology_info.keys()) - set(expired)  # find current cellxgene schema versions
+    logging.info("Expired versions:\n\t", "\t\n".join(expired))
+
+    def _get_ontology_files(schema_versions: List[str]) -> Set[str]:
+        """
+        find all ontologies that are in the list of schema_versions
+
+        :param schema_versions: list of schema versions
+        :return: ontology_files: set of ontology files
+        """
+
+        ontology_files = set()
+        for version in schema_versions:
+            for ontology, info in ontology_info[version]["ontologies"].items():
+                ontology_files.add(get_ontology_file_name(ontology, info["version"]))
+        return ontology_files
+
+    expired_files = _get_ontology_files(expired)  # find all ontology files that are in the expired versions
+    current_files = _get_ontology_files(list(current))  # find all ontology files that are in the current versions
+    # find the ontology files that are in the expired versions but not in the current versions
+    remove_files = expired_files - current_files
+    # remove expired versions from ontology_info
+    for version in expired:
+        del ontology_info[version]
+    return remove_files
+
+
+def deprecate_previous_cellxgene_schema_versions(ontology_info: Dict[str, Any], current_version: str) -> None:
+    """
+    Deprecate previous versions of the cellxgene schema. This modifies the ontology_info.json file in place.
+    :param ontology_info: the ontology information from ontology_info.json
+    :param current_version: the current cellxgene schema version
+    :return:
+    """
+    for schema_version in ontology_info:
+        if schema_version != current_version and "deprecated_on" not in ontology_info[schema_version]:
+            ontology_info[schema_version]["deprecated_on"] = datetime.now().strftime("%Y-%m-%d")
+
+
+def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List[str]:
+    """
+    Lists cellxgene schema version that are deprecated and should be removed from the ontology_info.json file
+    :param ontology_info: the ontology information from ontology_info.json
+    :return: a list of expired schema versions
+    """
+    expired_versions = []
+    now = datetime.now()
+    for schema_version in ontology_info:
+        deprecated_on = ontology_info[schema_version].get("deprecated_on")
+        if deprecated_on:
+            parsed_date = datetime.strptime(deprecated_on, "%Y-%m-%d")
+            expiration_date = parsed_date + timedelta(days=6 * 30)  # 6 months
+            if expiration_date < now:
+                expired_versions.append(schema_version)
+    return expired_versions
+
+
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
-    ontology_info = _get_ontology_info_file()
-    _download_ontologies(ontology_info)
-    _parse_ontologies(ontology_info)
+    ontology_info = get_ontology_info_file()
+    current_version = _get_latest_version(ontology_info.keys())
+    latest_ontology_version = ontology_info[current_version]
+    latest_ontologies = latest_ontology_version["ontologies"]
+    _download_ontologies(latest_ontologies)
+    _parse_ontologies(latest_ontologies)
+    deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
+    expired_files = update_ontology_info(ontology_info)
+    logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
+    for file in expired_files:
+        os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
+    save_ontology_info(ontology_info)
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
     registry = register_schemas()
-    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontology_info)]
+    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(latest_ontologies)]
     if not all(result):
         sys.exit(1)
