@@ -13,6 +13,10 @@
         "type": "string",
         "description": "human-readable name for the ontology entry."
       },
+      "description": {
+        "type": "string",
+        "description": "Optional description of the ontology entry."
+      },
       "deprecated": {
         "type": "boolean",
         "description": "Indicates whether the ontology entry is deprecated."

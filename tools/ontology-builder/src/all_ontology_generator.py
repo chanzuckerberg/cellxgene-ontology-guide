@@ -193,8 +193,11 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
         # no current use-case for NCBITaxon
         term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
 
-        # Gets label
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""
+
+        # optional description, if available
+        if getattr(onto_term, "IAO_0000115", None):
+            term_dict[term_id]["description"] = onto_term.IAO_0000115[0]
 
         # Add the "deprecated" status and associated metadata if True
         term_dict[term_id]["deprecated"] = False

@@ -8,7 +8,7 @@ from cellxgene_ontology_guide.supported_versions import CXGSchema
 @pytest.fixture
 def ontology_dict():
     return {
-        "CL:0000000": {"ancestors": {}, "label": "cell A", "deprecated": False},
+        "CL:0000000": {"ancestors": {}, "label": "cell A", "description": "This is cell A.", "deprecated": False},
         "CL:0000001": {
             "ancestors": {"CL:0000000": 1},
             "label": "cell B",
@@ -216,6 +216,19 @@ def test_map_term_labels(ontology_parser):
     assert ontology_parser.map_term_labels(["CL:0000000", "CL:0000004", "unknown", "na"]) == {
         "CL:0000000": "cell A",
         "CL:0000004": "cell BC",
+        "unknown": "unknown",
+        "na": "na",
+    }
+
+
+def test_get_term_description(ontology_parser):
+    assert ontology_parser.get_term_description("CL:0000000") == "This is cell A."
+
+
+def test_map_term_description(ontology_parser):
+    assert ontology_parser.map_term_descriptions(["CL:0000000", "CL:0000004", "unknown", "na"]) == {
+        "CL:0000000": "This is cell A.",
+        "CL:0000004": None,
         "unknown": "unknown",
         "na": "na",
     }
