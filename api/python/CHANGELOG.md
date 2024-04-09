@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.4.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.4.0...python-api-v0.4.1) (2024-04-09)
+
+
+### Misc
+
+* add doctesting to API ([#176](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/176)) ([c0aec23](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c0aec23c2cec48de0ea04b7703f6cb0322a7ec55))
+* deprecate older version of cellxgene schema ([#172](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/172)) ([186e762](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/186e76235df3eec6767e3014e48530377d14d21f))
+* move pytest configs to pyproject.toml ([#175](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/175)) ([a90341b](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a90341bdd16ae347f1f5e8b8db698afc38f37b80))
+
 ## [0.4.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.3.1...python-api-v0.4.0) (2024-03-29)
 
 

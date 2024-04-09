@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.2.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.2.0...ontology-assets-v0.2.1) (2024-04-09)
+
+
+### Misc
+
+* deprecate older version of cellxgene schema ([#172](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/172)) ([186e762](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/186e76235df3eec6767e3014e48530377d14d21f))
+* update ontology decendant mappings ([#162](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/162)) ([12def74](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/12def746eebb3d0273bb826be569ebfa1739d5ed))
+* update ontology descendant mappings ([#167](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/167)) ([5d3d097](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5d3d0979798c78a8874bcca945986f809b76a825))
+* update ontology descendant mappings ([#180](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/180)) ([65ca10f](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/65ca10feb7677f4066f87f73b49ea9f3b9ba78ca))
+
 ## [0.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.1.0...ontology-assets-v0.2.0) (2024-03-25)
 
 
