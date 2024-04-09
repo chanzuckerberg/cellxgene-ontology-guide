@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.5.0...python-api-v0.6.0) (2024-04-09)
+
+
+### Features
+
+* add get_term_children and get_term_parents ([#186](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/186)) ([dfcd2c2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/dfcd2c26f10196adab8bc3233e0f25dc5a214534))
+
 ## [0.5.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.4.0...python-api-v0.5.0) (2024-04-09)
 
 
