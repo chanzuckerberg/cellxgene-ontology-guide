@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.3.0...ontology-assets-v0.3.1) (2024-04-09)
+
+
+### BugFixes
+
+* cleanup ([6f2e8e2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/6f2e8e2cc80f29b7f0e80c24093b41afd37d56d6))
+* linked-versions ([5fde9d7](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5fde9d77fff6feef729e4dea9a24b0ec6865c07e))
+
 ## [0.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v0.2.0...ontology-assets-v0.3.0) (2024-04-09)
 
 
