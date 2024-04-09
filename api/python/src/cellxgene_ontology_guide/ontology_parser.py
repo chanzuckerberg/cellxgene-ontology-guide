@@ -501,7 +501,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000006"])
-        {'CL:0000005': 'Any fibroblast that is deriived from the neural crest.', 'CL:0000003': None}
+        {'CL:0000005': 'Any fibroblast that is deriived from the neural crest.', 'CL:0000006': None}
 
         :param term_ids: list of str ontology terms to fetch descriptions for
         :return: Dict[str, str] mapping term IDs to their respective descriptions
