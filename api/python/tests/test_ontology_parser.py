@@ -8,7 +8,7 @@ from cellxgene_ontology_guide.supported_versions import CXGSchema
 @pytest.fixture
 def ontology_dict():
     return {
-        "CL:0000000": {"ancestors": {}, "label": "cell A", "deprecated": False},
+        "CL:0000000": {"ancestors": {}, "label": "cell A", "description": "This is cell A.", "deprecated": False},
         "CL:0000001": {
             "ancestors": {"CL:0000000": 1},
             "label": "cell B",
@@ -221,6 +221,19 @@ def test_map_term_labels(ontology_parser):
     }
 
 
+def test_get_term_description(ontology_parser):
+    assert ontology_parser.get_term_description("CL:0000000") == "This is cell A."
+
+
+def test_map_term_description(ontology_parser):
+    assert ontology_parser.map_term_descriptions(["CL:0000000", "CL:0000004", "unknown", "na"]) == {
+        "CL:0000000": "This is cell A.",
+        "CL:0000004": None,
+        "unknown": "unknown",
+        "na": "na",
+    }
+
+
 def test_get_high_level_terms(ontology_parser):
     high_level_terms = ["CL:0000000", "CL:0000001"]
     assert ontology_parser.get_high_level_terms("CL:0000004", high_level_terms) == ["CL:0000000", "CL:0000001"]
@@ -288,23 +301,29 @@ def test_get_distance_between_terms(ontology_parser):
 def test_get_term_graph(ontology_parser):
     graph = ontology_parser.get_term_graph("CL:0000000")
     assert graph.to_dict() == {
-        "CL:0000000": [
+        "term_id": "CL:0000000",
+        "name": "cell A",
+        "children": [
             {
-                "CL:0000001": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                    {"CL:0000006": []},
-                    {"CL:0000007": []},
-                ]
+                "term_id": "CL:0000001",
+                "name": "cell B",
+                "children": [
+                    {"term_id": "CL:0000004", "name": "cell BC", "children": []},
+                    {"term_id": "CL:0000005", "name": "cell BC2", "children": []},
+                    {"term_id": "CL:0000006", "name": "cell B2", "children": []},
+                    {"term_id": "CL:0000007", "name": "cell B3", "children": []},
+                ],
             },
             {
-                "CL:0000002": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                ]
+                "term_id": "CL:0000002",
+                "name": "cell C",
+                "children": [
+                    {"term_id": "CL:0000004", "name": "cell BC", "children": []},
+                    {"term_id": "CL:0000005", "name": "cell BC2", "children": []},
+                ],
             },
-            {"CL:0000003": []},
-        ]
+            {"term_id": "CL:0000003", "name": "obsolete cell", "children": []},
+        ],
     }
 
     assert graph.term_counter == {

@@ -348,20 +348,19 @@ class OntologyParser:
         'CL:0000000'
         >>> root_node.to_dict() # doctest: +SKIP
         {
-            'CL:0000000': [
-                {'CL:0000001': [
-                    {'CL:0000004': [...]},
-                    {'CL:0000005': [...]},
-                    {'CL:0000006': [...]},
-                    {'CL:0000007': [...]},
-                    ...
-                ]},
-                {'CL:0000002': [
-                    {'CL:0000004': [...]},
-                    {'CL:0000005': [...]},
-                    ...
-                ]},
-                {'CL:0000003': []},
+            "term_id": "CL:0000000",
+            "name": "cell A",
+            "children": [
+                {
+                    "term_id": "CL:0000001",
+                    "name": "cell B",
+                    "children": [...],
+                },
+                {
+                    "term_id": "CL:0000002",
+                    "name": "cell C",
+                    "children": [...],
+                },
                 ...
             ]
         }
@@ -372,7 +371,8 @@ class OntologyParser:
         :return: OntologyNode representation of graph with term_id as root.
         """
         ontology_name = self._parse_ontology_name(term_id)
-        root = OntologyNode(term_id)
+        term_label = self.get_term_label(term_id)
+        root = OntologyNode(term_id, term_label)
         for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
             for ancestor, distance in candidate_metadata["ancestors"].items():
                 if ancestor == term_id and distance == 1:
@@ -473,3 +473,37 @@ class OntologyParser:
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels
         """
         return {term_id: self.get_term_label(term_id) for term_id in term_ids}
+
+    def get_term_description(self, term_id: str) -> Optional[str]:
+        """
+        Fetch the description for a given ontology term.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_description("CL:0000005")
+        'Any fibroblast that is deriived from the neural crest.'
+
+        :param term_id: str ontology term to fetch description for
+        :return: str description for the term
+        """
+        if term_id in VALID_NON_ONTOLOGY_TERMS:
+            return term_id
+        ontology_name = self._parse_ontology_name(term_id)
+        description: Optional[str] = self.cxg_schema.ontology(ontology_name)[term_id].get("description", None)
+        return description
+
+    def map_term_descriptions(self, term_ids: List[str]) -> Dict[str, Optional[str]]:
+        """
+        Fetch the descriptions for a given list of ontology terms.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000006"])
+        {'CL:0000005': 'Any fibroblast that is deriived from the neural crest.', 'CL:0000006': None}
+
+        :param term_ids: list of str ontology terms to fetch descriptions for
+        :return: Dict[str, str] mapping term IDs to their respective descriptions
+        """
+        return {term_id: self.get_term_description(term_id) for term_id in term_ids}
