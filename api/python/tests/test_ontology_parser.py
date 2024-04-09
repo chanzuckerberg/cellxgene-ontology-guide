@@ -300,7 +300,7 @@ def test_get_distance_between_terms(ontology_parser):
 
 @pytest.mark.parametrize(
     "term_id,expected",
-    [("CL:0000005", ["CL:0000001", "CL:0000002"]), ("CL:0000002", ["CL:0000000"]), ("CL:0000000", []), ("unknown", [])]
+    [("CL:0000005", ["CL:0000001", "CL:0000002"]), ("CL:0000002", ["CL:0000000"]), ("CL:0000000", []), ("unknown", [])],
 )
 def test_get_term_parents(ontology_parser, term_id, expected):
     assert ontology_parser.get_term_parents(term_id) == expected
