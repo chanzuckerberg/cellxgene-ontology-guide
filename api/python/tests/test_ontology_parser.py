@@ -298,6 +298,22 @@ def test_get_distance_between_terms(ontology_parser):
     assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
 
 
+@pytest.mark.parametrize(
+    "term_id,expected",
+    [("CL:0000005", ["CL:0000001", "CL:0000002"]), ("CL:0000002", ["CL:0000000"]), ("CL:0000000", []), ("unknown", [])]
+)
+def test_get_term_parents(ontology_parser, term_id, expected):
+    assert ontology_parser.get_term_parents(term_id) == expected
+
+
+@pytest.mark.parametrize(
+    "term_id,expected",
+    [("CL:0000000", ["CL:0000001", "CL:0000002", "CL:0000003"]), ("CL:0000005", []), ("unknown", [])],
+)
+def test_get_term_children(ontology_parser, term_id, expected):
+    assert ontology_parser.get_term_children(term_id) == expected
+
+
 def test_get_term_graph(ontology_parser):
     graph = ontology_parser.get_term_graph("CL:0000000")
     assert graph.to_dict() == {
