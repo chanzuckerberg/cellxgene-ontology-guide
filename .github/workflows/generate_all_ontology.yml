@@ -41,6 +41,7 @@ jobs:
         run: |
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
           git add ./ontology-assets/*.json.gz
+          git add ./ontology-assets/ontology_info.json
       - name: Commit
         run: |
           git commit -m "AUTO: update ontologies"

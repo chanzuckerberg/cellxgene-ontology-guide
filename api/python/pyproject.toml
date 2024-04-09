@@ -47,7 +47,10 @@ root = "../.."  # relative to the location of the pyproject.toml file
 
 [tool.pytest.ini_options]
 pythonpath = ["src/cellxgene_ontology_guide"]
+addopts = "--doctest-modules"
+doctest_optionflags = ["NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL", "ELLIPSIS"]
 testpaths = [
     "tests",
+    "src/cellxgene_ontology_guide"
 ]
 

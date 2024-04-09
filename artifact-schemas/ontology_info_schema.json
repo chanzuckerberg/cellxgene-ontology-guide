@@ -8,34 +8,46 @@
       "description": "The version of CellxGene schema that maps to this set of ontology versions",
       "type": "object",
       "properties": {
-        "CL": {
-          "$ref": "#/definitions/ontologyEntry"
+        "deprecated_on": {
+          "type": "string",
+          "description": "The date this version was deprecated. The format of the date is YYYY-MM-DD. If this is the current verison then this field will be empty."
         },
-        "EFO": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "HANCESTRO": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "HsapDv": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "MONDO": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "MmusDv": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "NCBITaxon": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "UBERON": {
-          "$ref": "#/definitions/ontologyEntry"
-        },
-        "PATO": {
-          "$ref": "#/definitions/ontologyEntry"
+        "ontologies": {
+          "type": "object",
+          "properties": {
+            "CL": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "EFO": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "HANCESTRO": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "HsapDv": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "MONDO": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "MmusDv": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "NCBITaxon": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "UBERON": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "PATO": {
+              "$ref": "#/definitions/ontologyEntry"
+            }
+          }
         }
-      }
+      },
+      "required": [
+        "ontologies"
+      ]
     }
   },
   "additionalProperties": false,
