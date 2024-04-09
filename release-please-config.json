@@ -27,17 +27,7 @@
     },
     "ontology-assets": {
       "package-name": "ontology-assets",
-      "component": "ontology-assets",
-      "plugins": [
-        {
-          "type": "linked-versions",
-          "groupName": "my group",
-          "components": [
-            "python-api",
-            "ontology-assets"
-          ]
-        }
-      ]
+      "component": "ontology-assets"
     }
   }
 }
