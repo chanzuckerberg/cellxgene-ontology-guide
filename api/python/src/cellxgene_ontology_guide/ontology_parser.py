@@ -348,20 +348,19 @@ class OntologyParser:
         'CL:0000000'
         >>> root_node.to_dict() # doctest: +SKIP
         {
-            'CL:0000000': [
-                {'CL:0000001': [
-                    {'CL:0000004': [...]},
-                    {'CL:0000005': [...]},
-                    {'CL:0000006': [...]},
-                    {'CL:0000007': [...]},
-                    ...
-                ]},
-                {'CL:0000002': [
-                    {'CL:0000004': [...]},
-                    {'CL:0000005': [...]},
-                    ...
-                ]},
-                {'CL:0000003': []},
+            "term_id": "CL:0000000",
+            "name": "cell A",
+            "children": [
+                {
+                    "term_id": "CL:0000001",
+                    "name": "cell B",
+                    "children": [...],
+                },
+                {
+                    "term_id": "CL:0000002",
+                    "name": "cell C",
+                    "children": [...],
+                },
                 ...
             ]
         }
@@ -372,7 +371,8 @@ class OntologyParser:
         :return: OntologyNode representation of graph with term_id as root.
         """
         ontology_name = self._parse_ontology_name(term_id)
-        root = OntologyNode(term_id)
+        term_label = self.get_term_label(term_id)
+        root = OntologyNode(term_id, term_label)
         for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
             for ancestor, distance in candidate_metadata["ancestors"].items():
                 if ancestor == term_id and distance == 1:

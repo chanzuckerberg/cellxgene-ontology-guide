@@ -37,8 +37,9 @@ class OntologyNode:
     Class to represent an ontology term and its subclasses
     """
 
-    def __init__(self, term_id: str):
+    def __init__(self, term_id: str, name: str):
         self._term_id = term_id
+        self._name = name
         self._children: List["OntologyNode"] = []
         self._term_counter: Counter[str] = Counter({self.term_id: 1})
 
@@ -48,6 +49,13 @@ class OntologyNode:
         Ontology term ID represented by this OntologyNode.
         """
         return self._term_id
+
+    @property
+    def name(self) -> str:
+        """
+        Human-readable label for ontology term represented by this OntologyNode.
+        """
+        return self._name
 
     @property
     def children(self) -> List["OntologyNode"]:
@@ -70,4 +78,8 @@ class OntologyNode:
         self._term_counter.update(child.term_counter)
 
     def to_dict(self) -> Dict[str, Any]:
-        return {self.term_id: [child.to_dict() for child in self.children]}
+        return {
+            "term_id": self.term_id,
+            "name": self.name,
+            "children": [child.to_dict() for child in self.children],
+        }

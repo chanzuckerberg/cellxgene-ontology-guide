@@ -301,23 +301,29 @@ def test_get_distance_between_terms(ontology_parser):
 def test_get_term_graph(ontology_parser):
     graph = ontology_parser.get_term_graph("CL:0000000")
     assert graph.to_dict() == {
-        "CL:0000000": [
+        "term_id": "CL:0000000",
+        "name": "cell A",
+        "children": [
             {
-                "CL:0000001": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                    {"CL:0000006": []},
-                    {"CL:0000007": []},
-                ]
+                "term_id": "CL:0000001",
+                "name": "cell B",
+                "children": [
+                    {"term_id": "CL:0000004", "name": "cell BC", "children": []},
+                    {"term_id": "CL:0000005", "name": "cell BC2", "children": []},
+                    {"term_id": "CL:0000006", "name": "cell B2", "children": []},
+                    {"term_id": "CL:0000007", "name": "cell B3", "children": []},
+                ],
             },
             {
-                "CL:0000002": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                ]
+                "term_id": "CL:0000002",
+                "name": "cell C",
+                "children": [
+                    {"term_id": "CL:0000004", "name": "cell BC", "children": []},
+                    {"term_id": "CL:0000005", "name": "cell BC2", "children": []},
+                ],
             },
-            {"CL:0000003": []},
-        ]
+            {"term_id": "CL:0000003", "name": "obsolete cell", "children": []},
+        ],
     }
 
     assert graph.term_counter == {
