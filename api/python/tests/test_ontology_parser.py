@@ -8,7 +8,7 @@ from cellxgene_ontology_guide.supported_versions import CXGSchema
 @pytest.fixture
 def ontology_dict():
     return {
-        "CL:0000000": {"ancestors": {}, "label": "cell A", "deprecated": False},
+        "CL:0000000": {"ancestors": {}, "label": "cell A", "description": "This is cell A.", "deprecated": False},
         "CL:0000001": {
             "ancestors": {"CL:0000000": 1},
             "label": "cell B",
@@ -43,7 +43,9 @@ def ontology_dict():
 @pytest.fixture
 def mock_CXGSchema(ontology_dict, mock_load_supported_versions, mock_load_ontology_file):
     mock_load_supported_versions.return_value = {
-        "v5.0.0": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
+        "v5.0.0": {
+            "ontologies": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
+        }
     }
     cxg_schema = CXGSchema()
     cxg_schema.ontology_file_names = {"CL": "CL-ontology-2024-01-01.json.gz"}
@@ -219,6 +221,19 @@ def test_map_term_labels(ontology_parser):
     }
 
 
+def test_get_term_description(ontology_parser):
+    assert ontology_parser.get_term_description("CL:0000000") == "This is cell A."
+
+
+def test_map_term_description(ontology_parser):
+    assert ontology_parser.map_term_descriptions(["CL:0000000", "CL:0000004", "unknown", "na"]) == {
+        "CL:0000000": "This is cell A.",
+        "CL:0000004": None,
+        "unknown": "unknown",
+        "na": "na",
+    }
+
+
 def test_get_high_level_terms(ontology_parser):
     high_level_terms = ["CL:0000000", "CL:0000001"]
     assert ontology_parser.get_high_level_terms("CL:0000004", high_level_terms) == ["CL:0000000", "CL:0000001"]
@@ -283,26 +298,48 @@ def test_get_distance_between_terms(ontology_parser):
     assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
 
 
+@pytest.mark.parametrize(
+    "term_id,expected",
+    [("CL:0000005", ["CL:0000001", "CL:0000002"]), ("CL:0000002", ["CL:0000000"]), ("CL:0000000", []), ("unknown", [])],
+)
+def test_get_term_parents(ontology_parser, term_id, expected):
+    assert ontology_parser.get_term_parents(term_id) == expected
+
+
+@pytest.mark.parametrize(
+    "term_id,expected",
+    [("CL:0000000", ["CL:0000001", "CL:0000002", "CL:0000003"]), ("CL:0000005", []), ("unknown", [])],
+)
+def test_get_term_children(ontology_parser, term_id, expected):
+    assert ontology_parser.get_term_children(term_id) == expected
+
+
 def test_get_term_graph(ontology_parser):
     graph = ontology_parser.get_term_graph("CL:0000000")
     assert graph.to_dict() == {
-        "CL:0000000": [
+        "term_id": "CL:0000000",
+        "name": "cell A",
+        "children": [
             {
-                "CL:0000001": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                    {"CL:0000006": []},
-                    {"CL:0000007": []},
-                ]
+                "term_id": "CL:0000001",
+                "name": "cell B",
+                "children": [
+                    {"term_id": "CL:0000004", "name": "cell BC", "children": []},
+                    {"term_id": "CL:0000005", "name": "cell BC2", "children": []},
+                    {"term_id": "CL:0000006", "name": "cell B2", "children": []},
+                    {"term_id": "CL:0000007", "name": "cell B3", "children": []},
+                ],
             },
             {
-                "CL:0000002": [
-                    {"CL:0000004": []},
-                    {"CL:0000005": []},
-                ]
+                "term_id": "CL:0000002",
+                "name": "cell C",
+                "children": [
+                    {"term_id": "CL:0000004", "name": "cell BC", "children": []},
+                    {"term_id": "CL:0000005", "name": "cell BC2", "children": []},
+                ],
             },
-            {"CL:0000003": []},
-        ]
+            {"term_id": "CL:0000003", "name": "obsolete cell", "children": []},
+        ],
     }
 
     assert graph.term_counter == {

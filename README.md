@@ -18,6 +18,11 @@ This project adheres to the Contributor Covenant [code of conduct](https://githu
 
 If you believe you have found a security issue, please responsibly disclose by contacting us at [security@chanzuckerberg.com](mailto:security@chanzuckerberg.com).
 
+## Updating to a new Cellxgene Schema Version
+
+1. Update the [ontology_info.json](./ontology-assets/ontology_info.json) file with the new schema version
+2. Leave the older versions in the file for backward compatibility. They will be deprecated and removed automatically after 6 months. That process is handled in [deprecate_previous_cellxgene_schema_versions](https://github.com/chanzuckerberg/cellxgene-ontology/blob/main/tools/ontology-builder/src/all_ontology_generator.py#L311-L311).
+
 ## Release Please
 
 [Release-please]() is used to manage the release process for this repository. To make changes to how releases are

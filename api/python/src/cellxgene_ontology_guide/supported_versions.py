@@ -2,6 +2,8 @@ import functools
 import gzip
 import json
 import os
+import warnings
+from datetime import datetime
 from typing import Any, Dict, List, Optional
 
 from semantic_version import Version
@@ -63,8 +65,16 @@ class CXGSchema:
             raise ValueError(f"Schema version {version} is not supported in this package version.")
 
         self.version = version
-        self.supported_ontologies = ontology_info[version]
+        self.supported_ontologies = ontology_info[version]["ontologies"]
         self.ontology_file_names: Dict[str, str] = {}
+        self.deprecated_on = ontology_info[version].get("deprecated_on")
+        if self.deprecated_on:
+            parsed_date = datetime.strptime(self.deprecated_on, "%Y-%m-%d")
+            warnings.warn(
+                f"Schema version {version} is deprecated as of {parsed_date}. It will be removed in a future version.",
+                DeprecationWarning,
+                stacklevel=1,
+            )
 
     def ontology(self, name: str) -> Any:
         """Return the ontology terms for the given ontology name. Load from the file cache if available.

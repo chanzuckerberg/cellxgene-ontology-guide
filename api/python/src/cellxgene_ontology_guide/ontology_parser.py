@@ -20,14 +20,15 @@ class OntologyParser:
         version. If not cached, it will make a network call to GitHub Release Assets to load in memory and
         parse the corresponding ontology metadata.
 
-        :param schema_version: str version of the schema to load ontology metadata for. If not provided, the latest is loaded.
+        :param schema_version: str version of the schema to load ontology metadata for. If not provided, the latest
+        is loaded.
         """
         self.cxg_schema = CXGSchema(version=schema_version) if schema_version else CXGSchema()
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
-        Parse the ontology name from a given term ID. If the term ID does not conform to the expected term format or is not
-        from an ontology supported by cellxgene-ontology-guide, raise a ValueError.
+        Parse the ontology name from a given term ID. If the term ID does not conform to the expected term format or
+        is not from an ontology supported by cellxgene-ontology-guide, raise a ValueError.
 
         :param term_id: str ontology term to parse
         :return: str name of ontology that term belongs to
@@ -65,13 +66,13 @@ class OntologyParser:
     def get_term_ancestors(self, term_id: str, include_self: bool = False) -> List[str]:
         """
         Get the ancestor ontology terms for a given term. If include_self is True, the term itself will be included as
-        an ancestor.
+        an ancestor. Raises ValueError if the term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_ancestors("CL:0000005")
-        ["CL:0000000", ...]
+        >>> ontology_parser.get_term_ancestors("CL:0000005") # doctest: +SKIP
+        ['CL:0000000', 'CL:0000057', ...
 
         :param term_id: str ontology term to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -86,20 +87,21 @@ class OntologyParser:
     def map_term_ancestors(self, term_ids: Iterable[str], include_self: bool = False) -> Dict[str, List[str]]:
         """
         Get the ancestor ontology terms for each term in a list. If include_self is True, the term itself will be
-        included as an ancestor.
+        included as an ancestor. Raises ValueError if the term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_list_ancestors(["CL:0000003", "CL:0000005"], include_self=True)
+        >>> ontology_parser.map_term_ancestors(["CL:0000003", "CL:0000005"], include_self=True) # doctest: +SKIP
         {
-            "CL:0000003": ["CL:0000003"],
-            "CL:0000005": ["CL:0000005", "CL:0000000", ...]
+            'CL:0000003': ['CL:0000003'],
+            'CL:0000005': ['CL:0000005', 'CL:0000000', ...]
         }
 
         :param term_ids: list of str ontology terms to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
-        :return: Dictionary mapping str term IDs to their respective flattened List[str] of ancestor terms. Maps to empty
+        :return: Dictionary mapping str term IDs to their respective flattened List[str] of ancestor terms. Maps to
+        empty
         list if there are no ancestors.
         """
         return {term_id: self.get_term_ancestors(term_id, include_self) for term_id in term_ids}
@@ -107,13 +109,14 @@ class OntologyParser:
     def get_term_ancestors_with_distances(self, term_id: str, include_self: bool = False) -> Dict[str, int]:
         """
         Get the ancestor ontology terms for a given term, and their distance from the term_id. If include_self is True,
-        the term itself will be included as an ancestor.
+        the term itself will be included as an ancestor. Raises ValueError if the term ID is not valid member of a
+        supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005")
-        {"CL:0000000": 1, ...}
+        >>> ontology_parser.get_term_ancestors_with_distances("CL:0000005") # doctest: +SKIP
+        {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3}
 
         :param term_id: str ontology term to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -132,16 +135,15 @@ class OntologyParser:
     ) -> Dict[str, Dict[str, int]]:
         """
         Get the ancestor ontology terms for each term in a list, and their distance from the term_id. If include_self is
-        True, the term itself will be included as an ancestor.
+        True, the term itself will be included as an ancestor. Raises ValueError if the term ID is not valid member of a
+        supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_list_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
-        {
-            "CL:0000003": {"CL:0000003": 0, ...},
-            "CL:0000005": {"CL:0000005": 0, "CL:0000000": 1, ...}
-        }
+        >>> ontology_parser.map_term_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
+        {'CL:0000003': {'CL:0000003': 0}, 'CL:0000005': {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3,
+        'CL:0000005': 0}}
 
         :param term_ids: list of str ontology terms to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -150,10 +152,32 @@ class OntologyParser:
         """
         return {term_id: self.get_term_ancestors_with_distances(term_id, include_self) for term_id in term_ids}
 
+    def get_term_parents(self, term_id: str) -> List[str]:
+        """
+        Get the direct parent ontology terms for a given term. Raises ValueError if the term ID is not valid member of
+        a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_parents("CL:0000101")
+        ['CL:0000526']
+
+        :param term_id: str ontology term to find parents for
+        :return: List[str] of parent terms
+        """
+        if term_id in VALID_NON_ONTOLOGY_TERMS:
+            return []
+        ontology_name = self._parse_ontology_name(term_id)
+        ancestors: Dict[str, int] = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"]
+        parents: List[str] = [ancestor for ancestor, distance in ancestors.items() if distance == 1]
+        return parents
+
     def get_distance_between_terms(self, term_id_1: str, term_id_2: str) -> int:
         """
         Get the distance between two ontology terms. The distance is defined as the number of edges between the
         two terms. Terms must be from the same ontology. Returns -1 if terms are disjoint.
+        Raises ValueError if term IDs are not valid members of a supported ontology.
 
         :param term_id_1: str ontology term to find distance for
         :param term_id_2: str ontology term to find distance for
@@ -171,6 +195,7 @@ class OntologyParser:
         """
         Get the lowest common ancestors between two ontology terms that is from the given ontology.
         Terms must be from the same ontology. Ontologies are DAGs, so there may be multiple lowest common ancestors.
+        Raises ValueError if term IDs are not valid members of a supported ontology.
 
         :param term_id_1: str ontology term to find LCA for
         :param term_id_2: str ontology term to find LCA for
@@ -197,13 +222,14 @@ class OntologyParser:
     def get_high_level_terms(self, term_id: str, high_level_terms: List[str]) -> List[str]:
         """
         Get the high-level ontology terms for a given term. High-level terms are defined as the ancestors of the term
-        that are part of the high-level ontology terms supported by cellxgene-ontology-guide.
+        that are part of the high-level ontology terms supported by cellxgene-ontology-guide. Raises ValueError if
+        term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_high_level_terms("CL:0000005")
-        ["CL:0000000", ...]
+        >>> ontology_parser.get_high_level_terms("CL:0000005", ["CL:0000000", "CL:0000001"])
+        ['CL:0000000']
 
         :param term_id: str ontology term to find high-level terms for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -222,7 +248,7 @@ class OntologyParser:
         {"CL:0000003": ["CL:0000000", ...], "CL:0000005": ["CL:0000000", ...]}
 
         Where each term_id is mapped to a List[str] of high-level terms that it is a descendant of. Includes self
-        as a descendant.
+        as a descendant. Raises ValueError if term ID is not valid member of a supported ontology.
 
         :param term_ids: list of str ontology terms to map high level terms for
         :param high_level_terms: list of str ontology terms to be mapped to descendant term_ids
@@ -234,13 +260,14 @@ class OntologyParser:
     def get_highest_level_term(self, term_id: str, high_level_terms: List[str]) -> Union[str, None]:
         """
         Get the highest level ontology term for a given term. The highest level term is defined as the ancestor of the
-        term that is part of the high-level ontology terms supported by cellxgene-ontology-guide.
+        term that is part of the high-level ontology terms supported by cellxgene-ontology-guide. Raises ValueError
+        if term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_highest_level_term("CL:0000005")
-        "CL:0000000"
+        >>> ontology_parser.get_highest_level_term("CL:0000005", ["CL:0000000", "CL:0000001"])
+        'CL:0000000'
 
         :param term_id: str ontology term to find highest level term for
         :param high_level_terms: list of str ontology terms to check for ancestry to term_id
@@ -262,7 +289,7 @@ class OntologyParser:
 
         Where each term_id is mapped to the highest level term that it is a descendant of, from the list provided.
         Includes term itself as a descendant. Maps to None if term_id does not map to any high level terms among the
-        provided input.
+        provided input. Raises ValueError if term ID is not valid member of a supported ontology.
 
         :param term_ids: list of str ontology terms to map high level terms for
         :param high_level_terms: list of str ontology terms that can be mapped to descendant term_ids
@@ -274,13 +301,13 @@ class OntologyParser:
     def get_term_descendants(self, term_id: str, include_self: bool = False) -> List[str]:
         """
         Get the descendant ontology terms for a given term. If include_self is True, the term itself will be included as
-        a descendant.
+        a descendant. Raises ValueError if term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_term_descendant("CL:0000005")
-        ["CL:0000005", "CL:0002363", ...]
+        >>> ontology_parser.get_term_descendants("CL:0000005") # doctest: +SKIP
+        ['CL:0002363']
 
         :param term_id: str ontology term to find descendants for
         :param include_self: boolean flag to include the term itself as a descendant
@@ -299,15 +326,15 @@ class OntologyParser:
     def map_term_descendants(self, term_ids: Iterable[str], include_self: bool = False) -> Dict[str, List[str]]:
         """
         Get the descendant ontology terms for each term in a list. If include_self is True, the term itself will be
-         included as a descendant.
+         included as a descendant. Raises ValueError if term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_terms_descendants(["CL:0000003", "CL:0000005"], include_self=True)
-         {
-            "CL:0000003": ["CL:0000003", "CL:0000004", ...],
-            "CL:0000005": ["CL:0000005", "CL:0002363", ...]
+        >>> ontology_parser.map_term_descendants(["CL:0000003", "CL:0000005"], include_self=True) # doctest: +SKIP
+        {
+            'CL:0000003': ['CL:0000003', ...],
+            'CL:0000005': ['CL:0000005', 'CL:0002363', ...]
         }
 
         :param term_ids: list of str ontology terms to find descendants for
@@ -334,53 +361,75 @@ class OntologyParser:
 
         return descendants_dict
 
+    def get_term_children(self, term_id: str) -> List[str]:
+        """
+        Get the direct children ontology terms for a given term. Raises ValueError if term ID is not valid member of a
+        supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_children("CL:0000526")
+        ['CL:0000101']
+
+        :param term_id: str ontology term to find children for
+        :return: List[str] of children terms
+        """
+        if term_id in VALID_NON_ONTOLOGY_TERMS:
+            return []
+        ontology_name = self._parse_ontology_name(term_id)
+        children = []
+        for candidate_child, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
+            for ancestor, distance in candidate_metadata["ancestors"].items():
+                if ancestor == term_id and distance == 1:
+                    children.append(candidate_child)
+        return children
+
     def get_term_graph(self, term_id: str) -> OntologyNode:
         """
         Get the DAG of OntologyNode relationships, with the input term as the root node. Only includes terms from the
-        same ontology as the root term ID.
+        same ontology as the root term ID. Raises ValueError if term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> root_node = ontology_parser.get_term_graph("CL:0000000")
         >>> root_node.term_id
-        "CL:0000000"
-        >>> root_node.to_dict()
+        'CL:0000000'
+        >>> root_node.to_dict() # doctest: +SKIP
         {
-            "CL:0000000": [
-                {"CL:0000001": [
-                    {"CL:0000004": [...]},
-                    {"CL:0000005": [...]},
-                    {"CL:0000006": [...]},
-                    {"CL:0000007": [...]},
-                    ...
-                ]},
-                {"CL:0000002": [
-                    {"CL:0000004": [...]},
-                    {"CL:0000005": [...]},
-                    ...
-                ]},
-                {"CL:0000003": []},
+            "term_id": "CL:0000000",
+            "name": "cell A",
+            "children": [
+                {
+                    "term_id": "CL:0000001",
+                    "name": "cell B",
+                    "children": [...],
+                },
+                {
+                    "term_id": "CL:0000002",
+                    "name": "cell C",
+                    "children": [...],
+                },
                 ...
             ]
         }
-        >>> root_node.term_counter
-        {"CL:0000000": 1, "CL:0000001": 1, "CL:0000004": 2, ...}
+        >>> root_node.term_counter # doctest: +SKIP
+        Counter({'CL:0002058': 48, 'CL:0002471': 48, ...
 
         :param term_id: str ontology term to build subtree for
         :return: OntologyNode representation of graph with term_id as root.
         """
-        ontology_name = self._parse_ontology_name(term_id)
-        root = OntologyNode(term_id)
-        for candidate_descendant, candidate_metadata in self.cxg_schema.ontology(ontology_name).items():
-            for ancestor, distance in candidate_metadata["ancestors"].items():
-                if ancestor == term_id and distance == 1:
-                    root.add_child(self.get_term_graph(candidate_descendant))
+        term_label = self.get_term_label(term_id)
+        root = OntologyNode(term_id, term_label)
+        for child_term_id in self.get_term_children(term_id):
+            root.add_child(self.get_term_graph(child_term_id))
         return root
 
     def is_term_deprecated(self, term_id: str) -> bool:
         """
-        Check if an ontology term is deprecated.
+        Check if an ontology term is deprecated. Raises ValueError if term ID is not valid member of a supported
+        ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
@@ -400,12 +449,13 @@ class OntologyParser:
     def get_term_replacement(self, term_id: str) -> Union[str, None]:
         """
         Fetch the replacement term for a deprecated ontology term, if a replacement exists. Return None otherwise.
+        Raises ValueError if term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_replacement("CL:0000003")
-        "CL:0000000"
+        'CL:0000000'
 
         :param term_id: str ontology term to check a replacement term for
         :return: replacement str term ID if it exists, None otherwise
@@ -426,7 +476,8 @@ class OntologyParser:
         Term Tracker maps to a str url where there is discussion around this term's curation (or deprecation).
         Consider maps to List[str] of alternate ontology terms to consider using instead of this term
 
-        All keys map to None if no metadata of that type is present.
+        All keys map to None if no metadata of that type is present. Raises ValueError if term ID is not valid member
+        of a supported ontology.
 
         :param term_id: str ontology term to fetch metadata for
         :return: Dict with keys 'Comments', 'Term Tracker', and 'Consider' containing associated metadata.
@@ -441,13 +492,14 @@ class OntologyParser:
 
     def get_term_label(self, term_id: str) -> str:
         """
-        Fetch the human-readable label for a given ontology term.
+        Fetch the human-readable label for a given ontology term. Raises ValueError if term ID is not valid member of a
+        supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_label("CL:0000005")
-        "fibroblast neural crest derived"
+        'fibroblast neural crest derived'
 
         :param term_id: str ontology term to fetch label for
         :return: str human-readable label for the term
@@ -460,15 +512,52 @@ class OntologyParser:
 
     def map_term_labels(self, term_ids: Iterable[str]) -> Dict[str, str]:
         """
-        Fetch the human-readable label for a given list of ontology terms.
+        Fetch the human-readable label for a given list of ontology terms. Raises ValueError if term ID is not valid
+        member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.map_term_label(["CL:0000005", "CL:0000003"])
-        {"CL:0000005": "fibroblast neural crest derived", "CL:0000003": "fibroblast"}
+        >>> ontology_parser.map_term_labels(["CL:0000005", "CL:0000003"])
+        {'CL:0000005': 'fibroblast neural crest derived', 'CL:0000003': 'obsolete native cell'}
 
         :param term_ids: list of str ontology terms to fetch label for
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels
         """
         return {term_id: self.get_term_label(term_id) for term_id in term_ids}
+
+    def get_term_description(self, term_id: str) -> Optional[str]:
+        """
+        Fetch the description for a given ontology term. Raises ValueError if term ID is not valid member of a
+        supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_description("CL:0000005")
+        'Any fibroblast that is deriived from the neural crest.'
+
+        :param term_id: str ontology term to fetch description for
+        :return: str description for the term
+        """
+        if term_id in VALID_NON_ONTOLOGY_TERMS:
+            return term_id
+        ontology_name = self._parse_ontology_name(term_id)
+        description: Optional[str] = self.cxg_schema.ontology(ontology_name)[term_id].get("description", None)
+        return description
+
+    def map_term_descriptions(self, term_ids: List[str]) -> Dict[str, Optional[str]]:
+        """
+        Fetch the descriptions for a given list of ontology terms. Raises ValueError if term ID is not valid member of
+        a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000006"])
+        {'CL:0000005': 'Any fibroblast that is deriived from the neural crest.', 'CL:0000006': None}
+
+        :param term_ids: list of str ontology terms to fetch descriptions for
+        :return: Dict[str, str] mapping term IDs to their respective descriptions
+        """
+        return {term_id: self.get_term_description(term_id) for term_id in term_ids}

@@ -5,7 +5,7 @@ export COVERAGE_RUN_ARGS:=--data-file=$(REPO_ROOT)/$(COVERAGE_DATA_FILE) --branc
 
 
 coverage/run:
-	coverage run $(COVERAGE_RUN_ARGS) -m pytest ./tests;
+	coverage run $(COVERAGE_RUN_ARGS) -m pytest;
 
 coverage/combine:
 	coverage combine --data-file=$(COVERAGE_DATA_FILE)
