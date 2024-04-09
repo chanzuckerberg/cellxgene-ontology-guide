@@ -222,8 +222,9 @@ class OntologyParser:
     def get_high_level_terms(self, term_id: str, high_level_terms: List[str]) -> List[str]:
         """
         Get the high-level ontology terms for a given term. High-level terms are defined as the ancestors of the term
-        that are part of the high-level ontology terms supported by cellxgene-ontology-guide. Raises ValueError if
-        term ID is not valid member of a supported ontology.
+        that are part of the high-level ontology terms supported by cellxgene-ontology-guide. If more than 1 
+        high_level_term is matched, the returned list of matches preserves the order of the input high_level_terms list. 
+        Raises ValueError if term ID is not valid member of a supported ontology.
 
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
@@ -238,7 +239,7 @@ class OntologyParser:
         if term_id in VALID_NON_ONTOLOGY_TERMS:
             return []
         ancestors = self.get_term_ancestors(term_id, include_self=True)
-        return [high_level_term for high_level_term in ancestors if high_level_term in high_level_terms]
+        return [high_level_term for high_level_term in high_level_terms if high_level_term in ancestors]
 
     def map_high_level_terms(self, term_ids: List[str], high_level_terms: List[str]) -> Dict[str, List[str]]:
         """
