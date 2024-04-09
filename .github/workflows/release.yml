@@ -29,67 +29,66 @@ jobs:
     outputs:
       ontology_assets_upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
       paths_released: ${{ steps.release.outputs.paths_released }}
+#  add-release-artifacts:
+#    runs-on: [ubuntu-latest]
+#    needs: release-please
+#    if: contains(needs.release-please.outputs.paths_released, 'ontology-assets')
+#    strategy:
+#      matrix:
+#        include:
+#          - file_name: "ontology_info.json"
+#            content_type: "application/json"
+#          - file_name: "cell_class_list.json"
+#            content_type: "application/json"
+#          - file_name: "cell_subclass_list.json"
+#            content_type: "application/json"
+#          - file_name: "organ_list.json"
+#            content_type: "application/json"
+#          - file_name: "tissue_general_list.json"
+#            content_type: "application/json"
+#          - file_name: "system_list.json"
+#            content_type: "application/json"
+#          - file_name: "uberon_development_stage_list.json"
+#            content_type: "application/json"
+#    steps:
+#      - name: Checkout main branch
+#        uses: actions/checkout@v4
+#        with:
+#          ref: tsmith/release-docs
+#          fetch-depth: 1
+#      - name: Upload release asset
+#        uses: actions/upload-release-asset@v1
+#        with:
+#          upload_url: ${{ needs.release-please.outputs.ontology_assets_upload_url }}
+#          asset_path: "ontology-assets/${{ matrix.file_name }}"
+#          asset_name: ${{ matrix.file_name }}
+#          asset_content_type: ${{ matrix.content_type }}
+#        env:
+#          GITHUB_TOKEN: ${{ github.token }}
 
-  add-release-artifacts:
-    runs-on: [ubuntu-latest]
-    needs: release-please
-    if: contains(needs.release-please.outputs.paths_released, 'ontology-assets')
-    strategy:
-      matrix:
-        include:
-          - file_name: "ontology_info.json"
-            content_type: "application/json"
-          - file_name: "cell_class_list.json"
-            content_type: "application/json"
-          - file_name: "cell_subclass_list.json"
-            content_type: "application/json"
-          - file_name: "organ_list.json"
-            content_type: "application/json"
-          - file_name: "tissue_general_list.json"
-            content_type: "application/json"
-          - file_name: "system_list.json"
-            content_type: "application/json"
-          - file_name: "uberon_development_stage_list.json"
-            content_type: "application/json"
-    steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
-        with:
-          ref: tsmith/release-docs
-          fetch-depth: 1
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        with:
-          upload_url: ${{ needs.release-please.outputs.ontology_assets_upload_url }}
-          asset_path: "ontology-assets/${{ matrix.file_name }}"
-          asset_name: ${{ matrix.file_name }}
-          asset_content_type: ${{ matrix.content_type }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
-
-  publish-pypi-package:
-    runs-on: [ubuntu-latest]
-    needs: release-please
-    environment:
-      name: pypi
-      url: https://pypi.org/p/cellxgene-ontology-guide
-    permissions:
-      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
-    if: contains(needs.release-please.outputs.paths_released, 'api/python')
-    steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v4
-        with:
-          ref: tsmith/release-docs"
-          fetch-depth: 0
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
-        with:
-          python-version: 3.11
-      - name: build
-        run: |
-          make build -C api/python
-      - name: Publish distribution 📦 to PyPI
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          packages-dir: api/python/dist
+#  publish-pypi-package:
+#    runs-on: [ubuntu-latest]
+#    needs: release-please
+#    environment:
+#      name: pypi
+#      url: https://pypi.org/p/cellxgene-ontology-guide
+#    permissions:
+#      id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
+#    if: contains(needs.release-please.outputs.paths_released, 'api/python')
+#    steps:
+#      - name: Checkout main branch
+#        uses: actions/checkout@v4
+#        with:
+#          ref: tsmith/release-docs"
+#          fetch-depth: 0
+#      - name: Set up Python 3.11
+#        uses: actions/setup-python@v5
+#        with:
+#          python-version: 3.11
+#      - name: build
+#        run: |
+#          make build -C api/python
+#      - name: Publish distribution 📦 to PyPI
+#        uses: pypa/gh-action-pypi-publish@release/v1
+#        with:
+#          packages-dir: api/python/dist

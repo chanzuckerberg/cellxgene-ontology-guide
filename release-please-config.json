@@ -27,12 +27,12 @@
     },
     "ontology-assets": {
       "package-name": "ontology-assets",
-      "component": "assets",
+      "component": "ontology-assets",
       "extra-files": [
         {
-          "type": "toml",
-          "path": "api/python/pyproject.toml",
-          "jsonpath": "$.project.ontology-assets-version"
+          "type": "json",
+          "path": "../api/python/ontology-assets-version.json",
+          "jsonpath": "$.version"
         }
       ]
     }
