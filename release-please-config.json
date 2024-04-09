@@ -28,11 +28,14 @@
     "ontology-assets": {
       "package-name": "ontology-assets",
       "component": "ontology-assets",
-      "extra-files": [
+      "plugins": [
         {
-          "type": "json",
-          "path": "../api/python/ontology-assets-version.json",
-          "jsonpath": "$.version"
+          "type": "linked-versions",
+          "groupName": "my group",
+          "components": [
+            "python-api",
+            "ontology-assets"
+          ]
         }
       ]
     }
