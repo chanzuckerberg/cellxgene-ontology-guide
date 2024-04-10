@@ -46,16 +46,6 @@
         "source": "https://github.com/pato-ontology/pato/raw",
         "filename": "pato.owl"
       }
-    },
-    "deprecated_on": "2024-04-10"
-  },
-  "v5.1.0": {
-    "ontologies": {
-      "CL": {
-        "version": "v2024-01-04",
-        "source": "https://github.com/obophenotype/cell-ontology/releases/download",
-        "filename": "cl.owl"
-      }
     }
   }
 }
