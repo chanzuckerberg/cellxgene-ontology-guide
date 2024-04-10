@@ -33,6 +33,12 @@ jobs:
         run: |
           cd tools/ontology-builder
           pip install -r requirements.txt
+      - name: Modified ontology info
+        uses: tj-actions/changed-files@v44
+        id: modified-ontology-info
+        with:
+          files: |
+            - **ontology-info.json
       - name: setup git
         run: |
           git config user.name github-actions
@@ -42,14 +48,8 @@ jobs:
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
-      - name: update API if ontology-info.json was upated
-        id: check
-        run: |
-          echo "Checking for changes in ontology-info.json"
-          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "ontology-assets/ontology_info.json"
-          echo "::set-output name=changed::${?}"
       - name: update API
-        if: steps.check.outputs.changed == 0
+        if: steps.modified-ontology-info.outputs.any_changed == true
         run: |
           cat ${{ github.ref }} >> ./api/python/ontology-assets-version.txt
           git add ./api/python/ontology-assets-version.txt
