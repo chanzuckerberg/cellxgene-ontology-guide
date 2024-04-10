@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.6.0...python-api-v0.6.1) (2024-04-10)
+
+
+### BugFixes
+
+* Preserve order of high_level_terms when matching against an input curated list of terms ([#189](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/189)) ([8dca5f3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/8dca5f332f217360a1ef6422b392fcfbb45a1c8a))
+
 ## [0.6.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.5.0...python-api-v0.6.0) (2024-04-09)
 
 
