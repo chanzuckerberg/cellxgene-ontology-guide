@@ -234,12 +234,19 @@ def test_map_term_description(ontology_parser):
     }
 
 
-def test_get_high_level_terms(ontology_parser):
-    high_level_terms = ["CL:0000000", "CL:0000001"]
-    assert ontology_parser.get_high_level_terms("CL:0000004", high_level_terms) == ["CL:0000000", "CL:0000001"]
-    assert ontology_parser.get_high_level_terms("CL:0000008", high_level_terms) == []
-    assert ontology_parser.get_high_level_terms("CL:0000000", high_level_terms) == ["CL:0000000"]
-    assert ontology_parser.get_high_level_terms("na", high_level_terms) == []
+@pytest.mark.parametrize(
+    "term_id,high_level_terms,expected",
+    [
+        ("CL:0000004", ["CL:0000000", "CL:0000001"], ["CL:0000000", "CL:0000001"]),
+        ("CL:0000004", ["CL:0000001", "CL:0000000"], ["CL:0000001", "CL:0000000"]),  # preserve high level term order
+        ("CL:0000008", ["CL:0000000", "CL:0000001"], []),
+        ("CL:0000000", ["CL:0000000", "CL:0000001"], ["CL:0000000"]),
+        ("CL:0000001", ["CL:0000000", "CL:0000001"], ["CL:0000000", "CL:0000001"]),
+        ("na", ["CL:0000000", "CL:0000001"], []),
+    ],
+)
+def test_get_high_level_terms(ontology_parser, term_id, high_level_terms, expected):
+    assert ontology_parser.get_high_level_terms(term_id, high_level_terms) == expected
 
 
 def test_map_high_level_terms(ontology_parser):
