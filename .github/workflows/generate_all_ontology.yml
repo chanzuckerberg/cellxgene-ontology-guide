@@ -44,7 +44,7 @@ jobs:
           git add ./ontology-assets/ontology_info.json
       - name: update API
         run: |
-          cat ${{ github.ref }} >> ./api/python/ontology-assets-version.txt
+          echo "${{ github.event.pull_request.head.ref }}" > ./api/python/ontology-assets-version.txt
           git add ./api/python/ontology-assets-version.txt
       - name: Commit
         run: |
