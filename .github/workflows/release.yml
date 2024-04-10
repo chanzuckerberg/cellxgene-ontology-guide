@@ -2,9 +2,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
-    branches:
-      - "*"
 
 permissions:
   contents: write
@@ -25,7 +22,7 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: "tsmith/release-docs"
+          target-branch: ${{ github.ref }}
     outputs:
       ontology_assets_upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
       paths_released: ${{ steps.release.outputs.paths_released }}
@@ -52,10 +49,10 @@ jobs:
           - file_name: "uberon_development_stage_list.json"
             content_type: "application/json"
     steps:
-      - name: Checkout main branch
+      - name: Checkout ref branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref }}
           fetch-depth: 1
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
@@ -77,10 +74,10 @@ jobs:
       id-token: write # IMPORTANT: this permission is mandatory for trusted publishing
     if: contains(needs.release-please.outputs.paths_released, 'api/python')
     steps:
-      - name: Checkout main branch
+      - name: Checkout ref branch
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.ref }}
           fetch-depth: 0
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
