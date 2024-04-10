@@ -40,9 +40,36 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
+          cat ${{ github.ref }} >> ./api/python/ontology-assets-version.txt
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
+      - name: update API if ontology-info.json was upated
+        id: check
+        run: |
+          echo "Checking for changes in ontology-info.json"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "ontology-assets/ontology_info.json"
+          echo "::set-output name=changed::${?}"
+      - name: update API
+        if: steps.check.outputs.changed == 0
+        run: |
+          cat ${{ github.ref }} >> ./api/python/ontology-assets-version.txt
+          git add ./api/python/ontology-assets-version.txt
       - name: Commit
         run: |
           git commit -m "AUTO: update ontologies"
           git push
+
+  update-api:
+    runs-on: ubuntu-latest
+    needs: ontology-processing
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: check if ontology-info.json was updated
+        id: check
+        run: |
+          echo "Checking for changes in ontology-info.json"
+          git diff --name-only ${{ github.event.before }} ${{ github.sha }} | grep "ontology-assets/ontology_info.json"
+          echo "::set-output name=changed::${?}"

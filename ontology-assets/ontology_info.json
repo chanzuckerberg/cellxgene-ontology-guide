@@ -47,5 +47,14 @@
         "filename": "pato.owl"
       }
     }
+  },
+  "v4.0.0": {
+    "ontologies": {
+      "CL": {
+        "version": "v2024-01-04",
+        "source": "https://github.com/obophenotype/cell-ontology/releases/download",
+        "filename": "cl.owl"
+      }
+    }
   }
 }
