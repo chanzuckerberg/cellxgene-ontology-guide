@@ -33,12 +33,6 @@ jobs:
         run: |
           cd tools/ontology-builder
           pip install -r requirements.txt
-      - name: Modified ontology info
-        uses: tj-actions/changed-files@v44
-        id: modified-ontology-info
-        with:
-          files: |
-            **ontology_info.json
       - name: setup git
         run: |
           git config user.name github-actions
@@ -49,7 +43,6 @@ jobs:
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
       - name: update API
-        if: steps.modified-ontology-info.outputs.any_changed == 'true'
         run: |
           cat ${{ github.ref }} >> ./api/python/ontology-assets-version.txt
           git add ./api/python/ontology-assets-version.txt
