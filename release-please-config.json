@@ -22,14 +22,10 @@
   ],
   "packages": {
     "api/python": {
-      "package-name": "python-api",
-      "component": "python-api"
+      "package-name": "python-api"
     },
     "ontology-assets": {
-      "package-name": "ontology-assets",
-      "component": "ontology-assets"
+      "package-name": "ontology-assets"
     }
   }
 }
-
-

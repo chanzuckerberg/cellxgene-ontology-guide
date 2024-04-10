@@ -72,9 +72,6 @@ To release a new version of the ontology assets, merge a pull request to main. R
 
 The GHA workflow [tag-latest-ontology-assets.yml](.github/workflows/tag-latest-ontology-assets.yml) will automatically update the `latest` tag when the appropriate.
 
-- move scripts out of CLI
--
-
 ## Updating to a new Cellxgene Schema Version
 
 1. Update the [ontology_info.json](./ontology-assets/ontology_info.json) file with the new schema version
