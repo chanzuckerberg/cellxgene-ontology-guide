@@ -40,7 +40,6 @@ jobs:
       - name: ontology-processing
         run: |
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
-          cat ${{ github.ref }} >> ./api/python/ontology-assets-version.txt
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
       - name: update API if ontology-info.json was upated
