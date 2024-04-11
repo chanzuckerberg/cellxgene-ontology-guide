@@ -12,12 +12,8 @@ from urllib.error import HTTPError, URLError
 
 import env
 import owlready2
-import semantic_version
+from cellxgene_ontology_guide.supported_versions import get_latest_schema_version
 from validate_json_schemas import register_schemas, verify_json
-
-
-def _get_latest_version(versions: List[str]) -> str:
-    return "v" + str(sorted([semantic_version.Version.coerce(version[1:]) for version in versions])[-1])
 
 
 def get_ontology_info_file(ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> Any:
@@ -345,7 +341,7 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     ontology_info = get_ontology_info_file()
-    current_version = _get_latest_version(ontology_info.keys())
+    current_version = get_latest_schema_version(ontology_info.keys())
     latest_ontology_version = ontology_info[current_version]
     latest_ontologies = latest_ontology_version["ontologies"]
     _download_ontologies(latest_ontologies)

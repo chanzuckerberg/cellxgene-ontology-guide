@@ -28,13 +28,20 @@ def get_latest_schema_version(versions: List[str]) -> str:
     """Given a list of schema versions, return the latest version.
 
     :param versions: List[str] list of schema versions. Versions can be in the format "v5.0.0" or "5.0.0"
-    :return: str latest version with a "v" prefix
+    :return: str latest version without the leading "v"
     """
 
-    def _coerce(v: str) -> Version:
-        return Version.coerce(v[1:]) if v[0] == "v" else Version.coerce(v)
+    return str(sorted([coerce_version(version) for version in versions])[-1])
 
-    return "v" + str(sorted([_coerce(version) for version in versions])[-1])
+
+def coerce_version(version: str) -> Version:
+    """Coerce a version string into a semantic_version.Version object.
+
+    :param version: str version string to coerce
+    :return: Version coerced version object
+    """
+    v = version[1:] if version[0] == "v" else version
+    return Version.coerce(v)
 
 
 def load_supported_versions() -> Any:
@@ -60,18 +67,20 @@ class CXGSchema:
         """
         ontology_info = load_supported_versions()
         if version is None:
-            version = get_latest_schema_version(ontology_info.keys())
-        elif version not in ontology_info:
-            raise ValueError(f"Schema version {version} is not supported in this package version.")
+            _version = get_latest_schema_version(ontology_info.keys())
+        else:
+            _version = str(coerce_version(version))
+            if str(_version) not in ontology_info:
+                raise ValueError(f"Schema version {_version} is not supported in this package version.")
 
-        self.version = version
-        self.supported_ontologies = ontology_info[version]["ontologies"]
+        self.version = _version
+        self.supported_ontologies = ontology_info[_version]["ontologies"]
         self.ontology_file_names: Dict[str, str] = {}
-        self.deprecated_on = ontology_info[version].get("deprecated_on")
+        self.deprecated_on = ontology_info[_version].get("deprecated_on")
         if self.deprecated_on:
             parsed_date = datetime.strptime(self.deprecated_on, "%Y-%m-%d")
             warnings.warn(
-                f"Schema version {version} is deprecated as of {parsed_date}. It will be removed in a future version.",
+                f"Schema version {_version} is deprecated as of {parsed_date}. It will be removed in a future version.",
                 DeprecationWarning,
                 stacklevel=1,
             )

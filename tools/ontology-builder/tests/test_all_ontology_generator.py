@@ -7,7 +7,6 @@ from unittest.mock import MagicMock, patch
 import pytest
 from all_ontology_generator import (
     _download_ontologies,
-    _get_latest_version,
     _parse_ontologies,
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
@@ -44,14 +43,6 @@ def mock_raw_ontology_dir(tmpdir):
     onto_owl_file = tmpdir.join(sub_dir_name, "ontology_name.owl")
     onto_owl_file.write("")
     return str(sub_dir)
-
-
-def test_get_latest_version():
-    # Call the function
-    latest_version = _get_latest_version(versions=["v1", "v2.0", "v3.0.0", "v3.0.1", "v3.1.0"])
-
-    # Assertion
-    assert latest_version == "v3.1.0"
 
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):

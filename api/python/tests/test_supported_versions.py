@@ -17,7 +17,7 @@ MODULE_PATH = "cellxgene_ontology_guide.supported_versions"
 @pytest.fixture
 def initialized_CXGSchemaInfo(mock_load_supported_versions):
     mock_load_supported_versions.return_value = {
-        "v5.0.0": {
+        "5.0.0": {
             "ontologies": {"CL": {"version": "v2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
         }
     }
@@ -26,7 +26,7 @@ def initialized_CXGSchemaInfo(mock_load_supported_versions):
 
 @pytest.mark.parametrize("versions, expected", [(["v5.0.0", "v0.0.1"], "v5.0.0"), (["5.0.0", "0.0.1"], "v5.0.0")])
 def test__get_latest_schema_version__OK(versions, expected):
-    assert get_latest_schema_version(versions) == "v5.0.0"
+    assert get_latest_schema_version(versions) == "5.0.0"
 
 
 @pytest.fixture
@@ -71,36 +71,42 @@ def test__load_supported_versions__OK(tmpdir):
         assert load_supported_versions() == file_contents
 
 
+@pytest.mark.parametrize("version, expected", [("v5.0.0", "5.0.0"), ("5.0.0", "5.0.0")])
+def test_coerce_version(version, expected):
+    assert get_latest_schema_version([version]) == expected
+
+
 class TestCXGSchema:
     def test__init__defaults(self, mock_load_supported_versions):
-        support_versions = {"v5.0.0": {"ontologies": {}}, "v0.0.1": {"ontologies": {}}}
+        support_versions = {"5.0.0": {"ontologies": {}}, "0.0.1": {"ontologies": {}}}
         mock_load_supported_versions.return_value = support_versions
         cxgs = CXGSchema()
-        assert cxgs.version == "v5.0.0"
-        assert cxgs.supported_ontologies == support_versions["v5.0.0"]["ontologies"]
+        assert cxgs.version == "5.0.0"
+        assert cxgs.supported_ontologies == support_versions["5.0.0"]["ontologies"]
 
-    def test__init__specific_version(self, mock_load_supported_versions):
-        support_versions = {"v5.0.0": {"ontologies": {}}, "v0.0.1": {"ontologies": {}}}
+    @pytest.mark.parametrize("version", ["v0.0.1", "0.0.1"])
+    def test__init__specific_version(self, version, mock_load_supported_versions):
+        support_versions = {"5.0.0": {"ontologies": {}}, "0.0.1": {"ontologies": {}}}
         mock_load_supported_versions.return_value = support_versions
-        cxgs = CXGSchema(version="v0.0.1")
-        assert cxgs.version == "v0.0.1"
-        assert cxgs.supported_ontologies == support_versions["v0.0.1"]["ontologies"]
+        cxgs = CXGSchema(version=version)
+        assert cxgs.version == "0.0.1"
+        assert cxgs.supported_ontologies == support_versions["0.0.1"]["ontologies"]
 
     def test__init__deprecated_version(self, mock_load_supported_versions):
-        support_versions = {"v5.0.0": {"ontologies": {}}, "v0.0.1": {"ontologies": {}, "deprecated_on": "2024-01-01"}}
+        support_versions = {"5.0.0": {"ontologies": {}}, "0.0.1": {"ontologies": {}, "deprecated_on": "2024-01-01"}}
         mock_load_supported_versions.return_value = support_versions
         # catch the deprecation warning
         with pytest.warns(DeprecationWarning) as record:
-            CXGSchema(version="v0.0.1")
+            CXGSchema(version="0.0.1")
         warning = record.pop()
         assert warning.message.args[0] == (
-            "Schema version v0.0.1 is deprecated as of 2024-01-01 00:00:00. It will be removed in a " "future version."
+            "Schema version 0.0.1 is deprecated as of 2024-01-01 00:00:00. It will be removed in a " "future version."
         )
 
     def test__init__unsupported_version(self, mock_load_supported_versions):
         mock_load_supported_versions.return_value = {}
         with pytest.raises(ValueError):
-            CXGSchema(version="v5.0.1")
+            CXGSchema(version="5.0.1")
 
     def test__ontology__unsupported_ontology_by_package(self, initialized_CXGSchemaInfo, mock_load_ontology_file):
         with pytest.raises(ValueError):
