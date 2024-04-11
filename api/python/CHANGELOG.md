@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.7.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.6.1...python-api-v0.7.0) (2024-04-11)
+
+
+### Features
+
+* remove v from ontology_info.json ([#196](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/196)) ([a1292a3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a1292a3c3a7d6c58e30b81c77418ce047d93df69))
+
+
+### Misc
+
+* deploy api when ontology_info.json changes ([#194](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/194)) ([40d58f6](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/40d58f6ca4cdb5236e1a3288e887d1d2516a7dbb))
+* update readmes ([#171](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/171)) ([d38ba65](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/d38ba65867730f14240f470713668a0a121e214d))
+
+
+### BugFixes
+
+* update notebooks ([96c7213](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/96c72137e0fefc4d0125e880d7c556c35aa96f47))
+
 ## [0.6.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.6.0...python-api-v0.6.1) (2024-04-10)
 
 
