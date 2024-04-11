@@ -28,7 +28,7 @@ def get_latest_schema_version(versions: List[str]) -> str:
     """Given a list of schema versions, return the latest version.
 
     :param versions: List[str] list of schema versions. Versions can be in the format "v5.0.0" or "5.0.0"
-    :return: str latest version with a "v" prefix
+    :return: str latest version without the leading "v"
     """
 
     return str(sorted([coerce_version(version) for version in versions])[-1])
