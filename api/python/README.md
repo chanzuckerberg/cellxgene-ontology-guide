@@ -46,3 +46,5 @@ The [release.yml](../../.github/workflows/release.yml) GHA should handle the rel
 make build
 make release/pypi
 ```
+
+The file [ontology-assets-version.json](./ontology-assets-version.json) will be automatically updated with a new version number whenever new ontology-assets are released. This will trigger a new release of the pypi package with the new ontology-assets.
