@@ -84,10 +84,11 @@ class TestCXGSchema:
         assert cxgs.version == "5.0.0"
         assert cxgs.supported_ontologies == support_versions["5.0.0"]["ontologies"]
 
-    def test__init__specific_version(self, mock_load_supported_versions):
+    @pytest.mark.parametrize("version", ["v0.0.1", "0.0.1"])
+    def test__init__specific_version(self, version, mock_load_supported_versions):
         support_versions = {"5.0.0": {"ontologies": {}}, "0.0.1": {"ontologies": {}}}
         mock_load_supported_versions.return_value = support_versions
-        cxgs = CXGSchema(version="0.0.1")
+        cxgs = CXGSchema(version=version)
         assert cxgs.version == "0.0.1"
         assert cxgs.supported_ontologies == support_versions["0.0.1"]["ontologies"]
 

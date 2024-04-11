@@ -67,20 +67,20 @@ class CXGSchema:
         """
         ontology_info = load_supported_versions()
         if version is None:
-            version = get_latest_schema_version(ontology_info.keys())
+            _version = get_latest_schema_version(ontology_info.keys())
         else:
-            version = str(coerce_version(version))
-            if str(version) not in ontology_info:
-                raise ValueError(f"Schema version {version} is not supported in this package version.")
+            _version = str(coerce_version(version))
+            if str(_version) not in ontology_info:
+                raise ValueError(f"Schema version {_version} is not supported in this package version.")
 
-        self.version = version
-        self.supported_ontologies = ontology_info[version]["ontologies"]
+        self.version = _version
+        self.supported_ontologies = ontology_info[_version]["ontologies"]
         self.ontology_file_names: Dict[str, str] = {}
-        self.deprecated_on = ontology_info[version].get("deprecated_on")
+        self.deprecated_on = ontology_info[_version].get("deprecated_on")
         if self.deprecated_on:
             parsed_date = datetime.strptime(self.deprecated_on, "%Y-%m-%d")
             warnings.warn(
-                f"Schema version {version} is deprecated as of {parsed_date}. It will be removed in a future version.",
+                f"Schema version {_version} is deprecated as of {parsed_date}. It will be removed in a future version.",
                 DeprecationWarning,
                 stacklevel=1,
             )
