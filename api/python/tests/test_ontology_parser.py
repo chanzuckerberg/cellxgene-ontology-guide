@@ -43,9 +43,7 @@ def ontology_dict():
 @pytest.fixture
 def mock_CXGSchema(ontology_dict, mock_load_supported_versions, mock_load_ontology_file):
     mock_load_supported_versions.return_value = {
-        "v5.0.0": {
-            "ontologies": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
-        }
+        "5.0.0": {"ontologies": {"CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}}
     }
     cxg_schema = CXGSchema()
     cxg_schema.ontology_file_names = {"CL": "CL-ontology-2024-01-01.json.gz"}

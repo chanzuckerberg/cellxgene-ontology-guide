@@ -31,10 +31,17 @@ def get_latest_schema_version(versions: List[str]) -> str:
     :return: str latest version with a "v" prefix
     """
 
-    def _coerce(v: str) -> Version:
-        return Version.coerce(v[1:]) if v[0] == "v" else Version.coerce(v)
+    return str(sorted([coerce_version(version) for version in versions])[-1])
 
-    return "v" + str(sorted([_coerce(version) for version in versions])[-1])
+
+def coerce_version(version: str) -> Version:
+    """Coerce a version string into a semantic_version.Version object.
+
+    :param version: str version string to coerce
+    :return: Version coerced version object
+    """
+    v = version[1:] if version[0] == "v" else version
+    return Version.coerce(v)
 
 
 def load_supported_versions() -> Any:
@@ -61,8 +68,10 @@ class CXGSchema:
         ontology_info = load_supported_versions()
         if version is None:
             version = get_latest_schema_version(ontology_info.keys())
-        elif version not in ontology_info:
-            raise ValueError(f"Schema version {version} is not supported in this package version.")
+        else:
+            version = str(coerce_version(version))
+            if str(version) not in ontology_info:
+                raise ValueError(f"Schema version {version} is not supported in this package version.")
 
         self.version = version
         self.supported_ontologies = ontology_info[version]["ontologies"]
