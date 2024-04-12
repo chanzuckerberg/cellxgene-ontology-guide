@@ -22,7 +22,8 @@
   ],
   "packages": {
     "api/python": {
-      "package-name": "python-api"
+      "package-name": "python-api",
+      "release-type": "python"
     },
     "ontology-assets": {
       "package-name": "ontology-assets"

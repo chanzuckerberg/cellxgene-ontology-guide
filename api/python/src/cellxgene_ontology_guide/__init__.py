@@ -19,7 +19,5 @@ repository.
 .. include:: ../../CHANGELOG.md
 """
 
-import cellxgene_ontology_guide._version as version
-
-__version__ = version.__version__
+__version__ = "0.7.0"
 __all__ = ["curated_ontology_term_lists", "entities", "ontology_parser", "supported_versions"]
