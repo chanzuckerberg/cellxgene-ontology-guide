@@ -1,10 +1,10 @@
 [build-system]
-requires = ["setuptools>=69", "setuptools-scm>=8"]
+requires = ["setuptools>=69"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "cellxgene_ontology_guide"
-dynamic = ["version"]
+version = "0.7.0"
 description = "Access ontology metadata used by CZ cellxgene"
 authors = [
     { name = "Chan Zuckerberg Initiative Foundation", email = "cellxgene@chanzuckerberg.com" }
@@ -40,10 +40,10 @@ where = ["src"]
 [tool.setuptools.package-data]
 "*" = ["*.json", "*.json.gz"]
 
-[tool.setuptools_scm]
-version_file = "src/cellxgene_ontology_guide/_version.py"
-version_scheme = "python-simplified-semver"
-root = "../.."  # relative to the location of the pyproject.toml file
+#[tool.setuptools_scm]
+#version_file = "src/cellxgene_ontology_guide/_version.py"
+#version_scheme = "python-simplified-semver"
+#root = "../.."  # relative to the location of the pyproject.toml file
 
 [tool.pytest.ini_options]
 pythonpath = ["src/cellxgene_ontology_guide"]
