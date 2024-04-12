@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.7.0...python-api-v0.8.0) (2024-04-12)
+
+
+### Features
+
+* remove setuptools-scm ([f33196e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/f33196e5ae90da6cd8d939e1836f33a5966d4059))
+
 ## [0.7.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.6.1...python-api-v0.7.0) (2024-04-11)
 
 
