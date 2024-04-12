@@ -3,10 +3,6 @@ on:
     branches:
       - main
 
-  pull_request:
-    branches:
-      - "*"
-
 permissions:
   contents: write
   pull-requests: write
@@ -26,7 +22,7 @@ jobs:
         with:
           manifest-file: ".release-please-manifest.json"
           config-file: "release-please-config.json"
-          target-branch: "tsmith/remove-setuptool-scm"
+          target-branch: "main"
     outputs:
       ontology_assets_upload_url: ${{ steps.release.outputs.ontology-assets--upload_url }}
       paths_released: ${{ steps.release.outputs.paths_released }}
