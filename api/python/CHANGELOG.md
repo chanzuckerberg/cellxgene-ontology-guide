@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.8.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.7.1...python-api-v0.8.0) (2024-04-15)
+
+
+### Features
+
+* fetch ontology term synonyms ([#200](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/200)) ([89c1725](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/89c1725bcb1a267229e43f136ea2d8941cb4a3bb))
+
 ## [0.7.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.7.0...python-api-v0.7.1) (2024-04-12)
 
 
