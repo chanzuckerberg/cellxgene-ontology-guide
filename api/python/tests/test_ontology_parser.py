@@ -14,6 +14,7 @@ def ontology_dict():
             "label": "cell B",
             "deprecated": False,
             "consider": ["CL:0000004"],
+            "synonyms": ["cell Beta", "cell Bravo"],
         },
         "CL:0000002": {"ancestors": {"CL:0000000": 1}, "label": "cell C", "deprecated": False},
         "CL:0000003": {
@@ -229,6 +230,19 @@ def test_map_term_description(ontology_parser):
         "CL:0000004": None,
         "unknown": "unknown",
         "na": "na",
+    }
+
+
+def test_get_term_synonyms(ontology_parser):
+    assert ontology_parser.get_term_synonyms("CL:0000001") == ["cell Beta", "cell Bravo"]
+
+
+def test_map_term_synonyms(ontology_parser):
+    assert ontology_parser.map_term_synonyms(["CL:0000000", "CL:0000001", "unknown", "na"]) == {
+        "CL:0000000": [],
+        "CL:0000001": ["cell Beta", "cell Bravo"],
+        "unknown": [],
+        "na": [],
     }
 
 

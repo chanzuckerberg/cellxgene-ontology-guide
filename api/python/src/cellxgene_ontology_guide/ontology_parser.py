@@ -562,3 +562,39 @@ class OntologyParser:
         :return: Dict[str, str] mapping term IDs to their respective descriptions
         """
         return {term_id: self.get_term_description(term_id) for term_id in term_ids}
+
+    def get_term_synonyms(self, term_id: str) -> List[str]:
+        """
+        Fetch a list of synonym labels for a given ontology term. Returns empty list if no synonyms found.
+        Raises ValueError if term ID is not valid member of a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_synonyms("CL:0000019")
+        ['spermatozoon', 'spermatozoid', 'sperm cell']
+
+        :param term_id: str ontology term to fetch synonyms for
+        :return: List[str] synonyms for the term
+        """
+        if term_id in VALID_NON_ONTOLOGY_TERMS:
+            return []
+        ontology_name = self._parse_ontology_name(term_id)
+        synonyms: List[str] = self.cxg_schema.ontology(ontology_name)[term_id].get("synonyms", [])
+        return synonyms
+
+    def map_term_synonyms(self, term_ids: List[str]) -> Dict[str, List[str]]:
+        """
+        Fetch the synonym labels for a given list of ontology terms. Raises ValueError if term ID is not valid member of
+        a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000019"])
+        {'CL:0000005': [], 'CL:0000019': ['spermatozoon', 'spermatozoid', 'sperm cell']}
+
+        :param term_ids: list of str ontology terms to fetch synonyms for
+        :return: Dict[str, List[str]] mapping term IDs to their respective synonym lists
+        """
+        return {term_id: self.get_term_synonyms(term_id) for term_id in term_ids}
