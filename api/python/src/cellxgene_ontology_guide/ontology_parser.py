@@ -572,7 +572,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_synonyms("CL:0000019")
-        ['spermatozoon', 'spermatozoid', 'sperm cell']
+        ['sperm cell', 'spermatozoid', 'spermatozoon']
 
         :param term_id: str ontology term to fetch synonyms for
         :return: List[str] synonyms for the term
@@ -592,7 +592,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_synonyms(["CL:0000005", "CL:0000019"])
-        {'CL:0000005': [], 'CL:0000019': ['spermatozoon', 'spermatozoid', 'sperm cell']}
+        {'CL:0000005': [], 'CL:0000019': ['sperm cell', 'spermatozoid', 'spermatozoon']}
 
         :param term_ids: list of str ontology terms to fetch synonyms for
         :return: Dict[str, List[str]] mapping term IDs to their respective synonym lists
