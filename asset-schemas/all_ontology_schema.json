@@ -56,6 +56,14 @@
         "type": "string",
         "pattern": "^\\w+:\\w+$",
         "description": "If deprecated, the ID of the ontology entry that should canonically replace this one."
+      },
+      "synonyms": {
+          "type": "array",
+          "items": {
+          "type": "string"
+          },
+          "minItems": 0,
+          "description": "Optional list of synonym labels for the ontology entry."
       }
     },
     "required": [
