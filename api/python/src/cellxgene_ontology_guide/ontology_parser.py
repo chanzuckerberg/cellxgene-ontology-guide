@@ -591,7 +591,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000019"])
+        >>> ontology_parser.map_term_synonyms(["CL:0000005", "CL:0000019"])
         {'CL:0000005': [], 'CL:0000019': ['spermatozoon', 'spermatozoid', 'sperm cell']}
 
         :param term_ids: list of str ontology terms to fetch synonyms for
