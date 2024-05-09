@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/psf/black
-    rev: 24.2.0 # Must be kept in sync with black version in requirements.txt
+    rev: 24.4.2 # Must be kept in sync with black version in requirements.txt
     hooks:
       - id: black
         stages: [commit]
@@ -9,7 +9,7 @@ repos:
         exclude_types: ["json"]
 
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.2.1
+    rev: v0.4.4
     hooks:
       - id: ruff
         args: ["--config=pyproject.toml", "--fix"]
@@ -30,14 +30,14 @@ repos:
           - prettier-plugin-organize-imports@2.3.3
           - typescript@4.9.5
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.8.0"
+    rev: "v1.10.0"
     hooks:
       - id: mypy
         args: [--strict, --ignore-missing-imports]
         additional_dependencies: [types-PyYAML]
         files: ^(api/python/src|tools/ontology-builder/src)/
   - repo: https://github.com/nbQA-dev/nbQA
-    rev: 1.7.0
+    rev: 1.8.5
     hooks:
       - id: nbqa-black
         stages: [commit]
