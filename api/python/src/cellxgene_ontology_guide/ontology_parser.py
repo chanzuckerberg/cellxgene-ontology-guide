@@ -500,7 +500,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_label("CL:0000005")
-        'fibroblast neural crest derived'
+        'neural crest derived fibroblast'
 
         :param term_id: str ontology term to fetch label for
         :return: str human-readable label for the term
@@ -520,7 +520,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_labels(["CL:0000005", "CL:0000003"])
-        {'CL:0000005': 'fibroblast neural crest derived', 'CL:0000003': 'obsolete native cell'}
+        {'CL:0000005': 'neural crest derived fibroblast', 'CL:0000003': 'obsolete native cell'}
 
         :param term_ids: list of str ontology terms to fetch label for
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels
@@ -536,7 +536,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_description("CL:0000005")
-        'Any fibroblast that is deriived from the neural crest.'
+        'Any fibroblast that is derived from the neural crest.'
 
         :param term_id: str ontology term to fetch description for
         :return: str description for the term
@@ -556,7 +556,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000006"])
-        {'CL:0000005': 'Any fibroblast that is deriived from the neural crest.', 'CL:0000006': None}
+        {'CL:0000005': 'Any fibroblast that is derived from the neural crest.', 'CL:0000006': None}
 
         :param term_ids: list of str ontology terms to fetch descriptions for
         :return: Dict[str, str] mapping term IDs to their respective descriptions
@@ -592,7 +592,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_synonyms(["CL:0000005", "CL:0000019"])
-        {'CL:0000005': [], 'CL:0000019': ['sperm cell', 'spermatozoid', 'spermatozoon']}
+        {'CL:0000005': ['fibroblast neural crest derived'], 'CL:0000019': ['sperm cell', 'spermatozoid', 'spermatozoon']}
 
         :param term_ids: list of str ontology terms to fetch synonyms for
         :return: Dict[str, List[str]] mapping term IDs to their respective synonym lists
