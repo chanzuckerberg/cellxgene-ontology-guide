@@ -520,7 +520,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_labels(["CL:0000005", "CL:0000003"])
-        {'CL:0000005': 'fibroblast neural crest derived', 'CL:0000003': 'obsolete native cell'}
+        {'CL:0000005': 'neural crest derived fibroblast', 'CL:0000003': 'obsolete native cell'}
 
         :param term_ids: list of str ontology terms to fetch label for
         :return: Dict[str, str] mapping term IDs to their respective human-readable labels

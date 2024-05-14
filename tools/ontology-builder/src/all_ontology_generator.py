@@ -196,7 +196,7 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
             term_dict[term_id]["description"] = onto_term.IAO_0000115[0]
         # optional synonym list, if available
         if hasExactSynonym := getattr(onto_term, "hasExactSynonym", None):
-            term_dict[term_id]["synonyms"] = [x if isinstance(x, str) else str(x) for x in hasExactSynonym]
+            term_dict[term_id]["synonyms"] = [str(x) for x in hasExactSynonym]
         # Add the "deprecated" status and associated metadata if True
         term_dict[term_id]["deprecated"] = False
         if onto_term.deprecated and onto_term.deprecated.first():
