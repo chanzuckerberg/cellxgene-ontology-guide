@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.8.0...python-api-v1.0.0) (2024-05-15)
+
+
+### Features
+
+* update ontology_info.json for 5.1 ([#207](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/207)) ([d5c8ae3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/d5c8ae3f0502f0ca7165f821f384d553e2ed3e0b))
+
+
+### Misc
+
+* release 1.0.0 ([60eef67](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/60eef67d69fa3f4f776e67eeefef27391a307785))
+
 ## [0.8.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.7.1...python-api-v0.8.0) (2024-04-15)
 
 
