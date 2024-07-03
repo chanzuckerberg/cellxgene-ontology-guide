@@ -24,7 +24,9 @@ class OntologyParser:
         is loaded.
         """
         self.cxg_schema = CXGSchema(version=schema_version) if schema_version else CXGSchema()
-        self.term_label_to_id_map = {ontology_name: dict() for ontology_name in self.cxg_schema.supported_ontologies}
+        self.term_label_to_id_map: Dict[str, str] = {
+            ontology_name: dict() for ontology_name in self.cxg_schema.supported_ontologies
+        }
 
     def get_term_label_to_id_map(self, ontology_name: str) -> Dict[str, str]:
         """
@@ -642,4 +644,3 @@ class OntologyParser:
         """
         ontology_term_label_to_id_map = self.get_term_label_to_id_map(ontology_name)
         return ontology_term_label_to_id_map.get(term_label)
-
