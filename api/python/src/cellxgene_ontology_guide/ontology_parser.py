@@ -24,6 +24,30 @@ class OntologyParser:
         is loaded.
         """
         self.cxg_schema = CXGSchema(version=schema_version) if schema_version else CXGSchema()
+        self.term_label_to_id_map = {ontology_name: dict() for ontology_name in self.cxg_schema.supported_ontologies}
+
+    def get_term_label_to_id_map(self, ontology_name: str) -> Dict[str, str]:
+        """
+        Fetch the mapping of term labels to term IDs for a given ontology. Caches generated maps by ontology_name.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_label_to_id_map("CL") # doctest: +SKIP
+        {'Label A': 'CL:0000000', ... }
+
+        :param ontology_name: str name of ontology to get map of term labels to term IDs
+        """
+        if ontology_name not in self.cxg_schema.supported_ontologies:
+            raise ValueError(f"{ontology_name} is not a supported ontology, its metadata cannot be fetched.")
+
+        if self.term_label_to_id_map[ontology_name]:
+            return self.term_label_to_id_map[ontology_name]
+
+        for term_id, term_metadata in self.cxg_schema.ontology(ontology_name).items():
+            self.term_label_to_id_map[ontology_name][term_metadata["label"]] = term_id
+
+        return self.term_label_to_id_map[ontology_name]
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
@@ -598,3 +622,24 @@ class OntologyParser:
         :return: Dict[str, List[str]] mapping term IDs to their respective synonym lists
         """
         return {term_id: self.get_term_synonyms(term_id) for term_id in term_ids}
+
+    def get_term_id_by_label(self, term_label: str, ontology_name: str) -> Optional[str]:
+        """
+        Fetch the ontology term ID from a given human-readable label. Filters by ontology_name. Raises ValueError if
+        ontology_name is not a supported ontology.
+
+        Returns None if term ID is not valid member of a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_term_id_by_label("neural crest derived fibroblast", "CL")
+        'CL:0000005'
+
+        :param term_label: str human-readable label to fetch term ID for
+        :param ontology_name: str name of ontology to search for term label in
+        :return: Optional[str] term IDs with that label, or None if the label is not found in the ontology
+        """
+        ontology_term_label_to_id_map = self.get_term_label_to_id_map(ontology_name)
+        return ontology_term_label_to_id_map.get(term_label)
+
