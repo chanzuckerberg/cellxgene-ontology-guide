@@ -371,3 +371,29 @@ def test_get_term_graph(ontology_parser):
         "CL:0000006": 1,
         "CL:0000007": 1,
     }
+
+
+def test_get_term_label_to_id_map(ontology_parser):
+    term_label_to_id_map_expected = {
+        "cell A": "CL:0000000",
+        "cell B": "CL:0000001",
+        "cell C": "CL:0000002",
+        "obsolete cell": "CL:0000003",
+        "cell BC": "CL:0000004",
+        "cell BC2": "CL:0000005",
+        "cell B2": "CL:0000006",
+        "cell B3": "CL:0000007",
+        "cell unrelated": "CL:0000008",
+    }
+    assert ontology_parser.get_term_label_to_id_map("CL") == term_label_to_id_map_expected
+    assert ontology_parser.term_label_to_id_map["CL"] == term_label_to_id_map_expected
+
+
+def test_get_term_id_by_label(ontology_parser):
+    assert ontology_parser.get_term_id_by_label("cell A", "CL") == "CL:0000000"
+    assert ontology_parser.get_term_id_by_label("cell Z", "CL") is None
+
+
+def test_get_term_id_by_label__unsupported_ontology_name(ontology_parser):
+    with pytest.raises(ValueError):
+        ontology_parser.get_term_id_by_label("gene A", "GO")
