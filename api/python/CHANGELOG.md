@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.0.0...python-api-v1.1.0) (2024-07-08)
+
+
+### Features
+
+* fetch term ID by term label ([#212](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/212)) ([11c671d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/11c671d4abc5afea15b5aa319a5499fef56e574b))
+
 ## [1.0.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v0.8.0...python-api-v1.0.0) (2024-05-15)
 
 
