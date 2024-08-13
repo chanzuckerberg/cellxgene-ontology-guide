@@ -36,7 +36,7 @@ A new version of the PyPi package will be released for the following reasons (no
 
 To release a new version of API, merge a pull request to main. Release-please will automatically create a PR with the a version bump if needed. Merging the release-please PR will create a new release in github and a new version will be uploaded to pypi. If no changes were made that affect the API, the API will not be release. Closing the PR will skip the release of these changes and they will be included in the next release.
 
-If the version number needs to be change see [release-plesae documentation](https://github.com/googleapis/release-please?tab=readme-ov-file#how-do-i-change-the-version-number) for how to change the version number. This same process can be used to manually release the package.
+If the version number needs to be change see [release-please documentation](https://github.com/googleapis/release-please?tab=readme-ov-file#how-do-i-change-the-version-number) for how to change the version number. This same process can be used to manually release the package.
 
 ## Local Manual Release
 
