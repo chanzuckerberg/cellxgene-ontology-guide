@@ -95,7 +95,8 @@
         "source": "https://github.com/pato-ontology/pato/raw",
         "filename": "pato.owl"
       }
-    }
+    },
+    "deprecated_on": "2024-08-19"
   },
   "5.0.0": {
     "ontologies": {
