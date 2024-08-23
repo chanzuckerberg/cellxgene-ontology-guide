@@ -1,12 +1,5 @@
 # Changelog
 
-## [1.1.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.1.0...python-api-v1.1.1) (2024-08-23)
-
-
-### Misc
-
-* Fix typo in python readme ([#216](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/216)) ([30a6ba8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/30a6ba87156d8b5fb223be0332407cf824f16926))
-
 ## [1.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.0.0...python-api-v1.1.0) (2024-07-08)
 
 
