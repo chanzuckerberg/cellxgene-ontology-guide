@@ -1,4 +1,53 @@
 {
+  "5.2.0": {
+    "ontologies": {
+      "CL": {
+        "version": "v2024-08-16",
+        "source": "https://github.com/obophenotype/cell-ontology/releases/download",
+        "filename": "cl.owl"
+      },
+      "EFO": {
+        "version": "v3.69.0",
+        "source": "https://github.com/EBISPOT/efo/releases/download",
+        "filename": "efo.owl"
+      },
+      "HANCESTRO": {
+        "version": "3.0",
+        "source": "https://github.com/EBISPOT/hancestro/raw",
+        "filename": "hancestro.owl"
+      },
+      "HsapDv": {
+        "version": "v2024-05-28",
+        "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
+        "filename": "hsapdv.owl"
+      },
+      "MONDO": {
+        "version": "v2024-08-06",
+        "source": "https://github.com/monarch-initiative/mondo/releases/download",
+        "filename": "mondo.owl"
+      },
+      "MmusDv": {
+        "version": "v2024-05-28",
+        "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
+        "filename": "mmusdv.owl"
+      },
+      "NCBITaxon": {
+        "version": "v2023-06-20",
+        "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
+        "filename": "ncbitaxon.owl.gz"
+      },
+      "UBERON": {
+        "version": "v2024-08-07",
+        "source": "https://github.com/obophenotype/uberon/releases/download",
+        "filename": "uberon.owl"
+      },
+      "PATO": {
+        "version": "v2023-05-18",
+        "source": "https://github.com/pato-ontology/pato/raw",
+        "filename": "pato.owl"
+      }
+    }
+  },
   "5.1.0": {
     "ontologies": {
       "CL": {
@@ -46,7 +95,8 @@
         "source": "https://github.com/pato-ontology/pato/raw",
         "filename": "pato.owl"
       }
-    }
+    },
+    "deprecated_on": "2024-08-19"
   },
   "5.0.0": {
     "ontologies": {
