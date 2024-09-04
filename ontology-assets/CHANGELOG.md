@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.0.2...ontology-assets-v1.1.0) (2024-09-04)
+
+
+### Features
+
+* bump CL, EFO, HsapDv, MmusDv, MONDO, UBERON ontology versions for CxG schema 5.2.0 ([#217](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/217)) ([5bb43b9](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5bb43b988652ff003e89deccff8aecb9852205e5))
+
 ## [1.0.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.0.1...ontology-assets-v1.0.2) (2024-08-23)
 
 

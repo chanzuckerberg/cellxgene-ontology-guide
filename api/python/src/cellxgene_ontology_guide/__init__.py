@@ -19,5 +19,5 @@ repository.
 .. include:: ../../CHANGELOG.md
 """
 
-__version__ = "1.1.0"
+__version__ = "1.2.0"
 __all__ = ["curated_ontology_term_lists", "entities", "ontology_parser", "supported_versions"]
