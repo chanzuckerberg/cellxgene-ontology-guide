@@ -167,6 +167,7 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass, term_pref
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
+    :param: term_prefixes: List of prefixes to filter out terms that are not direct children from this ontology
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
