@@ -162,11 +162,12 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> D
     }
 
 
-def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[str, Any]:
+def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass, term_prefixes: list[str]) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
+    :param: term_prefixes: List of prefixes to filter out terms that are not direct children from this ontology
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
@@ -174,7 +175,7 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
         term_id = onto_term.name.replace("_", ":")
 
         # Skip terms that are not direct children from this ontology
-        if onto.name != term_id.split(":")[0]:
+        if term_id.split(":")[0] not in term_prefixes:
             continue
         # Gets ancestors
         ancestors = _get_ancestors(onto_term, onto.name)
@@ -266,8 +267,8 @@ def _parse_ontologies(
         version = ontology_info[onto.name]["version"]
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
-
-        onto_dict = _extract_ontology_term_metadata(onto)
+        term_prefixes = [onto.name] + ontology_info[onto.name].get("additional_term_prefixes", [])
+        onto_dict = _extract_ontology_term_metadata(onto, term_prefixes)
 
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))

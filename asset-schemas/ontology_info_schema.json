@@ -67,6 +67,13 @@
         "filename": {
           "type": "string",
           "description": "name of ontology file used to build generated artifacts for this ontology data release"
+        },
+        "additional_term_prefixes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of additional term id prefixes to extracted from the source ontology file."
         }
       },
       "required": [

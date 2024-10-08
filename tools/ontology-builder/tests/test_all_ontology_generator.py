@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from all_ontology_generator import (
     _download_ontologies,
+    _extract_ontology_term_metadata,
     _parse_ontologies,
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
@@ -43,6 +44,16 @@ def mock_raw_ontology_dir(tmpdir):
     onto_owl_file = tmpdir.join(sub_dir_name, "ontology_name.owl")
     onto_owl_file.write("")
     return str(sub_dir)
+
+
+@pytest.fixture
+def mock_owl(tmpdir):
+    import owlready2
+
+    onto = owlready2.get_ontology("http://example.com/ontology_name.owl")
+    onto.name = "FAKE"
+
+    return onto
 
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):
@@ -224,3 +235,52 @@ def test_deprecate_previous_cellxgene_schema_versions(mock_datetime):
     deprecate_previous_cellxgene_schema_versions(ontology_info, "v1")
 
     assert ontology_info == expected_ontology_info
+
+
+@pytest.fixture
+def sample_ontology(tmp_path):
+    # Create a new ontology
+    import owlready2
+
+    onto = owlready2.get_ontology("http://test.org/onto.owl")
+    onto.name = "FOO"
+
+    with onto:
+
+        class FOO(owlready2.Thing):
+            pass
+
+        class FOO_33208(FOO):
+            pass
+
+        class TestTerm(FOO_33208):
+            label = ["Test Term"]
+            IAO_0000115 = ["Test description"]
+            hasExactSynonym = ["Test synonym"]
+            deprecated = [True]
+            comment = ["Deprecated term"]
+            IAO_0000233 = ["http://example.org/term_tracker"]
+            IAO_0100001 = ["http://example.org/replaced_by"]
+
+    onto.save(file=str(tmp_path.joinpath("test_ontology.owl")))
+    return onto
+
+
+def test_extract_ontology_term_metadata(sample_ontology):
+    term_prefixes = ["FOO"]
+    result = _extract_ontology_term_metadata(sample_ontology, term_prefixes)
+
+    expected_result = {
+        "FOO:TestTerm": {
+            "ancestors": {"FOO:33208": 1},
+            "label": "Test Term",
+            "description": "Test description",
+            "synonyms": ["Test synonym"],
+            "deprecated": True,
+            "comments": ["Deprecated term"],
+            "term_tracker": "http://example.org/term_tracker",
+            "replaced_by": "example:replaced_by",
+        }
+    }
+
+    assert result == expected_result
