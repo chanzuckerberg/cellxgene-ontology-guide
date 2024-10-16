@@ -267,8 +267,8 @@ def sample_ontology(tmp_path):
 
 
 def test_extract_ontology_term_metadata(sample_ontology):
-    term_prefixes = ["FOO"]
-    result = _extract_ontology_term_metadata(sample_ontology, term_prefixes)
+    allowed_ontologies = ["FOO"]
+    result = _extract_ontology_term_metadata(sample_ontology, allowed_ontologies)
 
     expected_result = {
         "FOO:TestTerm": {
