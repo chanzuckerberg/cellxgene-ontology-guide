@@ -2,10 +2,6 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Ontology Version and Source Schema",
   "definitions": {
-    "AfPO_term_id": {
-      "type": "string",
-      "pattern": "^AfPO+:[0-9]+$"
-    },
     "CL_term_id": {
       "type": "string",
       "pattern": "^CL+:[0-9]+$"
@@ -44,9 +40,6 @@
     },
     "supported_term_id": {
       "anyOf": [
-        {
-          "$ref": "#/definitions/AfPO_term_id"
-        },
         {
           "$ref": "#/definitions/CL_term_id"
         },
