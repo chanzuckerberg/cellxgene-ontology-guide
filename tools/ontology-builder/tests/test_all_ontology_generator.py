@@ -7,6 +7,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from all_ontology_generator import (
     _download_ontologies,
+    _extract_ontology_term_metadata,
     _parse_ontologies,
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
@@ -43,6 +44,16 @@ def mock_raw_ontology_dir(tmpdir):
     onto_owl_file = tmpdir.join(sub_dir_name, "ontology_name.owl")
     onto_owl_file.write("")
     return str(sub_dir)
+
+
+@pytest.fixture
+def mock_owl(tmpdir):
+    import owlready2
+
+    onto = owlready2.get_ontology("http://example.com/ontology_name.owl")
+    onto.name = "FAKE"
+
+    return onto
 
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):
@@ -224,3 +235,121 @@ def test_deprecate_previous_cellxgene_schema_versions(mock_datetime):
     deprecate_previous_cellxgene_schema_versions(ontology_info, "v1")
 
     assert ontology_info == expected_ontology_info
+
+
+@pytest.fixture
+def sample_ontology(tmp_path):
+    # Create a new ontology
+    import owlready2
+
+    onto = owlready2.get_ontology("http://test.org/onto.owl")
+    onto.name = "FOO"
+
+    with onto:
+
+        class FOO_000001(owlready2.Thing):
+            label = ["Test Root Term"]
+
+        class FOO_000002(FOO_000001):
+            label = ["Test Deprecated Descendant Term"]
+            IAO_0000115 = ["Test description"]
+            hasExactSynonym = ["Test synonym"]
+            deprecated = [True]
+            comment = ["Deprecated term", "See Links for more details"]
+            IAO_0000233 = ["http://example.org/term_tracker"]
+            IAO_0100001 = ["http://ontology.org/FOO_000003"]
+
+        class FOO_000003(FOO_000001):
+            label = ["Test Non-Deprecated Descendant Term"]
+
+        class OOF_000001(owlready2.Thing):
+            label = ["Test Unrelated Different Ontology Term"]
+
+        class OOF_000002(FOO_000001):
+            label = ["Test Descendant Different Ontology Term"]
+
+        class FOO_000004(OOF_000002, FOO_000003):
+            label = ["Test Ontology Term With Different Ontology Ancestors"]
+
+    onto.save(file=str(tmp_path.joinpath("test_ontology.owl")))
+    return onto
+
+
+def test_extract_ontology_term_metadata(sample_ontology):
+    allowed_ontologies = ["FOO"]
+    result = _extract_ontology_term_metadata(sample_ontology, allowed_ontologies)
+
+    expected_result = {
+        "FOO:000001": {
+            "ancestors": {},
+            "label": "Test Root Term",
+            "deprecated": False,
+        },
+        "FOO:000002": {
+            "ancestors": {"FOO:000001": 1},
+            "label": "Test Deprecated Descendant Term",
+            "description": "Test description",
+            "synonyms": ["Test synonym"],
+            "deprecated": True,
+            "comments": ["Deprecated term", "See Links for more details"],
+            "term_tracker": "http://example.org/term_tracker",
+            "replaced_by": "FOO:000003",
+        },
+        "FOO:000003": {
+            "ancestors": {"FOO:000001": 1},
+            "label": "Test Non-Deprecated Descendant Term",
+            "deprecated": False,
+        },
+        "FOO:000004": {
+            "ancestors": {"FOO:000001": 2, "FOO:000003": 1},
+            "label": "Test Ontology Term With Different Ontology Ancestors",
+            "deprecated": False,
+        },
+    }
+
+    assert result == expected_result
+
+
+def test_extract_ontology_term_metadata_multiple_allowed_ontologies(sample_ontology):
+    allowed_ontologies = ["FOO", "OOF"]
+    result = _extract_ontology_term_metadata(sample_ontology, allowed_ontologies)
+
+    expected_result = {
+        "FOO:000001": {
+            "ancestors": {},
+            "label": "Test Root Term",
+            "deprecated": False,
+        },
+        "FOO:000002": {
+            "ancestors": {"FOO:000001": 1},
+            "label": "Test Deprecated Descendant Term",
+            "description": "Test description",
+            "synonyms": ["Test synonym"],
+            "deprecated": True,
+            "comments": ["Deprecated term", "See Links for more details"],
+            "term_tracker": "http://example.org/term_tracker",
+            "replaced_by": "FOO:000003",
+        },
+        "FOO:000003": {
+            "ancestors": {"FOO:000001": 1},
+            "label": "Test Non-Deprecated Descendant Term",
+            "deprecated": False,
+        },
+        "FOO:000004": {
+            "ancestors": {"FOO:000001": 2, "FOO:000003": 1, "OOF:000002": 1},
+            "label": "Test Ontology Term With Different Ontology Ancestors",
+            "deprecated": False,
+        },
+        "OOF:000001": {
+            "ancestors": {},
+            "label": "Test Unrelated Different Ontology Term",
+            "deprecated": False,
+        },
+        "OOF:000002": {
+            "ancestors": {"FOO:000001": 1},
+            "label": "Test Descendant Different Ontology Term",
+            "deprecated": False,
+        },
+    }
+
+    assert result == expected_result
