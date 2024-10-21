@@ -411,6 +411,11 @@ def test_get_lowest_common_ancestors(ontology_parser):
     # disjoint
     assert ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000001", term_id_2="CL:0000008") == []
 
+    # diff ontology terms with a common ancestor
+    assert ontology_parser.get_lowest_common_ancestors(
+        term_id_1="AfPO:0000000", term_id_2="HANCESTRO:0000001"
+    ) == ["AfPO:0000000"]
+
 
 def test_get_distance_between_terms(ontology_parser):
     # distance when root node is lca
@@ -424,6 +429,9 @@ def test_get_distance_between_terms(ontology_parser):
 
     # disjoint distance
     assert ontology_parser.get_distance_between_terms(term_id_1="CL:0000001", term_id_2="CL:0000008") == -1
+
+    # diff ontology terms
+    assert ontology_parser.get_distance_between_terms(term_id_1="AfPO:0000000", term_id_2="HANCESTRO:0000001") == 1
 
 
 @pytest.mark.parametrize(
