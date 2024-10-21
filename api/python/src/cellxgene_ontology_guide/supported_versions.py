@@ -75,6 +75,11 @@ class CXGSchema:
 
         self.version = _version
         self.supported_ontologies = ontology_info[_version]["ontologies"]
+        self.imported_ontologies = {
+            imported_ontology: ontology
+            for ontology, info in self.supported_ontologies.items()
+            for imported_ontology in info.get("additional_ontologies", [])
+        }
         self.ontology_file_names: Dict[str, str] = {}
         self.deprecated_on = ontology_info[_version].get("deprecated_on")
         if self.deprecated_on:
@@ -87,6 +92,9 @@ class CXGSchema:
 
     def ontology(self, name: str) -> Any:
         """Return the ontology terms for the given ontology name. Load from the file cache if available.
+
+        Does not support "additional ontologies" of another ontology.
+
         :param name: str name of the ontology to get the terms for
         :return: dict representation of the ontology terms
         """
