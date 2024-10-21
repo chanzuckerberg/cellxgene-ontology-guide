@@ -12,12 +12,9 @@
         "filename": "efo.owl"
       },
       "HANCESTRO": {
-        "version": "v2024-08-19",
+        "version": "3.0",
         "source": "https://github.com/EBISPOT/hancestro/raw",
-        "filename": "hancestro.owl",
-        "additional_ontologies": [
-          "AfPO"
-        ]
+        "filename": "hancestro.owl"
       },
       "HsapDv": {
         "version": "v2024-05-28",
