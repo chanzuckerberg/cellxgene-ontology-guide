@@ -24,21 +24,12 @@ def clear_ontology_file_cache() -> None:
     load_ontology_file.cache_clear()
 
 
-def get_latest_schema_version(versions: List[str], experimental: bool) -> str:
+def get_latest_schema_version(versions: List[str]) -> str:
     """Given a list of schema versions, return the latest version.
 
-    :param versions: List[str] list of schema versions. Versions can be in the format "v5.0.0" or "5.0.0".
-    :param experimental: If available, returns the release tagged as "experimental" as the latest schema version
-
+    :param versions: List[str] list of schema versions. Versions can be in the format "v5.0.0" or "5.0.0"
     :return: str latest version without the leading "v"
     """
-    if experimental:
-        experimental_versions = []
-        for version in versions:
-            if version.endswith("experimental"):
-                experimental_versions.append(version)
-        assert len(experimental_versions) <= 1, "Only one experimental version can be present"
-        return experimental_versions[0]
 
     return str(sorted([coerce_version(version) for version in versions])[-1])
 
@@ -76,7 +67,7 @@ class CXGSchema:
         """
         ontology_info = load_supported_versions()
         if version is None:
-            _version = get_latest_schema_version(versions=ontology_info.keys(), experimental=False)
+            _version = get_latest_schema_version(ontology_info.keys())
         else:
             _version = str(coerce_version(version))
             if str(_version) not in ontology_info:

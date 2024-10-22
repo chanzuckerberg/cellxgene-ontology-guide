@@ -13,6 +13,7 @@ from cellxgene_ontology_guide.supported_versions import (
 
 MODULE_PATH = "cellxgene_ontology_guide.supported_versions"
 
+
 @pytest.fixture
 def initialized_CXGSchemaInfo(mock_load_supported_versions):
     mock_load_supported_versions.return_value = {
@@ -23,24 +24,9 @@ def initialized_CXGSchemaInfo(mock_load_supported_versions):
     return CXGSchema()
 
 
-@pytest.mark.parametrize("versions, expected", [
-    (["v5.0.0", "v0.0.1"], "5.0.0"),
-    (["5.0.0", "0.0.1"], "5.0.0"),
-    (["5.0.0+experimental", "5.0.0"], "5.0.0"),
-])
+@pytest.mark.parametrize("versions, expected", [(["v5.0.0", "v0.0.1"], "v5.0.0"), (["5.0.0", "0.0.1"], "v5.0.0")])
 def test__get_latest_schema_version__OK(versions, expected):
-    print("fuck")
-    print(get_latest_schema_version.__code__.co_filename)
-    assert get_latest_schema_version(versions=versions, experimental=False) == expected
-
-
-@pytest.mark.parametrize("versions, expected", [
-    (["v5.2.0", "v5.1.0"], "5.2.0"),
-    (["5.2.0", "5.1.0"], "5.2.0"),
-    (["5.2.0+experimental", "5.2.0", "5.1.0"], "5.2.0+experimental")
-])
-def test__get_latest_schema_version_experimental__OK(versions, expected):
-    assert get_latest_schema_version(versions=versions, experimental=True) == expected
+    assert get_latest_schema_version(versions) == "5.0.0"
 
 
 @pytest.fixture
