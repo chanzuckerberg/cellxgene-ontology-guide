@@ -40,7 +40,7 @@ class OntologyParser:
 
         :param ontology_name: str name of ontology to get map of term labels to term IDs
         """
-        ontology_name = self._get_supported_ontology_name(ontology_name)
+        ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_name)
         if not ontology_name:
             raise ValueError(f"{ontology_name} is not a supported ontology, its metadata cannot be fetched.")
 
@@ -65,7 +65,7 @@ class OntologyParser:
             raise ValueError(f"{term_id} does not conform to expected regex pattern {pattern} and cannot be queried.")
 
         ontology_term_prefix = term_id.split(":")[0]
-        ontology_name = self._get_supported_ontology_name(ontology_term_prefix)
+        ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_term_prefix)
         if not ontology_name:
             raise ValueError(f"{term_id} is not part of a supported ontology, its metadata cannot be fetched.")
 
@@ -89,7 +89,6 @@ class OntologyParser:
         elif ontology_term_prefix in self.cxg_schema.imported_ontologies:
             return self.cxg_schema.imported_ontologies[ontology_term_prefix]
         return None
-
 
     def is_valid_term_id(self, term_id: str, ontology: Optional[str] = None) -> bool:
         """

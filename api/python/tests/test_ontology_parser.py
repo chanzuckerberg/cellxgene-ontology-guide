@@ -51,7 +51,7 @@ def ontology_dict_with_imports():
             "comments": ["this is an HANCESTRO term, not imported"],
             "term_tracker": "http://example.com/issue/HANCESTRO/1234",
             "synonyms": ["root ancestry synonym"],
-            "deprecated": False
+            "deprecated": False,
         },
         "AfPO:0000000": {
             "ancestors": {"HANCESTRO:0000000": 1},
@@ -61,12 +61,12 @@ def ontology_dict_with_imports():
             "comments": ["this is an AfPO term imported into HANCESTRO"],
             "synonyms": ["specialized ancestry synonym"],
             "term_tracker": "http://example.com/issue/AfPO/1234",
-            "replaced_by": "AfPO:0000001"
+            "replaced_by": "AfPO:0000001",
         },
         "HANCESTRO:0000001": {
             "ancestors": {"HANCESTRO:0000000": 2, "AfPO:0000000": 1},
             "label": "root ontology descendant of specialized ancestry type",
-            "deprecated": False
+            "deprecated": False,
         },
     }
 
@@ -81,7 +81,7 @@ def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supporte
                     "version": "2024-01-01",
                     "source": "http://example.com",
                     "filename": "cl.owl",
-                    "additional_ontologies": ["AfPO"]
+                    "additional_ontologies": ["AfPO"],
                 },
             }
         }
@@ -89,7 +89,7 @@ def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supporte
     cxg_schema = CXGSchema()
     cxg_schema.ontology_file_names = {
         "CL": "CL-ontology-2024-01-01.json.gz",
-        "HANCESTRO": "HANCESTRO-ontology-2024-01-01.json.gz"
+        "HANCESTRO": "HANCESTRO-ontology-2024-01-01.json.gz",
     }
 
     def get_mock_ontology_dict(file_name):
@@ -113,6 +113,7 @@ def ontology_parser(mock_CXGSchema):
 def test_parse_ontology_name(ontology_parser):
     assert ontology_parser._parse_ontology_name("CL:0000001") == "CL"
 
+
 @pytest.mark.parametrize("term_id", ["AfPO:0000001", "HANCESTRO:0000000"])
 def test_parse_ontology_name__imported_term(ontology_parser, term_id):
     assert ontology_parser._parse_ontology_name(term_id) == "HANCESTRO"
@@ -129,9 +130,8 @@ def test_parse_ontology_name__not_supported(ontology_parser):
 
 
 @pytest.mark.parametrize(
-    "term_id,expected", [
-        ("CL:0000001", True), ("CL:0000003", True), ("CL:0000009", False), ("GO:0000001", False), ("AfPO:0000000", True)
-    ]
+    "term_id,expected",
+    [("CL:0000001", True), ("CL:0000003", True), ("CL:0000009", False), ("GO:0000001", False), ("AfPO:0000000", True)],
 )
 def test_is_valid_term_id(ontology_parser, term_id, expected):
     assert ontology_parser.is_valid_term_id(term_id) == expected
@@ -140,9 +140,13 @@ def test_is_valid_term_id(ontology_parser, term_id, expected):
 @pytest.mark.parametrize(
     "term_id,ontology,expected",
     [
-        ("CL:0000001", "CL", True), ("CL:0000001", "UBERON", False), ("GO:0000001", "GO", False),
-        ("AfPO:0000000", "HANCESTRO", True), ("AfPO:0000000", "AfPO", False), ("HANCESTRO:0000001", "AfPO", False),
-    ]
+        ("CL:0000001", "CL", True),
+        ("CL:0000001", "UBERON", False),
+        ("GO:0000001", "GO", False),
+        ("AfPO:0000000", "HANCESTRO", True),
+        ("AfPO:0000000", "AfPO", False),
+        ("HANCESTRO:0000001", "AfPO", False),
+    ],
 )
 def test_is_valid_term_id__with_ontology(ontology_parser, term_id, ontology, expected):
     assert ontology_parser.is_valid_term_id(term_id, ontology) == expected
@@ -308,7 +312,9 @@ def test_get_term_label(ontology_parser):
 
 
 def test_map_term_labels(ontology_parser):
-    assert ontology_parser.map_term_labels(["CL:0000000", "CL:0000004", "AfPO:0000000", "HANCESTRO:0000000", "unknown", "na"]) == {
+    assert ontology_parser.map_term_labels(
+        ["CL:0000000", "CL:0000004", "AfPO:0000000", "HANCESTRO:0000000", "unknown", "na"]
+    ) == {
         "CL:0000000": "cell A",
         "CL:0000004": "cell BC",
         "AfPO:0000000": "specialized ancestry type",
@@ -345,7 +351,9 @@ def test_get_term_synonyms(ontology_parser):
 
 
 def test_map_term_synonyms(ontology_parser):
-    assert ontology_parser.map_term_synonyms(["CL:0000000", "CL:0000001", "AfPO:0000000", "HANCESTRO:0000000", "unknown", "na"]) == {
+    assert ontology_parser.map_term_synonyms(
+        ["CL:0000000", "CL:0000001", "AfPO:0000000", "HANCESTRO:0000000", "unknown", "na"]
+    ) == {
         "CL:0000000": [],
         "CL:0000001": ["cell Beta", "cell Bravo"],
         "AfPO:0000000": ["specialized ancestry synonym"],
@@ -412,9 +420,9 @@ def test_get_lowest_common_ancestors(ontology_parser):
     assert ontology_parser.get_lowest_common_ancestors(term_id_1="CL:0000001", term_id_2="CL:0000008") == []
 
     # diff ontology terms with a common ancestor
-    assert ontology_parser.get_lowest_common_ancestors(
-        term_id_1="AfPO:0000000", term_id_2="HANCESTRO:0000001"
-    ) == ["AfPO:0000000"]
+    assert ontology_parser.get_lowest_common_ancestors(term_id_1="AfPO:0000000", term_id_2="HANCESTRO:0000001") == [
+        "AfPO:0000000"
+    ]
 
 
 def test_get_distance_between_terms(ontology_parser):
@@ -436,8 +444,14 @@ def test_get_distance_between_terms(ontology_parser):
 
 @pytest.mark.parametrize(
     "term_id,expected",
-    [("CL:0000005", ["CL:0000001", "CL:0000002"]), ("CL:0000002", ["CL:0000000"]), ("CL:0000000", []), ("unknown", []),
-     ("AfPO:0000000", ["HANCESTRO:0000000"]), ("HANCESTRO:0000001", ["AfPO:0000000"])],
+    [
+        ("CL:0000005", ["CL:0000001", "CL:0000002"]),
+        ("CL:0000002", ["CL:0000000"]),
+        ("CL:0000000", []),
+        ("unknown", []),
+        ("AfPO:0000000", ["HANCESTRO:0000000"]),
+        ("HANCESTRO:0000001", ["AfPO:0000000"]),
+    ],
 )
 def test_get_term_parents(ontology_parser, term_id, expected):
     assert ontology_parser.get_term_parents(term_id) == expected
@@ -445,8 +459,13 @@ def test_get_term_parents(ontology_parser, term_id, expected):
 
 @pytest.mark.parametrize(
     "term_id,expected",
-    [("CL:0000000", ["CL:0000001", "CL:0000002", "CL:0000003"]), ("CL:0000005", []), ("unknown", []),
-     ("AfPO:0000000", ["HANCESTRO:0000001"]), ("HANCESTRO:0000000", ["AfPO:0000000"])],
+    [
+        ("CL:0000000", ["CL:0000001", "CL:0000002", "CL:0000003"]),
+        ("CL:0000005", []),
+        ("unknown", []),
+        ("AfPO:0000000", ["HANCESTRO:0000001"]),
+        ("HANCESTRO:0000000", ["AfPO:0000000"]),
+    ],
 )
 def test_get_term_children(ontology_parser, term_id, expected):
     assert ontology_parser.get_term_children(term_id) == expected
@@ -497,7 +516,13 @@ def test_get_term_graph__imported_ontology(ontology_parser):
     assert graph.to_dict() == {
         "term_id": "AfPO:0000000",
         "name": "specialized ancestry type",
-        "children": [{"term_id": "HANCESTRO:0000001", "name": "root ontology descendant of specialized ancestry type", "children": []}],
+        "children": [
+            {
+                "term_id": "HANCESTRO:0000001",
+                "name": "root ontology descendant of specialized ancestry type",
+                "children": [],
+            }
+        ],
     }
 
     assert graph.term_counter == {

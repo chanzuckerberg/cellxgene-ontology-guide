@@ -13,6 +13,7 @@ from cellxgene_ontology_guide.supported_versions import (
 
 MODULE_PATH = "cellxgene_ontology_guide.supported_versions"
 
+
 @pytest.fixture
 def ontology_info_content():
     return {
@@ -23,7 +24,7 @@ def ontology_info_content():
                     "version": "v2024-01-01",
                     "source": "http://example.com",
                     "filename": "hancestro.owl",
-                    "additional_ontologies": ["FOO", "OOF"]
+                    "additional_ontologies": ["FOO", "OOF"],
                 },
             }
         }
