@@ -371,6 +371,8 @@ def test_map_term_synonyms(ontology_parser):
         ("CL:0000008", ["CL:0000000", "CL:0000001"], []),
         ("CL:0000000", ["CL:0000000", "CL:0000001"], ["CL:0000000"]),
         ("CL:0000001", ["CL:0000000", "CL:0000001"], ["CL:0000000", "CL:0000001"]),
+        ("HANCESTRO:0000001", ["HANCESTRO:0000000", "AfPO:0000000"], ["HANCESTRO:0000000", "AfPO:0000000"]),
+        ("AfPO:0000000", ["HANCESTRO:0000000", "HANCESTRO:0000001"], ["HANCESTRO:0000000"]),
         ("na", ["CL:0000000", "CL:0000001"], []),
     ],
 )
@@ -392,12 +394,21 @@ def test_get_highest_level_term(ontology_parser):
     assert ontology_parser.get_highest_level_term("CL:0000008", high_level_terms) is None
     assert ontology_parser.get_highest_level_term("na", high_level_terms) is None
 
+    assert (
+        ontology_parser.get_highest_level_term("AfPO:0000000", ["HANCESTRO:0000000", "AfPO:0000000"])
+        == "HANCESTRO:0000000"
+    )
+
 
 def test_map_highest_level_term(ontology_parser):
     assert ontology_parser.map_highest_level_term(
         term_ids=["CL:0000000", "CL:0000008", "CL:0000004"],
         high_level_terms=["CL:0000000", "CL:0000001"],
     ) == {"CL:0000000": "CL:0000000", "CL:0000008": None, "CL:0000004": "CL:0000000"}
+    assert ontology_parser.map_highest_level_term(
+        term_ids=["AfPO:0000000", "HANCESTRO:0000001"],
+        high_level_terms=["HANCESTRO:0000000", "AfPO:0000000"],
+    ) == {"AfPO:0000000": "HANCESTRO:0000000", "HANCESTRO:0000001": "HANCESTRO:0000000"}
 
 
 def test_get_lowest_common_ancestors(ontology_parser):
