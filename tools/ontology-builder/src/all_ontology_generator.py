@@ -344,7 +344,7 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     ontology_info = get_ontology_info_file()
-    current_version = get_latest_schema_version(versions=ontology_info.keys(), experimental=True)
+    current_version = get_latest_schema_version(ontology_info.keys())
     latest_ontology_version = ontology_info[current_version]
     latest_ontologies = latest_ontology_version["ontologies"]
     _download_ontologies(latest_ontologies)
