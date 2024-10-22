@@ -84,11 +84,11 @@ class OntologyParser:
         :return: str name of ontology that term belongs to, or None if it is not directly supported nor imported in
         a supported ontology in the CxG schema.
         """
-        if ontology_term_prefix in self.cxg_schema.supported_ontologies:
-            return ontology_term_prefix
-        elif supported_ontology_name := self.cxg_schema.imported_ontologies.get(ontology_term_prefix):
+        supported_ontology_name: Optional[str] = self.cxg_schema.supported_ontologies.get(ontology_term_prefix)
+        if supported_ontology_name:
             return supported_ontology_name
-        return None
+        supported_ontology_name = self.cxg_schema.imported_ontologies.get(ontology_term_prefix)
+        return supported_ontology_name
 
     def is_valid_term_id(self, term_id: str, ontology: Optional[str] = None) -> bool:
         """
