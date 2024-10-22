@@ -75,7 +75,7 @@ class CXGSchema:
 
         self.version = _version
         self.supported_ontologies = ontology_info[_version]["ontologies"]
-        self.imported_ontologies = {
+        self.imported_ontologies: Dict[str, str] = {
             imported_ontology: ontology
             for ontology, info in self.supported_ontologies.items()
             for imported_ontology in info.get("additional_ontologies", [])
