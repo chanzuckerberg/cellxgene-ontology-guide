@@ -40,17 +40,17 @@ class OntologyParser:
 
         :param ontology_name: str name of ontology to get map of term labels to term IDs
         """
-        ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_name)
-        if not ontology_name:
-            raise ValueError(f"{ontology_name} is not a supported ontology, its metadata cannot be fetched.")
+        supported_ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_name)
+        if not supported_ontology_name:
+            raise ValueError(f"{supported_ontology_name} is not a supported ontology, its metadata cannot be fetched.")
 
-        if self.term_label_to_id_map[ontology_name]:
-            return self.term_label_to_id_map[ontology_name]
+        if self.term_label_to_id_map[supported_ontology_name]:
+            return self.term_label_to_id_map[supported_ontology_name]
 
-        for term_id, term_metadata in self.cxg_schema.ontology(ontology_name).items():
-            self.term_label_to_id_map[ontology_name][term_metadata["label"]] = term_id
+        for term_id, term_metadata in self.cxg_schema.ontology(supported_ontology_name).items():
+            self.term_label_to_id_map[supported_ontology_name][term_metadata["label"]] = term_id
 
-        return self.term_label_to_id_map[ontology_name]
+        return self.term_label_to_id_map[supported_ontology_name]
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
