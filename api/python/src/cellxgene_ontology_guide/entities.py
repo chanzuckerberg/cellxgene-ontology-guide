@@ -17,6 +17,9 @@ class Ontology(Enum):
     MmusDv = "mmusdv"
     PATO = "pato"
     NCBITaxon = "ncbitaxon"
+    FBbt = "fbbt"
+    FBdv = "fbdv"
+    ZFA = "zfa"
 
 
 class CuratedOntologyTermList(Enum):

@@ -41,6 +41,15 @@
             },
             "PATO": {
               "$ref": "#/definitions/ontologyEntry"
+            },
+            "FBbt": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "FBdv": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "ZFA": {
+              "$ref": "#/definitions/ontologyEntry"
             }
           }
         }
