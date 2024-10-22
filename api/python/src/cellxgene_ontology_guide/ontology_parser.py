@@ -86,8 +86,8 @@ class OntologyParser:
         """
         if ontology_term_prefix in self.cxg_schema.supported_ontologies:
             return ontology_term_prefix
-        elif ontology_term_prefix in self.cxg_schema.imported_ontologies:
-            return self.cxg_schema.imported_ontologies[ontology_term_prefix]
+        elif supported_ontology_name := self.cxg_schema.imported_ontologies.get(ontology_term_prefix):
+            return supported_ontology_name
         return None
 
     def is_valid_term_id(self, term_id: str, ontology: Optional[str] = None) -> bool:
