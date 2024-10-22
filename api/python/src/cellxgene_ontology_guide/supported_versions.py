@@ -57,6 +57,9 @@ class CXGSchema:
     """The schema version used by the class instance."""
     supported_ontologies: Dict[str, Any]
     """A dictionary of supported ontologies for the schema version."""
+    imported_ontologies: Dict[str, str]
+    """A dictionary of ontologies with terms imported into supported ontologies, mapped to the supported ontology
+    importing them."""
     ontology_file_names: Dict[str, str]
     """A dictionary of ontology names and their corresponding file names."""
 
@@ -75,7 +78,7 @@ class CXGSchema:
 
         self.version = _version
         self.supported_ontologies = ontology_info[_version]["ontologies"]
-        self.imported_ontologies: Dict[str, str] = {
+        self.imported_ontologies = {
             imported_ontology: ontology
             for ontology, info in self.supported_ontologies.items()
             for imported_ontology in info.get("additional_ontologies", [])
