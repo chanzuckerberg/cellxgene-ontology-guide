@@ -45,6 +45,24 @@
         "version": "v2023-05-18",
         "source": "https://github.com/pato-ontology/pato/raw",
         "filename": "pato.owl"
+      },
+      "FBbt": {
+        "version": "v2024-10-17",
+        "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
+        "filename": "fbbt.owl"
+      },
+      "FBdv": {
+        "version": "v2024-10-17",
+        "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download",
+        "filename": "fbdv.owl"
+      },
+      "ZFA": {
+        "version": "v2022-12-09",
+        "source": "https://github.com/ZFIN/zebrafish-anatomical-ontology/raw",
+        "filename": "zfa.owl",
+        "additional_ontologies": [
+          "ZFS"
+        ]
       }
     }
   },

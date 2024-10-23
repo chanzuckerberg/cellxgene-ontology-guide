@@ -175,7 +175,8 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass, allowed_o
         term_id = onto_term.name.replace("_", ":")
 
         # Skip terms that are not direct children from this ontology
-        if term_id.split(":")[0] not in allowed_ontologies:
+        term_id_parts = term_id.split(":")
+        if len(term_id_parts) > 2 or term_id_parts[0] not in allowed_ontologies:
             continue
         # Gets ancestors
         ancestors = _get_ancestors(onto_term, allowed_ontologies)
