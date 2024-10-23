@@ -40,16 +40,17 @@ class OntologyParser:
 
         :param ontology_name: str name of ontology to get map of term labels to term IDs
         """
-        if ontology_name not in self.cxg_schema.supported_ontologies:
-            raise ValueError(f"{ontology_name} is not a supported ontology, its metadata cannot be fetched.")
+        supported_ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_name)
+        if not supported_ontology_name:
+            raise ValueError(f"{supported_ontology_name} is not a supported ontology, its metadata cannot be fetched.")
 
-        if self.term_label_to_id_map[ontology_name]:
-            return self.term_label_to_id_map[ontology_name]
+        if self.term_label_to_id_map[supported_ontology_name]:
+            return self.term_label_to_id_map[supported_ontology_name]
 
-        for term_id, term_metadata in self.cxg_schema.ontology(ontology_name).items():
-            self.term_label_to_id_map[ontology_name][term_metadata["label"]] = term_id
+        for term_id, term_metadata in self.cxg_schema.ontology(supported_ontology_name).items():
+            self.term_label_to_id_map[supported_ontology_name][term_metadata["label"]] = term_id
 
-        return self.term_label_to_id_map[ontology_name]
+        return self.term_label_to_id_map[supported_ontology_name]
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
@@ -63,11 +64,30 @@ class OntologyParser:
         if not re.match(pattern, term_id):
             raise ValueError(f"{term_id} does not conform to expected regex pattern {pattern} and cannot be queried.")
 
-        ontology_name = term_id.split(":")[0]
-        if ontology_name not in self.cxg_schema.supported_ontologies:
+        ontology_term_prefix = term_id.split(":")[0]
+        ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_term_prefix)
+        if not ontology_name:
             raise ValueError(f"{term_id} is not part of a supported ontology, its metadata cannot be fetched.")
 
         return ontology_name
+
+    def _get_supported_ontology_name(self, ontology_term_prefix: str) -> Optional[str]:
+        """
+        Get the source ontology name for a given ontology term prefix, if it is supported by the CxG schema.
+
+        If ontology_term_prefix is directly supported by the CxG schema, returns ontology_term_prefix.
+        If ontology_term_prefix is supported as an import from another ontology, returns the name of the source ontology
+        it is imported in.
+        Otherwise, returns None.
+
+        :param ontology_term_prefix: str ontology term prefix to check
+        :return: str name of ontology that term belongs to, or None if it is not directly supported nor imported in
+        a supported ontology in the CxG schema.
+        """
+        if ontology_term_prefix in self.cxg_schema.supported_ontologies:
+            return ontology_term_prefix
+        supported_ontology_name: Optional[str] = self.cxg_schema.imported_ontologies.get(ontology_term_prefix)
+        return supported_ontology_name
 
     def is_valid_term_id(self, term_id: str, ontology: Optional[str] = None) -> bool:
         """
