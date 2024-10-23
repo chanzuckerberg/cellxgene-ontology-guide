@@ -4,7 +4,7 @@
   "description": "A schema for the set of valid ontology reference files mapping to a CZ CellXGene Dataset Schema Versions",
   "type": "object",
   "patternProperties": {
-    "^[0-9]+\\.[0-9]+\\.[0-9]+$": {
+    "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$": {
       "description": "The version of CellxGene schema that maps to this set of ontology versions",
       "type": "object",
       "properties": {
@@ -40,6 +40,15 @@
               "$ref": "#/definitions/ontologyEntry"
             },
             "PATO": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "FBbt": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "FBdv": {
+              "$ref": "#/definitions/ontologyEntry"
+            },
+            "ZFA": {
               "$ref": "#/definitions/ontologyEntry"
             }
           }
