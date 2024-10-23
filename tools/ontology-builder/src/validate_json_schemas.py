@@ -77,7 +77,7 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
 
 
 def validate_unique_ontologies(data):
-    """"
+    """ "
     Custom validation logic to check that all ontologies (including additional_ontologies) defined in ontology_info
     are unique across entries
     """
@@ -87,8 +87,10 @@ def validate_unique_ontologies(data):
             all_ontologies.append(ontology)
             all_ontologies.extend(ontology_info.get("additional_ontologies", []))
         if len(all_ontologies) != len(set(all_ontologies)):
-            logger.error("Ontology entries must be unique across all ontology entries, including "
-                         f"additional_ontologies. Duplicates found in definition for {schema_version}")
+            logger.error(
+                "Ontology entries must be unique across all ontology entries, including "
+                f"additional_ontologies. Duplicates found in definition for {schema_version}"
+            )
             raise ValueError
 
 
