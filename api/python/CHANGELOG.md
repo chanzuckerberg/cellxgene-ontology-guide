@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.2.0...python-api-v1.3.0) (2024-10-23)
+
+
+### Features
+
+* query cross-ontology terms imported into a supported ontology ([#232](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/232)) ([2e1a834](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2e1a834ad87f5ca8097b5943727a768f7fadbcd3))
+
 ## [1.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.1.0...python-api-v1.2.0) (2024-09-04)
 
 

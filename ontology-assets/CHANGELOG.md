@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.1.0...ontology-assets-v1.2.0) (2024-10-23)
+
+
+### Features
+
+* prototype to support multiple prefixes ([#225](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/225)) ([dbcdd29](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/dbcdd297e2f06ca0f833cb293a7bc584d06ae738))
+
 ## [1.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.0.2...ontology-assets-v1.1.0) (2024-09-04)
 
 
