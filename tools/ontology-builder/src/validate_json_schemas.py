@@ -76,8 +76,8 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
     return True
 
 
-def validate_unique_ontologies(data):
-    """ "
+def validate_unique_ontologies(data) -> None:
+    """
     Custom validation logic to check that all ontologies (including additional_ontologies) defined in ontology_info
     are unique across entries
     """
