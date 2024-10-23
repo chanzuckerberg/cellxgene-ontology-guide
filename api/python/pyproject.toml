@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cellxgene_ontology_guide"
-version = "1.2.0"
+version = "1.3.0+experimental"
 description = "Access ontology metadata used by CZ cellxgene"
 authors = [
     { name = "Chan Zuckerberg Initiative Foundation", email = "cellxgene@chanzuckerberg.com" }
