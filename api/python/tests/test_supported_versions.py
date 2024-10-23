@@ -15,12 +15,25 @@ MODULE_PATH = "cellxgene_ontology_guide.supported_versions"
 
 
 @pytest.fixture
-def initialized_CXGSchemaInfo(mock_load_supported_versions):
-    mock_load_supported_versions.return_value = {
+def ontology_info_content():
+    return {
         "5.0.0": {
-            "ontologies": {"CL": {"version": "v2024-01-01", "source": "http://example.com", "filename": "cl.owl"}}
+            "ontologies": {
+                "CL": {"version": "v2024-01-01", "source": "http://example.com", "filename": "cl.owl"},
+                "HANCESTRO": {
+                    "version": "v2024-01-01",
+                    "source": "http://example.com",
+                    "filename": "hancestro.owl",
+                    "additional_ontologies": ["FOO", "OOF"],
+                },
+            }
         }
     }
+
+
+@pytest.fixture
+def initialized_CXGSchemaInfo(mock_load_supported_versions, ontology_info_content):
+    mock_load_supported_versions.return_value = ontology_info_content
     return CXGSchema()
 
 
@@ -77,12 +90,10 @@ def test_coerce_version(version, expected):
 
 
 class TestCXGSchema:
-    def test__init__defaults(self, mock_load_supported_versions):
-        support_versions = {"5.0.0": {"ontologies": {}}, "0.0.1": {"ontologies": {}}}
-        mock_load_supported_versions.return_value = support_versions
-        cxgs = CXGSchema()
-        assert cxgs.version == "5.0.0"
-        assert cxgs.supported_ontologies == support_versions["5.0.0"]["ontologies"]
+    def test__init__defaults(self, ontology_info_content, initialized_CXGSchemaInfo):
+        assert initialized_CXGSchemaInfo.version == "5.0.0"
+        assert initialized_CXGSchemaInfo.supported_ontologies == ontology_info_content["5.0.0"]["ontologies"]
+        assert initialized_CXGSchemaInfo.imported_ontologies == {"FOO": "HANCESTRO", "OOF": "HANCESTRO"}
 
     @pytest.mark.parametrize("version", ["v0.0.1", "0.0.1"])
     def test__init__specific_version(self, version, mock_load_supported_versions):

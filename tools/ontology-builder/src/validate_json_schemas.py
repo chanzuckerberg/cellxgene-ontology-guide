@@ -3,7 +3,7 @@ import json
 import logging
 import os.path
 import sys
-from typing import Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple
 
 import env
 from jsonschema import validate
@@ -67,10 +67,31 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
 
     try:
         validate(instance=data, schema=schema, registry=registry)
+        # custom logic for ontology_info definition
+        if "ontology_info" in schema_file_name:
+            validate_unique_ontologies(data)
     except Exception:
         logger.exception(f"Error validating {json_file_name} against {schema_file_name}")
         return False
     return True
+
+
+def validate_unique_ontologies(data: Dict[str, Any]) -> None:
+    """
+    Custom validation logic to check that all ontologies (including additional_ontologies) defined in ontology_info
+    are unique across entries
+    """
+    for schema_version, version_info in data.items():
+        all_ontologies = []
+        for ontology, ontology_info in version_info["ontologies"].items():
+            all_ontologies.append(ontology)
+            all_ontologies.extend(ontology_info.get("additional_ontologies", []))
+        if len(all_ontologies) != len(set(all_ontologies)):
+            logger.error(
+                "Ontology entries must be unique across all ontology entries, including "
+                f"additional_ontologies. Duplicates found in definition for {schema_version}"
+            )
+            raise ValueError
 
 
 def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:

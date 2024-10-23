@@ -14,32 +14,8 @@
         },
         "ontologies": {
           "type": "object",
-          "properties": {
-            "CL": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "EFO": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "HANCESTRO": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "HsapDv": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "MONDO": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "MmusDv": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "NCBITaxon": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "UBERON": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "PATO": {
+          "patternProperties": {
+            "^[A-Za-z0-9]+$": {
               "$ref": "#/definitions/ontologyEntry"
             },
             "FBbt": {
@@ -51,7 +27,8 @@
             "ZFA": {
               "$ref": "#/definitions/ontologyEntry"
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
       "required": [
