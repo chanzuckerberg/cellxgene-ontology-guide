@@ -3,7 +3,7 @@ import json
 import logging
 import os.path
 import sys
-from typing import Iterable, Tuple
+from typing import Any, Dict, Iterable, Tuple
 
 import env
 from jsonschema import validate
@@ -76,7 +76,7 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
     return True
 
 
-def validate_unique_ontologies(data: dict) -> None:
+def validate_unique_ontologies(data: Dict[str, Any]) -> None:
     """
     Custom validation logic to check that all ontologies (including additional_ontologies) defined in ontology_info
     are unique across entries
