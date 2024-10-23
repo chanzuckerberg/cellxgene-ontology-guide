@@ -1,5 +1,6 @@
 import gzip
 import json
+import os
 
 import pytest
 from referencing import Resource
@@ -108,3 +109,84 @@ class TestVerifyJson:
 
         # Assert validation fails due to invalid schema
         assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is False
+
+
+class TestVerifyJsonCustomLogic:
+    @pytest.fixture
+    def ontology_info_schema_file_fixture(self, tmpdir):
+        ontology_info_schema = os.path.join(
+            os.path.realpath(__file__).rsplit("/", maxsplit=4)[0], "asset-schemas", "ontology_info_schema.json"
+        )
+        with open(ontology_info_schema, "r") as f:
+            schema_data = json.load(f)
+        schema_file = tmpdir.join("ontology_info_schema.json")
+        with open(str(schema_file), "w") as f:
+            json.dump(schema_data, f)
+        return str(schema_file)
+
+    @pytest.fixture
+    def ontology_info_registry_fixture(self, ontology_info_schema_file_fixture, tmpdir):
+        return register_schemas(tmpdir)
+
+    @pytest.fixture
+    def ontology_info_json_data(self):
+        return {
+            "2.0.0": {
+                "ontologies": {
+                    "A": {
+                        "version": "v1",
+                        "source": "https://example.org/ontology/download",
+                        "filename": "a.owl",
+                        "additional_ontologies": ["C"],
+                    },
+                    "B": {
+                        "version": "v2",
+                        "source": "https://example.org/ontology/download",
+                        "filename": "b.owl",
+                        "additional_ontologies": ["D"],
+                    },
+                }
+            },
+            "1.0.0": {
+                "ontologies": {
+                    "A": {
+                        "version": "v1",
+                        "source": "https://example.org/ontology/download",
+                        "filename": "a.owl",
+                    },
+                    "B": {
+                        "version": "v1",
+                        "source": "https://example.org/ontology/download",
+                        "filename": "b.owl",
+                    },
+                }
+            },
+        }
+
+    def test_validate_unique_ontologies(
+        self, ontology_info_json_data, ontology_info_schema_file_fixture, tmpdir, ontology_info_registry_fixture
+    ):
+        json_file = tmpdir.join("ontology_info.json")
+        with open(str(json_file), "w") as f:
+            json.dump(ontology_info_json_data, f)
+
+        # Assert validation passes
+        assert verify_json(ontology_info_schema_file_fixture, str(json_file), ontology_info_registry_fixture) is True
+
+    @pytest.mark.parametrize("additional_ontologies", [["C"], ["A"]])
+    def test_validate_unique_ontologies__invalid(
+        self,
+        additional_ontologies,
+        ontology_info_json_data,
+        ontology_info_schema_file_fixture,
+        tmpdir,
+        ontology_info_registry_fixture,
+    ):
+        # Create invalid JSON data
+        ontology_info_json_data["2.0.0"]["ontologies"]["B"]["additional_ontologies"] = additional_ontologies
+        json_file = tmpdir.join("ontology_info.json")
+        with open(str(json_file), "w") as f:
+            json.dump(ontology_info_json_data, f)
+
+        # Assert validation fails
+        assert verify_json(ontology_info_schema_file_fixture, str(json_file), ontology_info_registry_fixture) is False

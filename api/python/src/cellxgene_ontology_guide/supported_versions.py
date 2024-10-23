@@ -58,8 +58,9 @@ class CXGSchema:
     supported_ontologies: Dict[str, Any]
     """A dictionary of supported ontologies for the schema version."""
     imported_ontologies: Dict[str, str]
-    """A dictionary of ontologies with terms imported into supported ontologies, mapped to the supported ontology
-    importing them."""
+    """In our supported ontologies, the CxG schema can support terms imported from different ontologies. 
+    This dictionary maps these 'additional ontologies' to their supported ontology name. For example, 
+    for ZFS ontology terms imported into the ZFA ontology, imported_ontologies would be {"ZFS":"ZFA", ...}"""
     ontology_file_names: Dict[str, str]
     """A dictionary of ontology names and their corresponding file names."""
 
