@@ -70,19 +70,29 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
         onto_ref_data = ontology_info[_ontology]
         return f"{onto_ref_data['source']}/{onto_ref_data['version']}/{onto_ref_data['filename']}"
 
-    threads = []
-    for ontology, _ in ontology_info.items():
-        url = _build_url(ontology)
+    def _check_url(_ontology: str, _url: str) -> None:
         try:
-            urllib.request.urlopen(url)
+            urllib.request.urlopen(_url)
         except HTTPError as e:
-            raise Exception(f"{ontology} with pinned URL {url} returns status code {e.code}") from e
+            raise Exception(f"{_ontology} with pinned URL {_url} returns status code {e.code}") from e
         except URLError as e:
-            raise Exception(f"{ontology} with pinned URL {url} fails due to {e.reason}") from e
+            raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
+
+    threads = []
+    for ontology, info in ontology_info.items():
+        url = _build_url(ontology)
+        _check_url(ontology, url)
 
         t = Thread(target=download, args=(ontology, url))
         t.start()
         threads.append(t)
+        if bridges := info.get("bridges"):
+            for bridge_ontology, bridge_url in bridges.items():
+                bridge_ontology = f"{ontology}_to_{bridge_ontology}"
+                _check_url(bridge_ontology, bridge_url)
+                t = Thread(target=download, args=(bridge_ontology, bridge_url))
+                t.start()
+                threads.append(t)
 
     for t in threads:
         t.join()
@@ -162,12 +172,28 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
     }
 
 
-def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass, allowed_ontologies: list[str]) -> Dict[str, Any]:
+def _extract_bridge_terms(onto_term: owlready2.entity.ThingClass, bridge_ontologies: Dict[str, str]) -> Dict[str, str]:
+    """
+    Extract mapping of ontology term ID to equivalent term IDs in another ontology.
+
+    :param: onto_term: Ontology Term ID to find equivalent terms for
+    :param: bridge_ontologies: Map of ontologies to bridge file URIs to extract equivalent terms from
+    :return: Dict[str, str] map of bridged ontology term prefix to the equivalent term ID in that ontology for
+    onto_term, i.e. ZFA:0000001 -> {"UBERON": "UBERON:0000001", "CL": "CL:0000001",...}
+    """
+    # TODO: implement
+    return {}
+
+
+def _extract_ontology_term_metadata(
+    onto: owlready2.entity.ThingClass, allowed_ontologies: list[str], bridge_ontologies: Dict[str, str]
+) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
     :param: allowed_ontologies: List of term prefixes to filter out terms that are not direct children from this ontology
+    :param: bridge_ontologies: Bridge files to map terms to equivalent terms in another ontology
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
@@ -190,6 +216,8 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass, allowed_o
         # only write the ancestors if it's not NCBITaxon, as this saves a lot of disk space and there is
         # no current use-case for NCBITaxon
         term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
+
+        term_dict[term_id]["bridge_terms"] = _extract_bridge_terms(onto_term, bridge_ontologies)
 
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""
 
@@ -269,7 +297,8 @@ def _parse_ontologies(
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
-        onto_dict = _extract_ontology_term_metadata(onto, allowed_ontologies)
+        bridge_ontologies = ontology_info[onto.name].get("bridges", [])
+        onto_dict = _extract_ontology_term_metadata(onto, allowed_ontologies, bridge_ontologies)
 
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
