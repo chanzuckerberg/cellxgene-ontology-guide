@@ -298,7 +298,7 @@ def _parse_ontologies(
     :return: path to the output json file
     """
     for onto_file in os.listdir(working_dir):
-        if onto_file.startswith("."):
+        if not onto_file.endswith(".owl"):
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
         version = ontology_info[onto.name]["version"]
