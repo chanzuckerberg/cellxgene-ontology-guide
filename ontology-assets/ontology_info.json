@@ -4,7 +4,8 @@
       "CL": {
         "version": "v2024-08-16",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download",
-        "filename": "cl.owl"
+        "filename": "cl.owl",
+        "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
         "version": "v3.69.0",
@@ -39,7 +40,8 @@
       "UBERON": {
         "version": "v2024-08-07",
         "source": "https://github.com/obophenotype/uberon/releases/download",
-        "filename": "uberon.owl"
+        "filename": "uberon.owl",
+        "cross_ontology_mapping": "uberon.sssom.tsv"
       },
       "PATO": {
         "version": "v2023-05-18",
@@ -50,10 +52,10 @@
         "version": "v2024-10-17",
         "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
         "filename": "fbbt.owl",
-        "bridges": {
-          "CL": "https://github.com/obophenotype/uberon/raw/refs/heads/master/src/ontology/bridge/cl-bridge-to-fbbt.owl",
-          "UBERON": "https://github.com/obophenotype/uberon/raw/refs/heads/master/src/ontology/bridge/uberon-bridge-to-fbbt.owl"
-        }
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
       },
       "FBdv": {
         "version": "v2024-10-17",
@@ -67,10 +69,10 @@
         "additional_ontologies": [
           "ZFS"
         ],
-        "bridges": {
-          "CL": "https://github.com/obophenotype/uberon/raw/refs/heads/master/src/ontology/bridge/cl-bridge-to-zfa.owl",
-          "UBERON": "https://github.com/obophenotype/uberon/raw/refs/heads/master/src/ontology/bridge/cl-bridge-to-zfa.owl"
-        }
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
       }
     }
   },

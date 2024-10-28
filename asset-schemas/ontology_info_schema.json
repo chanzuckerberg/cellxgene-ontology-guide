@@ -52,19 +52,23 @@
           },
           "description": "List of additional term id prefixes to extracted from the source ontology file."
         },
-        "bridges": {
-          "type": "object",
-          "description": "ontology with mapping files from their terms to this ontology entry's terms.",
-          "patternProperties": {
-            "^[A-Za-z0-9]+$": {
-              "type": "string",
-              "format": "uri",
-              "description": "URI to file mapping between the ontology entry and this ontology"
-            }
-          },
-          "additionalProperties": false
+        "cross_ontology_mapping": {
+          "type": "string",
+          "description": "name of SSSOM file mapping this ontology's terms to cross-species equivalent ontology terms."
+        },
+        "map_to": {
+          "type": "array",
+            "items": {
+                "type": "string"
+            },
+          "description": "List of ontologies to map equivalent terms to this ontology"
         }
-      }
+      },
+      "required": [
+        "version",
+        "source",
+        "filename"
+      ]
     }
   }
 }

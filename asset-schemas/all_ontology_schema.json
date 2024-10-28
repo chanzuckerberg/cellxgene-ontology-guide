@@ -31,7 +31,7 @@
           "type": "integer"
         }
       },
-      "bridge_terms": {
+      "cross_ontology_terms": {
         "type": "object",
         "description": "Map of bridge terms that connect this ontology term to other ontologies.",
         "patternProperties": {

@@ -53,22 +53,28 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     """
 
     def download(_ontology: str, _url: str) -> None:
-        logging.info(f"Start Downloading {_ontology}")
+        logging.info(f"Start Downloading {_url}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
-
         output_file = os.path.join(output_dir, _ontology + ".owl")
-        if download_format == "gz":
+        if download_format == "tsv":
+            output_file = os.path.join(output_dir, _ontology + ".sssom.tsv")
+            urllib.request.urlretrieve(_url, output_file)
+        elif download_format == "gz":
             urllib.request.urlretrieve(_url, output_file + ".gz")
             _decompress(output_file + ".gz", output_file)
             os.remove(output_file + ".gz")
         else:
             urllib.request.urlretrieve(_url, output_file)
-        logging.info(f"Finish Downloading {_ontology}")
+        logging.info(f"Finish Downloading {_url}")
 
-    def _build_url(_ontology: str) -> str:
+    def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
-        return f"{onto_ref_data['source']}/{onto_ref_data['version']}/{onto_ref_data['filename']}"
+        base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
+        download_urls = [f"{base_url}/{onto_ref_data['filename']}"]
+        if onto_ref_data.get("cross_ontology_mapping"):
+            download_urls.append(f"{base_url}/{onto_ref_data['cross_ontology_mapping']}")
+        return download_urls
 
     def _check_url(_ontology: str, _url: str) -> None:
         try:
@@ -79,20 +85,13 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
 
     threads = []
-    for ontology, info in ontology_info.items():
-        url = _build_url(ontology)
-        _check_url(ontology, url)
-
-        t = Thread(target=download, args=(ontology, url))
-        t.start()
-        threads.append(t)
-        if bridges := info.get("bridges"):
-            for bridge_ontology, bridge_url in bridges.items():
-                bridge_ontology = f"{ontology}_to_{bridge_ontology}"
-                _check_url(bridge_ontology, bridge_url)
-                t = Thread(target=download, args=(bridge_ontology, bridge_url))
-                t.start()
-                threads.append(t)
+    for ontology, _ in ontology_info.items():
+        urls = _build_urls(ontology)
+        for url in urls:
+            _check_url(ontology, url)
+            t = Thread(target=download, args=(ontology, url))
+            t.start()
+            threads.append(t)
 
     for t in threads:
         t.join()
@@ -172,28 +171,37 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
     }
 
 
-def _extract_bridge_terms(onto_term: owlready2.entity.ThingClass, bridge_ontologies: Dict[str, str]) -> Dict[str, str]:
+def _extract_cross_ontology_terms(term_id: str, cross_ontologies: List[str]) -> Dict[str, str]:
     """
     Extract mapping of ontology term ID to equivalent term IDs in another ontology.
 
-    :param: onto_term: Ontology Term ID to find equivalent terms for
-    :param: bridge_ontologies: Map of ontologies to bridge file URIs to extract equivalent terms from
-    :return: Dict[str, str] map of bridged ontology term prefix to the equivalent term ID in that ontology for
-    onto_term, i.e. ZFA:0000001 -> {"UBERON": "UBERON:0000001", "CL": "CL:0000001",...}
+    :param: term_id: Ontology Term ID to find equivalent terms for
+    :param: cross_ontologies: Ontologies to map equivalent terms to
+    :return: Dict[str, str] map of ontology to the equivalent term ID in that ontology for the given
+    term_id, i.e. ZFA:0000001 -> {"UBERON": "UBERON:0000001", "CL": "CL:0000001",...}
     """
-    # TODO: implement
-    return {}
+    cross_ontology_terms = {}
+    for cross_ontology in cross_ontologies:
+        # load tsv, assume SSSOM format for now
+        with open(os.path.join(env.RAW_ONTOLOGY_DIR, f"{cross_ontology}.sssom.tsv"), "r") as f:
+            for line in f:
+                if term_id in line:
+                    # extract equivalent term IDs
+                    cross_ontology_terms[cross_ontology] = line.split("\t")[0]
+                    break
+        # TODO: what if this ontology isn't in the SSSOM file, but there is another mapping file?
+    return cross_ontology_terms
 
 
 def _extract_ontology_term_metadata(
-    onto: owlready2.entity.ThingClass, allowed_ontologies: list[str], bridge_ontologies: Dict[str, str]
+    onto: owlready2.entity.ThingClass, allowed_ontologies: List[str], cross_ontologies: List[str]
 ) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
     :param: allowed_ontologies: List of term prefixes to filter out terms that are not direct children from this ontology
-    :param: bridge_ontologies: Bridge files to map terms to equivalent terms in another ontology
+    :param: cross_ontologies: str Ontology to map equivalent terms to
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
@@ -217,7 +225,7 @@ def _extract_ontology_term_metadata(
         # no current use-case for NCBITaxon
         term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
 
-        term_dict[term_id]["bridge_terms"] = _extract_bridge_terms(onto_term, bridge_ontologies)
+        term_dict[term_id]["cross_ontology_terms"] = _extract_cross_ontology_terms(term_id, cross_ontologies)
 
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""
 
@@ -297,8 +305,8 @@ def _parse_ontologies(
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
-        bridge_ontologies = ontology_info[onto.name].get("bridges", [])
-        onto_dict = _extract_ontology_term_metadata(onto, allowed_ontologies, bridge_ontologies)
+        cross_ontologies = ontology_info[onto.name].get("map_to", [])
+        onto_dict = _extract_ontology_term_metadata(onto, allowed_ontologies, cross_ontologies)
 
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
