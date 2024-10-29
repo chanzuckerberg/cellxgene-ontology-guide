@@ -125,6 +125,33 @@ def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
     return onto
 
 
+def _load_cross_ontology_map(working_dir: str, ontology_info: Any) -> Dict[str, Dict[str, str]]:
+    """
+    Load cross ontology mapping from file and write into python dict
+
+    :param str working_dir: path to folder with ontology files
+    :param ANY ontology_info: the ontology references used to download the ontology files. It follows this [schema](
+    ./asset-schemas/ontology_info_schema.json)
+    :return Dict[str, Dict[str, str]]: per ontology, a dict of known equivalent term IDs in other ontologies
+    """
+    cross_ontology_map: Dict[str, Dict[str, str]] = {}
+    cross_ontologies = [
+        ontology for ontology, info in ontology_info.items() if info.get("cross_ontology_mapping") is not None
+    ]
+    for cross_ontology in cross_ontologies:
+        cross_ontology_map[cross_ontology] = {}
+        # load tsv, assume SSSOM format for now
+        try:
+            with open(os.path.join(working_dir, f"{cross_ontology}.sssom.tsv"), "r") as f:
+                for line in f:
+                    if not line.startswith("#") and not line.startswith("subject_id"):
+                        cols = line.split("\t")
+                        cross_ontology_map[cross_ontology][cols[3]] = cols[0]
+        except FileNotFoundError:
+            logging.warning(f"Cross ontology mapping file for {cross_ontology} not found")
+    return cross_ontology_map
+
+
 def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: list[str]) -> Dict[str, int]:
     """
     Returns a list of unique ancestor ontology term ids of the given onto class. Only returns those belonging to
@@ -171,37 +198,38 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
     }
 
 
-def _extract_cross_ontology_terms(term_id: str, cross_ontologies: List[str]) -> Dict[str, str]:
+def _extract_cross_ontology_terms(
+    term_id: str, map_to_cross_ontologies: List[str], cross_ontology_map: Dict[str, Dict[str, str]]
+) -> Dict[str, str]:
     """
     Extract mapping of ontology term ID to equivalent term IDs in another ontology.
 
     :param: term_id: Ontology Term ID to find equivalent terms for
-    :param: cross_ontologies: Ontologies to map equivalent terms to
+    :param: map_to_cross_ontologies: List of ontologies to map equivalent terms to
+    :param: cross_ontology_map: str for each ontology with a mapping, map to known equivalent terms in other ontologies
     :return: Dict[str, str] map of ontology to the equivalent term ID in that ontology for the given
     term_id, i.e. ZFA:0000001 -> {"UBERON": "UBERON:0000001", "CL": "CL:0000001",...}
     """
     cross_ontology_terms = {}
-    for cross_ontology in cross_ontologies:
-        # load tsv, assume SSSOM format for now
-        with open(os.path.join(env.RAW_ONTOLOGY_DIR, f"{cross_ontology}.sssom.tsv"), "r") as f:
-            for line in f:
-                if term_id in line:
-                    # extract equivalent term IDs
-                    cross_ontology_terms[cross_ontology] = line.split("\t")[0]
-                    break
-        # TODO: what if this ontology isn't in the SSSOM file, but there is another mapping file?
+    for cross_ontology in map_to_cross_ontologies:
+        if term_id in cross_ontology_map[cross_ontology]:
+            cross_ontology_terms[cross_ontology] = cross_ontology_map[cross_ontology][term_id]
     return cross_ontology_terms
 
 
 def _extract_ontology_term_metadata(
-    onto: owlready2.entity.ThingClass, allowed_ontologies: List[str], cross_ontologies: List[str]
+    onto: owlready2.entity.ThingClass,
+    allowed_ontologies: List[str],
+    map_to_cross_ontologies: List[str],
+    cross_ontology_map: Dict[str, Dict[str, str]],
 ) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
     :param: allowed_ontologies: List of term prefixes to filter out terms that are not direct children from this ontology
-    :param: cross_ontologies: str Ontology to map equivalent terms to
+    :param: map_to_cross_ontologies: List of ontologies to map equivalent terms to
+    :param: cross_ontology_map: str for each ontology with a mapping, map to known equivalent terms in other ontologies
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
@@ -225,7 +253,9 @@ def _extract_ontology_term_metadata(
         # no current use-case for NCBITaxon
         term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
 
-        term_dict[term_id]["cross_ontology_terms"] = _extract_cross_ontology_terms(term_id, cross_ontologies)
+        term_dict[term_id]["cross_ontology_terms"] = _extract_cross_ontology_terms(
+            term_id, map_to_cross_ontologies, cross_ontology_map
+        )
 
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""
 
@@ -297,6 +327,7 @@ def _parse_ontologies(
     :rtype str
     :return: path to the output json file
     """
+    cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
     for onto_file in os.listdir(working_dir):
         if not onto_file.endswith(".owl"):
             continue
@@ -305,9 +336,10 @@ def _parse_ontologies(
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
-        cross_ontologies = ontology_info[onto.name].get("map_to", [])
-        onto_dict = _extract_ontology_term_metadata(onto, allowed_ontologies, cross_ontologies)
-
+        map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
+        onto_dict = _extract_ontology_term_metadata(
+            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map
+        )
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
         yield output_file
