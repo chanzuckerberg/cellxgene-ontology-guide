@@ -31,6 +31,16 @@
           "type": "integer"
         }
       },
+      "cross_ontology_terms": {
+        "type": "object",
+        "description": "Map of bridge terms that connect this ontology term to other ontologies.",
+        "patternProperties": {
+          "^[A-Za-z0-9]+$": {
+            "$ref": "ontology_term_id_schema.json#/definitions/supported_term_id"
+          }
+        },
+        "additionalProperties": false
+      },
       "comments": {
         "type": "array",
         "items": {
