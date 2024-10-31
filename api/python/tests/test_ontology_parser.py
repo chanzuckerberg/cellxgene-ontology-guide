@@ -72,16 +72,104 @@ def ontology_dict_with_imports():
 
 
 @pytest.fixture
-def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supported_versions, mock_load_ontology_file):
+def ontology_dict_with_cross_ontology_terms():
+    return {
+        # test cases: terms with exact matches + ancestors of terms without exact matches
+        "ZFA:0000000": {
+            "ancestors": {},
+            "cross_ontology_terms": {
+                "CL": "CL:0000000",
+            },
+        },
+        "ZFA:0000001": {
+            "ancestors": {
+                "ZFA:0000000": 1,
+            },
+            "cross_ontology_terms": {
+                "CL": "CL:0000001",
+            },
+        },
+        "ZFA:0000002": {
+            "ancestors": {
+                "ZFA:0000000": 1,
+            },
+            "cross_ontology_terms": {
+                "CL": "CL:0000002",
+            },
+        },
+        "ZFA:0000003": {
+            "ancestors": {
+                "ZFA:0000000": 1,
+            },
+            "cross_ontology_terms": {
+                "CL": "CL:0000003",
+            },
+        },
+        # test case: term with no exact term and multiple closest terms 1 edge away
+        "ZFA:0000004": {
+            "ancestors": {
+                "ZFA:0000001": 1,
+                "ZFA:0000002": 1,
+                "ZFA:0000000": 2,
+            },
+            "cross_ontology_terms": {},
+        },
+        # test case: term with no exact term and 1 closest term, 1 edge away
+        "ZFA:0000005": {
+            "ancestors": {
+                "ZFA:0000003": 1,
+                "ZFA:0000000": 2,
+            },
+            "cross_ontology_terms": {},
+        },
+        # test case: term with no exact term and multiple closest terms 2 edges away
+        "ZFA:0000006": {
+            "ancestors": {
+                "ZFA:0000004": 1,
+                "ZFA:0000005": 1,
+                "ZFA:0000001": 2,
+                "ZFA:0000002": 2,
+                "ZFA:0000003": 2,
+                "ZFA:0000000": 3,
+            },
+            "cross_ontology_terms": {},
+        },
+        # test case: term with no exact or closest term
+        "ZFA:0000007": {
+            "ancestors": {},
+            "cross_ontology_terms": {},
+        },
+    }
+
+
+@pytest.fixture
+def mock_CXGSchema(
+    ontology_dict,
+    ontology_dict_with_imports,
+    ontology_dict_with_cross_ontology_terms,
+    mock_load_supported_versions,
+    mock_load_ontology_file,
+):
     mock_load_supported_versions.return_value = {
         "5.0.0": {
             "ontologies": {
-                "CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"},
+                "CL": {
+                    "version": "2024-01-01",
+                    "source": "http://example.com",
+                    "filename": "cl.owl",
+                    "cross_ontology_mapping": "cl.sssom",
+                },
                 "HANCESTRO": {
                     "version": "2024-01-01",
                     "source": "http://example.com",
                     "filename": "cl.owl",
                     "additional_ontologies": ["AfPO"],
+                },
+                "ZFA": {
+                    "version": "2024-01-01",
+                    "source": "http://example.com",
+                    "filename": "zfa.owl",
+                    "map_to": ["CL"],
                 },
             }
         }
@@ -90,6 +178,7 @@ def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supporte
     cxg_schema.ontology_file_names = {
         "CL": "CL-ontology-2024-01-01.json.gz",
         "HANCESTRO": "HANCESTRO-ontology-2024-01-01.json.gz",
+        "ZFA": "ZFA-ontology-2024-01-01.json.gz",
     }
 
     def get_mock_ontology_dict(file_name):
@@ -97,6 +186,8 @@ def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supporte
             return ontology_dict
         if "HANCESTRO" in file_name:
             return ontology_dict_with_imports
+        if "ZFA" in file_name:
+            return ontology_dict_with_cross_ontology_terms
         return None
 
     mock_load_ontology_file.side_effect = get_mock_ontology_dict
@@ -584,3 +675,27 @@ def test_get_term_id_by_label(ontology_parser, label, ontology_name, expected):
 def test_get_term_id_by_label__unsupported_ontology_name(ontology_parser):
     with pytest.raises(ValueError):
         ontology_parser.get_term_id_by_label("gene A", "GO")
+
+
+@pytest.mark.parametrize("term_id,expected", [("ZFA:0000000", "CL:0000000"), ("ZFA:0000004", None)])
+def test_get_bridge_term_id(ontology_parser, term_id, expected):
+    assert ontology_parser.get_bridge_term_id(term_id, "CL") == expected
+
+
+def test_get_bridge_term_id__unsupported_cross_ontology(ontology_parser):
+    with pytest.raises(ValueError):
+        ontology_parser.get_bridge_term_id("ZFA:0000000", "HANCESTRO")
+
+
+@pytest.mark.parametrize(
+    "term_id,expected",
+    [
+        ("ZFA:0000007", []),
+        ("ZFA:0000006", ["CL:0000001", "CL:0000002", "CL:0000003"]),
+        ("ZFA:0000005", ["CL:0000003"]),
+        ("ZFA:0000004", ["CL:0000001", "CL:0000002"]),
+        ("ZFA:0000000", ["CL:0000000"]),
+    ],
+)
+def test_get_closest_bridge_term_ids(ontology_parser, term_id, expected):
+    assert ontology_parser.get_closest_bridge_term_ids(term_id, "CL") == expected

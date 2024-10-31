@@ -683,8 +683,11 @@ class OntologyParser:
         :param cross_ontology: str name of ontology to search for equivalent term in
         :return: Optional[str] equivalent term ID from the cross_ontology
         """
-        # TODO: best way to communicate that we only support querying bridge terms for certain ontologies
-        # (i.e. ZFS/FBBT -> CL/UBERON) and not all of our supported ontologies?
+        if cross_ontology not in self.cxg_schema.cross_ontology_mappings:
+            raise ValueError(
+                f"{cross_ontology} is not in the set of supported cross ontology mappings "
+                f"{self.cxg_schema.cross_ontology_mappings}."
+            )
         ontology_name = self._parse_ontology_name(term_id)
         bridge_term_id: Optional[str] = self.cxg_schema.ontology(ontology_name)[term_id]["cross_ontology_terms"].get(
             cross_ontology
@@ -706,7 +709,7 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.get_bridge_term_id("FBbt:00000039", "UBERON")
+        >>> ontology_parser.get_closest_bridge_term_ids("FBbt:00000039", "UBERON")
         ['UBERON:0000476', 'UBERON:0000920']
 
         :param term_id: str ontology term to find closest term for
