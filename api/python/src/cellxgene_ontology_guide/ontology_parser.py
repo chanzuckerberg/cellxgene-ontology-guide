@@ -689,9 +689,10 @@ class OntologyParser:
                 f"{self.cxg_schema.cross_ontology_mappings}."
             )
         ontology_name = self._parse_ontology_name(term_id)
-        bridge_term_id: Optional[str] = self.cxg_schema.ontology(ontology_name)[term_id]["cross_ontology_terms"].get(
-            cross_ontology
-        )
+        cross_ontology_terms = self.cxg_schema.ontology(ontology_name)[term_id].get("cross_ontology_terms")
+        bridge_term_id: Optional[str] = None
+        if cross_ontology_terms:
+            bridge_term_id = cross_ontology_terms.get(cross_ontology)
         return bridge_term_id
 
     def get_closest_bridge_term_ids(self, term_id: str, cross_ontology: str) -> List[str]:

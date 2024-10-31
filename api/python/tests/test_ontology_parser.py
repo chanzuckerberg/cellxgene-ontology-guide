@@ -112,7 +112,6 @@ def ontology_dict_with_cross_ontology_terms():
                 "ZFA:0000002": 1,
                 "ZFA:0000000": 2,
             },
-            "cross_ontology_terms": {},
         },
         # test case: term with no exact term and 1 closest term, 1 edge away
         "ZFA:0000005": {
@@ -120,7 +119,6 @@ def ontology_dict_with_cross_ontology_terms():
                 "ZFA:0000003": 1,
                 "ZFA:0000000": 2,
             },
-            "cross_ontology_terms": {},
         },
         # test case: term with no exact term and multiple closest terms 2 edges away
         "ZFA:0000006": {
@@ -132,12 +130,10 @@ def ontology_dict_with_cross_ontology_terms():
                 "ZFA:0000003": 2,
                 "ZFA:0000000": 3,
             },
-            "cross_ontology_terms": {},
         },
         # test case: term with no exact or closest term
         "ZFA:0000007": {
             "ancestors": {},
-            "cross_ontology_terms": {},
         },
     }
 

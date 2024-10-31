@@ -253,9 +253,8 @@ def _extract_ontology_term_metadata(
         # no current use-case for NCBITaxon
         term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
 
-        term_dict[term_id]["cross_ontology_terms"] = _extract_cross_ontology_terms(
-            term_id, map_to_cross_ontologies, cross_ontology_map
-        )
+        if cross_ontology_terms := _extract_cross_ontology_terms(term_id, map_to_cross_ontologies, cross_ontology_map):
+            term_dict[term_id]["cross_ontology_terms"] = cross_ontology_terms
 
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""
 
