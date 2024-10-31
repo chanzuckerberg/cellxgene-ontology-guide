@@ -84,6 +84,9 @@ class CXGSchema:
             for ontology, info in self.supported_ontologies.items()
             for imported_ontology in info.get("additional_ontologies", [])
         }
+        self.cross_ontology_mappings = {
+            ontology for ontology, info in self.supported_ontologies.items() if info.get("cross_ontology_mapping")
+        }
         self.ontology_file_names: Dict[str, str] = {}
         self.deprecated_on = ontology_info[_version].get("deprecated_on")
         if self.deprecated_on:
