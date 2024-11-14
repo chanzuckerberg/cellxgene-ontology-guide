@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.1.0...ontology-assets-v1.2.0) (2024-11-14)
+
+
+### Features
+
+* prototype to support multiple prefixes ([#225](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/225)) ([dbcdd29](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/dbcdd297e2f06ca0f833cb293a7bc584d06ae738))
+* update EFO to 3.71.0 ([#242](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/242)) ([7a92c0f](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/7a92c0fdb72b983c308da257594dc6be89f5c992))
+
 ## [1.1.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.0.2...ontology-assets-v1.1.0) (2024-09-04)
 
 
