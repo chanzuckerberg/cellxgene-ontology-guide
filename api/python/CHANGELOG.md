@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.2.0...python-api-v1.3.0) (2024-11-14)
+
+
+### Features
+
+* query cross-ontology terms imported into a supported ontology ([#232](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/232)) ([2e1a834](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2e1a834ad87f5ca8097b5943727a768f7fadbcd3))
+* update EFO to 3.71.0 ([#242](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/242)) ([7a92c0f](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/7a92c0fdb72b983c308da257594dc6be89f5c992))
+
+
+### Misc
+
+* add test to ensure all supported ontologies are supported by COG API ([#236](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/236)) ([56051f9](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/56051f97015ca0bf0ebbd9992ab6d66a9d3abec6))
+
 ## [1.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.1.0...python-api-v1.2.0) (2024-09-04)
 
 
