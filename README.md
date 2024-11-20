@@ -21,8 +21,7 @@ If you believe you have found a security issue, please responsibly disclose by c
 ## Release Please
 
 [Release-please]() is used to manage the release process for this repository. To make changes to how releases are
-managed, update [.release-please.yml](./release-please-config.json). [This GHA workflow](.github/workflows/release.
-yml) performs the release.
+managed, update [.release-please.yml](./release-please-config.json). [This GHA workflow](.github/workflows/release.yml) performs the release.
 
 For instruction on how to release the different components of this repository, see the following:
 
