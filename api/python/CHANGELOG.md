@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.3.0...python-api-v1.4.0) (2024-11-21)
+
+
+### Features
+
+* fix string error in python release ([#244](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/244)) ([1587423](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/158742320cf7d903bd61d9fcf4178b9d7fee2b28))
+
+
+### BugFixes
+
+* idempotency issue ([#247](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/247)) ([0eebc68](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0eebc6839fd0a804ad563497610a2b824988f147))
+
 ## [1.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.2.0...python-api-v1.3.0) (2024-11-14)
 
 
