@@ -45,12 +45,12 @@ class OntologyParser:
             raise ValueError(f"{supported_ontology_name} is not a supported ontology, its metadata cannot be fetched.")
 
         if self.term_label_to_id_map[supported_ontology_name]:
-            return self.term_label_to_id_map[supported_ontology_name]
+            return self.term_label_to_id_map[supported_ontology_name].copy()
 
         for term_id, term_metadata in self.cxg_schema.ontology(supported_ontology_name).items():
             self.term_label_to_id_map[supported_ontology_name][term_metadata["label"]] = term_id
 
-        return self.term_label_to_id_map[supported_ontology_name]
+        return self.term_label_to_id_map[supported_ontology_name].copy()
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
@@ -171,10 +171,8 @@ class OntologyParser:
         if term_id in VALID_NON_ONTOLOGY_TERMS:
             return {}
         ontology_name = self._parse_ontology_name(term_id)
-        ancestors: Dict[str, int] = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"]
-        if include_self:
-            ancestors[term_id] = 0
-        return ancestors
+        ancestors: Dict[str, int] = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"].copy()
+        return ancestors | {term_id: 0} if include_self else ancestors
 
     def map_term_ancestors_with_distances(
         self, term_ids: Iterable[str], include_self: bool = False
@@ -626,7 +624,7 @@ class OntologyParser:
         if term_id in VALID_NON_ONTOLOGY_TERMS:
             return []
         ontology_name = self._parse_ontology_name(term_id)
-        synonyms: List[str] = self.cxg_schema.ontology(ontology_name)[term_id].get("synonyms", [])
+        synonyms: List[str] = list(self.cxg_schema.ontology(ontology_name)[term_id].get("synonyms", []))
         return synonyms
 
     def map_term_synonyms(self, term_ids: List[str]) -> Dict[str, List[str]]:
