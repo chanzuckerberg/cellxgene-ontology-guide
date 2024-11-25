@@ -20,6 +20,8 @@ class Ontology(Enum):
     FBbt = "fbbt"
     FBdv = "fbdv"
     ZFA = "zfa"
+    WBbt = "wbbt"
+    WBls = "wbls"
 
 
 class CuratedOntologyTermList(Enum):

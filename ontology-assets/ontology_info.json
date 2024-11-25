@@ -73,6 +73,20 @@
           "CL",
           "UBERON"
         ]
+      },
+      "WBls": {
+        "version": "vWS295",
+        "source": "https://github.com/obophenotype/c-elegans-development-ontology/raw/",
+        "filename": "wbls.owl"
+      },
+      "WBbt": {
+        "version": "vWS295",
+        "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw",
+        "filename": "wbbt.owl",
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
       }
     }
   },

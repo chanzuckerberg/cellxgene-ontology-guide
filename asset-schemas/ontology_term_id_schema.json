@@ -54,6 +54,14 @@
       "type": "string",
       "pattern": "^ZFS+:[0-9]+$"
     },
+    "WBls_term_id": {
+      "type": "string",
+      "pattern": "^WBls+:[0-9]+$"
+    },
+    "WBbt_term_id": {
+      "type": "string",
+      "pattern": "^WBbt+:[0-9]+$"
+    },
     "supported_term_id": {
       "anyOf": [
         {
@@ -96,6 +104,12 @@
         },
         {
           "$ref": "#/definitions/ZFS_term_id"
+        },
+        {
+          "$ref": "#/definitions/WBls_term_id"
+        },
+        {
+          "$ref": "#/definitions/WBbt_term_id"
         }
       ]
     }
