@@ -6,3 +6,7 @@
 .coverage*
 /htmlcov/
 /api/python/docs/
+
+# Compiled python files
+__pycache__/
+*.py[cod]
