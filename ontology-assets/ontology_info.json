@@ -8,7 +8,7 @@
         "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.71.0",
+        "version": "v3.69.0",
         "source": "https://github.com/EBISPOT/efo/releases/download",
         "filename": "efo.owl"
       },
@@ -49,7 +49,7 @@
         "filename": "pato.owl"
       },
       "FBbt": {
-        "version": "v2024-10-17",
+        "version": "v2024-12-05",
         "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
         "filename": "fbbt.owl",
         "map_to": [
@@ -58,7 +58,7 @@
         ]
       },
       "FBdv": {
-        "version": "v2024-10-17",
+        "version": "v2024-12-04",
         "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download",
         "filename": "fbdv.owl"
       },
@@ -83,6 +83,15 @@
         "version": "v2024-09-24",
         "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw",
         "filename": "wbbt.owl",
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
+      },
+      "XAO": {
+        "version": "v2024-09-03",
+        "source": "https://github.com/xenopus-anatomy/xao/releases/download",
+        "filename": "xenopus_anatomy.owl",
         "map_to": [
           "CL",
           "UBERON"
