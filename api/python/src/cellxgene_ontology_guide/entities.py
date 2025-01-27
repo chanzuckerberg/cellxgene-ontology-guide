@@ -22,7 +22,6 @@ class Ontology(Enum):
     ZFA = "zfa"
     WBbt = "wbbt"
     WBls = "wbls"
-    XAO = "xao"
 
 
 class CuratedOntologyTermList(Enum):

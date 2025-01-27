@@ -62,10 +62,6 @@
       "type": "string",
       "pattern": "^WBbt+:[0-9]+$"
     },
-    "XAO_term_id": {
-      "type": "string",
-      "pattern": "^XAO+:[0-9]+$"
-    },
     "supported_term_id": {
       "anyOf": [
         {
@@ -114,9 +110,6 @@
         },
         {
           "$ref": "#/definitions/WBbt_term_id"
-        },
-        {
-          "$ref": "#/definitions/XAO_term_id"
         }
       ]
     }
