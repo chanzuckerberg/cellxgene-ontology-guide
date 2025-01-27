@@ -71,7 +71,9 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
         base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
+            
         download_urls = [f"{base_url}/{onto_ref_data['filename']}"]
+        # this assumes the cross-ontology-map is part of the same repository.
         if onto_ref_data.get("cross_ontology_mapping"):
             download_urls.append(f"{base_url}/{onto_ref_data['cross_ontology_mapping']}")
         return download_urls

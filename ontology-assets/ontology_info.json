@@ -90,7 +90,7 @@
       },
       "XAO": {
         "version": "v2024-09-03",
-        "source": "https://github.com/xenopus-anatomy/xao/releases/download",
+        "source": "https://github.com/xenopus-anatomy/xao/raw",
         "filename": "xenopus_anatomy.owl",
         "map_to": [
           "CL",
