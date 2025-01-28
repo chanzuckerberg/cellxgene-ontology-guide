@@ -8,7 +8,7 @@
         "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.69.0",
+        "version": "v3.74.0",
         "source": "https://github.com/EBISPOT/efo/releases/download",
         "filename": "efo.owl"
       },
