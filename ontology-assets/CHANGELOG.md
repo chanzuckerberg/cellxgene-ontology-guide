@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.3.0...ontology-assets-v1.3.1) (2025-01-28)
+
+
+### BugFixes
+
+* upgrade EFO from 3.69 to 3.74 ([#257](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/257)) ([c38e905](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c38e905c22113c8c83bc632e1e9cdd140510f5b3))
+
 ## [1.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.2.0...ontology-assets-v1.3.0) (2025-01-28)
 
 
