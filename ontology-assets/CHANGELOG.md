@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.2.0...ontology-assets-v1.3.0) (2025-01-28)
+
+
+### Features
+
+* additional species-specific ontologies for cxg 5.3 multispecies schema ([#255](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/255)) ([64c32fe](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/64c32fe91256323e3d5a2eff4153aa4ec63f528e))
+
 ## [1.2.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.1.0...ontology-assets-v1.2.0) (2024-11-14)
 
 
