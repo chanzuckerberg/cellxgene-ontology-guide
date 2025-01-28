@@ -19,7 +19,12 @@ def ontology_info_content():
     return {
         "5.0.0": {
             "ontologies": {
-                "CL": {"version": "v2024-01-01", "source": "http://example.com", "filename": "cl.owl"},
+                "CL": {
+                    "version": "v2024-01-01",
+                    "source": "http://example.com",
+                    "filename": "cl.owl",
+                    "cross_ontology_mapping": "cl.sssom",
+                },
                 "HANCESTRO": {
                     "version": "v2024-01-01",
                     "source": "http://example.com",
@@ -94,6 +99,7 @@ class TestCXGSchema:
         assert initialized_CXGSchemaInfo.version == "5.0.0"
         assert initialized_CXGSchemaInfo.supported_ontologies == ontology_info_content["5.0.0"]["ontologies"]
         assert initialized_CXGSchemaInfo.imported_ontologies == {"FOO": "HANCESTRO", "OOF": "HANCESTRO"}
+        assert initialized_CXGSchemaInfo.cross_ontology_mappings == {"CL"}
 
     @pytest.mark.parametrize("version", ["v0.0.1", "0.0.1"])
     def test__init__specific_version(self, version, mock_load_supported_versions):

@@ -38,6 +38,30 @@
       "type": "string",
       "pattern": "^UBERON+:[0-9]+$"
     },
+    "FBbt_term_id": {
+      "type": "string",
+      "pattern": "^FBbt+:[0-9]+$"
+    },
+    "FBdv_term_id": {
+      "type": "string",
+      "pattern": "^FBdv+:[0-9]+$"
+    },
+    "ZFA_term_id": {
+      "type": "string",
+      "pattern": "^ZFA+:[0-9]+$"
+    },
+    "ZFS_term_id": {
+      "type": "string",
+      "pattern": "^ZFS+:[0-9]+$"
+    },
+    "WBls_term_id": {
+      "type": "string",
+      "pattern": "^WBls+:[0-9]+$"
+    },
+    "WBbt_term_id": {
+      "type": "string",
+      "pattern": "^WBbt+:[0-9]+$"
+    },
     "supported_term_id": {
       "anyOf": [
         {
@@ -66,6 +90,26 @@
         },
         {
           "$ref": "#/definitions/UBERON_term_id"
+        }
+        ,
+        {
+          "$ref": "#/definitions/FBbt_term_id"
+        }
+        ,
+        {
+          "$ref": "#/definitions/FBdv_term_id"
+        },
+        {
+          "$ref": "#/definitions/ZFA_term_id"
+        },
+        {
+          "$ref": "#/definitions/ZFS_term_id"
+        },
+        {
+          "$ref": "#/definitions/WBls_term_id"
+        },
+        {
+          "$ref": "#/definitions/WBbt_term_id"
         }
       ]
     }
