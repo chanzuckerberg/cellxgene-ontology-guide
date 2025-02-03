@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.0...python-api-v1.4.1) (2025-01-28)
+
+
+### BugFixes
+
+* upgrade EFO from 3.69 to 3.74 ([#257](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/257)) ([c38e905](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c38e905c22113c8c83bc632e1e9cdd140510f5b3))
+
+## [1.4.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.3.1...python-api-v1.4.0) (2025-01-28)
+
+
+### Features
+
+* additional species-specific ontologies for cxg 5.3 multispecies schema ([#255](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/255)) ([64c32fe](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/64c32fe91256323e3d5a2eff4153aa4ec63f528e))
+
 ## [1.3.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.3.0...python-api-v1.3.1) (2024-11-21)
 
 
