@@ -33,9 +33,9 @@
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2024-11-25",
+        "version": "v2023-06-20",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
-        "filename": "ncbitaxon.owl"
+        "filename": "ncbitaxon.owl.gz"
       },
       "UBERON": {
         "version": "v2024-08-07",
