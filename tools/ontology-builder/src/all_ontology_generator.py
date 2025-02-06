@@ -250,6 +250,7 @@ def _extract_ontology_term_metadata(
             continue
 
         term_dict[term_id] = dict()
+        term_dict[term_id]["ancestors"] = ancestors
 
         if cross_ontology_terms := _extract_cross_ontology_terms(term_id, map_to_cross_ontologies, cross_ontology_map):
             term_dict[term_id]["cross_ontology_terms"] = cross_ontology_terms
