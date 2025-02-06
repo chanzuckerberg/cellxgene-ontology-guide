@@ -35,7 +35,7 @@
       "NCBITaxon": {
         "version": "v2024-11-25",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
-        "filename": "ncbitaxon.owl.gz"
+        "filename": "ncbitaxon.owl"
       },
       "UBERON": {
         "version": "v2024-08-07",

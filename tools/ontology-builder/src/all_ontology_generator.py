@@ -245,15 +245,11 @@ def _extract_ontology_term_metadata(
         # Gets ancestors
         ancestors = _get_ancestors(onto_term, allowed_ontologies)
 
-        # Special Case: skip the current term if it is an NCBI Term, but not a descendant of 'NCBITaxon:33208'.
+        # Special Case: skip the current term if it is an NCBI Term, but not a descendant of 'NCBITaxon:33208' (Animal)
         if onto.name == "NCBITaxon" and "NCBITaxon:33208" not in ancestors:
             continue
 
         term_dict[term_id] = dict()
-
-        # only write the ancestors if it's not NCBITaxon, as this saves a lot of disk space and there is
-        # no current use-case for NCBITaxon
-        term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
 
         if cross_ontology_terms := _extract_cross_ontology_terms(term_id, map_to_cross_ontologies, cross_ontology_map):
             term_dict[term_id]["cross_ontology_terms"] = cross_ontology_terms
