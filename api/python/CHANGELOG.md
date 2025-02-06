@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.1...python-api-v1.4.2) (2025-02-06)
+
+
+### BugFixes
+
+* parse through NCBITaxon ancestors ([#259](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/259)) ([c461251](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c461251d7b5becc5f2c268a52d3848a3f96474da))
+
 ## [1.4.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.0...python-api-v1.4.1) (2025-01-28)
 
 
