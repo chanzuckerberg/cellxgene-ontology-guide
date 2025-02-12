@@ -36,9 +36,21 @@ jobs:
         run: |
           git config user.name github-actions
           git config user.email github-actions@github.com
+      - name: check ontology_info.json
+        run: |
+          git fetch origin ${{ github.event.pull_request.head.ref }} --depth=1
+          if git diff --quiet origin/${{ github.event.pull_request.head.ref }} -- ontology-assets/ontology_info.json; then
+            echo "DIFF_MODE=false" >> $GITHUB_ENV
+          else
+            echo "DIFF_MODE=true" >> $GITHUB_ENV
+          fi
       - name: ontology-processing
         run: |
-          python3 ./tools/ontology-builder/src/all_ontology_generator.py
+          if [ "$DIFF_MODE" = "true" ]; then
+            python3 ./tools/ontology-builder/src/all_ontology_generator.py --diff
+          else
+            python3 ./tools/ontology-builder/src/all_ontology_generator.py
+          fi
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
       - name: update API
