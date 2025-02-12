@@ -182,7 +182,8 @@
           "UBERON"
         ]
       }
-    }
+    },
+    "deprecated_on": "2025-02-12"
   },
   "5.2.0": {
     "ontologies": {
