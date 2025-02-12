@@ -12,7 +12,7 @@
         "source": "https://github.com/EBISPOT/efo/releases/download",
         "filename": "efo.owl",
         "additional_ontologies": [
-          "ZFS"
+          "CL"
         ]
       },
       "HANCESTRO": {
