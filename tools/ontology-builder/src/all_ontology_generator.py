@@ -1,5 +1,5 @@
-import gzip
 import argparse
+import gzip
 import json
 import logging
 import os
@@ -31,11 +31,11 @@ def get_ontology_info_file(ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> 
 
 
 def save_ontology_info(
-        ontology_info: Dict[str, Any],
-        latest_ontology_info: Dict[str, Any],
-        ontology_info_file: str = env.ONTOLOGY_INFO_FILE,
-        latest_ontology_info_file: str = env.LATEST_ONTOLOGY_INFO_FILE,
-    ) -> None:
+    ontology_info: Dict[str, Any],
+    latest_ontology_info: Dict[str, Any],
+    ontology_info_file: str = env.ONTOLOGY_INFO_FILE,
+    latest_ontology_info_file: str = env.LATEST_ONTOLOGY_INFO_FILE,
+) -> None:
     """
     Save ontology information to file
 
@@ -46,7 +46,7 @@ def save_ontology_info(
     """
     with open(ontology_info_file, "w") as f:
         json.dump(ontology_info, f, indent=2)
-    
+
     with open(latest_ontology_info_file, "w") as f:
         json.dump(latest_ontology_info, f, indent=2)
 
@@ -421,7 +421,11 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     parser = argparse.ArgumentParser()
-    parser.add_argument("--diff", action="store_true", help="If set to true, only download and parse ontologies that have changed since the last run.")
+    parser.add_argument(
+        "--diff",
+        action="store_true",
+        help="If set to true, only download and parse ontologies that have changed since the last run.",
+    )
     args = parser.parse_args()
 
     ontology_info = get_ontology_info_file()
@@ -432,9 +436,16 @@ if __name__ == "__main__":
     if args.diff:
         previous_ontology_info = get_ontology_info_file(env.LATEST_ONTOLOGY_INFO_FILE)
         previous_ontologies = previous_ontology_info["ontologies"]
-        diff_ontologies = {ontology: info for ontology, info in ontologies_to_process.items() if previous_ontologies.get(ontology) != info}
+        diff_ontologies = {
+            ontology: info
+            for ontology, info in ontologies_to_process.items()
+            if previous_ontologies.get(ontology) != info
+        }
         ontologies_to_process = diff_ontologies
-        logging.info("Processing the following ontologies that have changed since the last run:\n\t", "\t\n".join(diff_ontologies.keys()))
+        logging.info(
+            "Processing the following ontologies that have changed since the last run:\n\t",
+            "\t\n".join(diff_ontologies.keys()),
+        )
 
     _download_ontologies(ontologies_to_process)
     _parse_ontologies(ontologies_to_process)
@@ -447,6 +458,8 @@ if __name__ == "__main__":
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
     registry = register_schemas()
-    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontologies_to_process)]
+    result = [
+        verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontologies_to_process)
+    ]
     if not all(result):
         sys.exit(1)
