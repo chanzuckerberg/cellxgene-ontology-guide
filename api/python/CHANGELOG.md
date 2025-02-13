@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.5.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.2...python-api-v1.5.0) (2025-02-13)
+## [1.5.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.2...python-api-v1.5.0) (2025-02-13)
 
 
 ### Features
