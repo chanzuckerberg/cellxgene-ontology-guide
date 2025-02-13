@@ -1,8 +1,8 @@
 {
-  "5.3.1-alpha": {
+  "5.3.1": {
     "ontologies": {
       "CL": {
-        "version": "v2024-08-16",
+        "version": "v2025-01-08",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download",
         "filename": "cl.owl",
         "cross_ontology_mapping": "cl.sssom.tsv"
@@ -10,10 +10,7 @@
       "EFO": {
         "version": "v3.74.0",
         "source": "https://github.com/EBISPOT/efo/releases/download",
-        "filename": "efo.owl",
-        "additional_ontologies": [
-          "CL"
-        ]
+        "filename": "efo.owl"
       },
       "HANCESTRO": {
         "version": "3.0",
