@@ -2,7 +2,7 @@
   "5.3.1-alpha": {
     "ontologies": {
       "CL": {
-        "version": "v2024-08-16",
+        "version": "v2025-01-08",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download",
         "filename": "cl.owl",
         "cross_ontology_mapping": "cl.sssom.tsv"
