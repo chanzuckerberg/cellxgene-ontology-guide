@@ -420,6 +420,7 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--diff",
