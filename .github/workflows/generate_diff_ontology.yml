@@ -1,4 +1,4 @@
-name: Updates to Ontology Files
+name: Updates to Diff'd Ontology Files
 
 on:
   push:
