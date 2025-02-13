@@ -54,6 +54,7 @@ jobs:
           fi
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
+          git add ./ontology-assets/latest_ontology_info.json
       - name: update API
         run: |
           echo "${{ github.sha }}" > ./api/python/ontology-assets-version.txt
