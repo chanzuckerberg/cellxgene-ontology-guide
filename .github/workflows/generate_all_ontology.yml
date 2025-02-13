@@ -40,7 +40,7 @@ jobs:
       - name: check ontology_info.json
         run: |
           git fetch origin ${{ github.event.pull_request.head.ref }} --depth=1
-          if git diff --quiet origin/${{ github.event.pull_request.head.ref }} -- ontology-assets/ontology_info.json; then
+          if git diff --quiet ${{ github.event.pull_request.head.ref }} -- ontology-assets/ontology_info.json; then
             echo "DIFF_MODE=false" >> $GITHUB_ENV
           else
             echo "DIFF_MODE=true" >> $GITHUB_ENV
