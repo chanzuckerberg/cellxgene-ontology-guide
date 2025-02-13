@@ -68,7 +68,7 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
     try:
         validate(instance=data, schema=schema, registry=registry)
         # custom logic for ontology_info definition
-        if "ontology_info" in schema_file_name:
+        if "/ontology_info.json" in schema_file_name:
             validate_unique_ontologies(data)
     except Exception:
         logger.exception(f"Error validating {json_file_name} against {schema_file_name}")
