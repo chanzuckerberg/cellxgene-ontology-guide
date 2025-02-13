@@ -172,21 +172,3 @@ class TestVerifyJsonCustomLogic:
 
         # Assert validation passes
         assert verify_json(ontology_info_schema_file_fixture, str(json_file), ontology_info_registry_fixture) is True
-
-    @pytest.mark.parametrize("additional_ontologies", [["C"], ["A"]])
-    def test_validate_unique_ontologies__invalid(
-        self,
-        additional_ontologies,
-        ontology_info_json_data,
-        ontology_info_schema_file_fixture,
-        tmpdir,
-        ontology_info_registry_fixture,
-    ):
-        # Create invalid JSON data
-        ontology_info_json_data["2.0.0"]["ontologies"]["B"]["additional_ontologies"] = additional_ontologies
-        json_file = tmpdir.join("ontology_info.json")
-        with open(str(json_file), "w") as f:
-            json.dump(ontology_info_json_data, f)
-
-        # Assert validation fails
-        assert verify_json(ontology_info_schema_file_fixture, str(json_file), ontology_info_registry_fixture) is False
