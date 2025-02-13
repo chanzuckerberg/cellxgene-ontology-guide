@@ -46,5 +46,5 @@ jobs:
           git add ./api/python/ontology-assets-version.txt
       - name: Commit
         run: |
-          git commit -m "AUTO: update ontologies"
+          git commit -m "AUTO: update diff'd ontologies"
           git push
