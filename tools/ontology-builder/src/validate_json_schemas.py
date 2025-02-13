@@ -3,7 +3,7 @@ import json
 import logging
 import os.path
 import sys
-from typing import Any, Dict, Iterable, Tuple
+from typing import Iterable, Tuple
 
 import env
 from jsonschema import validate
