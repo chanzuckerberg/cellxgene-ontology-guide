@@ -432,7 +432,7 @@ if __name__ == "__main__":
     current_version = get_latest_schema_version(ontology_info.keys())
     latest_ontology_version = ontology_info[current_version]
     ontologies_to_process = latest_ontology_version["ontologies"]
-    print(ontologies_to_process)
+    print("ontologies_to_process", ontologies_to_process)
 
     # only process ontologies that have changed since the last run
     if args.diff:
