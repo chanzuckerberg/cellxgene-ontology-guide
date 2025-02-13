@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.3.2...ontology-assets-v1.4.0) (2025-02-13)
+
+
+### Features
+
+* add experimental release + cl terms in efo ([#263](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/263)) ([#267](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/267)) ([508dc12](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/508dc12e26c0a2a4ce17578624dd7164b3546f34))
+
 ## [1.3.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.3.1...ontology-assets-v1.3.2) (2025-02-06)
 
 

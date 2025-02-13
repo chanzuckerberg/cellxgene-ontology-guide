@@ -19,5 +19,5 @@ repository.
 .. include:: ../../CHANGELOG.md
 """
 
-__version__ = "1.4.2"
+__version__ = "1.5.0-alpha"
 __all__ = ["curated_ontology_term_lists", "entities", "ontology_parser", "supported_versions"]
