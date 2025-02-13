@@ -1,5 +1,4 @@
 {
-<<<<<<< HEAD
   "$schema": "http://json-schema.org/draft-07/schema#",
   "title": "Latest Ontology Info Schema",
   "description": "Dictionary of ontologies that were used to generate the last run of ontology assets",
@@ -59,65 +58,3 @@
     }
   }
 }
-=======
-    "$schema": "http://json-schema.org/draft-07/schema#",
-    "title": "Latest Ontology Info Schema",
-    "description": "Dictionary of ontologies that were used to generate the last run of ontology assets",
-    "type": "object",
-    "properties": {
-      "ontologies": {
-        "type": "object",
-        "description": "A dictionary mapping ontology names to their details.",
-        "patternProperties": {
-          "^[A-Za-z0-9]+$": {
-            "$ref": "#/definitions/ontologyEntry"
-          }
-        },
-        "additionalProperties": false
-      }
-    },
-    "required": ["ontologies"],
-    "additionalProperties": false,
-    "definitions": {
-      "ontologyEntry": {
-        "type": "object",
-        "properties": {
-          "version": {
-            "type": "string",
-            "description": "Version of the ontology, as defined in its source repository."
-          },
-          "source": {
-            "type": "string",
-            "format": "uri",
-            "description": "Source URL to find and download the ontology."
-          },
-          "filename": {
-            "type": "string",
-            "description": "Name of the ontology file used in this data release."
-          },
-          "cross_ontology_mapping": {
-            "type": "string",
-            "description": "Name of the SSSOM file mapping this ontology's terms to cross-species equivalent terms."
-          },
-          "additional_ontologies": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "List of additional term ID prefixes to extract from the source ontology file."
-          },
-          "map_to": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            },
-            "description": "List of ontologies to map equivalent terms."
-          }
-        },
-        "required": ["version", "source", "filename"],
-        "additionalProperties": false
-      }
-    }
-  }
-  
->>>>>>> d5a6ad6 (update validate json schemas)
