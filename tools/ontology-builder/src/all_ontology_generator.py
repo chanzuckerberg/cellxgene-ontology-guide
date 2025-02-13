@@ -433,6 +433,7 @@ if __name__ == "__main__":
     latest_ontology_version = ontology_info[current_version]
     ontologies_to_process = latest_ontology_version["ontologies"]
 
+    # only process ontologies that have changed since the last run
     if args.diff:
         previous_ontology_info = get_ontology_info_file(env.LATEST_ONTOLOGY_INFO_FILE)
         previous_ontologies = previous_ontology_info["ontologies"]
@@ -447,6 +448,7 @@ if __name__ == "__main__":
             "\t\n".join(diff_ontologies.keys()),
         )
 
+    # download and parse ontologies and generate ontology assets
     _download_ontologies(ontologies_to_process)
     _parse_ontologies(ontologies_to_process)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
@@ -455,6 +457,7 @@ if __name__ == "__main__":
     for file in expired_files:
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
     save_ontology_info(ontology_info, latest_ontology_version)
+
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
     registry = register_schemas()
