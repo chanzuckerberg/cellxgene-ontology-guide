@@ -3,6 +3,10 @@ name: Updates to Ontology Files
 on:
   push:
     paths:
+      # TODO: This workflow may execute alongside the generate_diff_ontology.yml workflow if
+      # updates are made to ontology_info.json and any of the files that trigger this
+      # generate_all_ontology.yml workflow. For now, you can cancel the workflow you don't
+      # need to run, but ideally we should ensure only one workflow executes.
       - "**/asset-schemas/ontology_info_schema.json"
       - "**/asset-schemas/all_ontology_schema.json"
       - "**/tools/ontology-builder/src/all_ontology_generator.py"
