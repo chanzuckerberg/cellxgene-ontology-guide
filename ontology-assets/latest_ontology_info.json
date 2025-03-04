@@ -9,10 +9,7 @@
     "EFO": {
       "version": "v3.74.0",
       "source": "https://github.com/EBISPOT/efo/releases/download",
-      "filename": "efo.owl",
-      "additional_ontologies": [
-        "CL"
-      ]
+      "filename": "efo.owl"
     },
     "HANCESTRO": {
       "version": "3.0",
