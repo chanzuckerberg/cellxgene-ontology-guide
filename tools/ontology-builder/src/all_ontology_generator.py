@@ -342,7 +342,7 @@ def _parse_ontologies(
             logging.info(f"Skipping {onto_file} as it is not in the ontology_info.json")
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
-            
+
         version = ontology_info[onto.name]["version"]
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
