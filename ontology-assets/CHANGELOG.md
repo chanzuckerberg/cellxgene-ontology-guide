@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.5.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.4.0-alpha...ontology-assets-v1.5.0-alpha) (2025-03-05)
+
+
+### Features
+
+* pinned ontologies for schema 5.3.0 ([#275](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/275)) ([cd6a15e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/cd6a15e0b5ef8a9b95a956f6373b85de665225e7))
+* set up new github workflow for only ontologies that have changed ([#264](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/264)) ([45d0fce](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/45d0fce7fc168fd59961bd624af1c6097beda0ab))
+
+
+### Misc
+
+* remove 5.3.1-alpha ([#273](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/273)) ([a930332](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a9303329e95e800ac8186ed833d7b45d146f6448))
+
 ## [1.4.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.3.2...ontology-assets-v1.4.0) (2025-02-13)
 
 
