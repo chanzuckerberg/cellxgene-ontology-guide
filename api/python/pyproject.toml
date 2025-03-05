@@ -31,7 +31,13 @@ Issues = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues"
 Changelog = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/blob/main/api/python/CHANGELOG.md"
 
 [project.optional-dependencies]
-test = ["pytest", "coverage", "nbconvert", "jupyter"]
+test = [
+    "pytest",
+    "coverage",
+    "nbconvert",
+    "jupyter",
+    "nbformat>=5.10.4",
+]
 docs = ["pdoc"]
 
 [tool.setuptools.packages.find]

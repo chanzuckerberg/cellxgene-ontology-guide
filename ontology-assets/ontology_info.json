@@ -134,7 +134,7 @@
       },
       "PATO": {
         "version": "v2023-05-18",
-        "source": "https://github.com/pato-ontology/pato/raw",
+        "source": "https://github.com/pato-ontology/pato/raw", 
         "filename": "pato.owl"
       }
     },
