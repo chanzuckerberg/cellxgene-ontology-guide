@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "cellxgene_ontology_guide"
-version = "1.5.0-alpha"
+version = "1.5.0"
 description = "Access ontology metadata used by CZ cellxgene"
 authors = [
     { name = "Chan Zuckerberg Initiative Foundation", email = "cellxgene@chanzuckerberg.com" }
@@ -31,7 +31,13 @@ Issues = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues"
 Changelog = "https://github.com/chanzuckerberg/cellxgene-ontology-guide/blob/main/api/python/CHANGELOG.md"
 
 [project.optional-dependencies]
-test = ["pytest", "coverage", "nbconvert", "jupyter"]
+test = [
+    "pytest",
+    "coverage",
+    "nbconvert",
+    "jupyter",
+    "nbformat>=5.10.4",
+]
 docs = ["pdoc"]
 
 [tool.setuptools.packages.find]

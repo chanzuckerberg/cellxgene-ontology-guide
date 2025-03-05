@@ -13,6 +13,7 @@ on:
 
 jobs:
   ontology-processing:
+    if: false # DISABLE. Should run instead of generate_all_ontology.yml
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
