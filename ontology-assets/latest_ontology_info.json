@@ -1,13 +1,13 @@
 {
   "ontologies": {
     "CL": {
-      "version": "v2025-02-13",
+      "version": "v2025-04-10",
       "source": "https://github.com/obophenotype/cell-ontology/releases/download",
       "filename": "cl.owl",
       "cross_ontology_mapping": "cl.sssom.tsv"
     },
     "EFO": {
-      "version": "v3.75.0",
+      "version": "v3.78.0",
       "source": "https://github.com/EBISPOT/efo/releases/download",
       "filename": "efo.owl"
     },
@@ -22,7 +22,7 @@
       "filename": "hsapdv.owl"
     },
     "MONDO": {
-      "version": "v2025-02-04",
+      "version": "v2025-05-06",
       "source": "https://github.com/monarch-initiative/mondo/releases/download",
       "filename": "mondo.owl"
     },
@@ -32,23 +32,23 @@
       "filename": "mmusdv.owl"
     },
     "NCBITaxon": {
-      "version": "v2024-11-25",
+      "version": "v2025-03-13",
       "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
       "filename": "ncbitaxon.owl.gz"
     },
     "UBERON": {
-      "version": "v2025-01-15",
+      "version": "v2025-05-28",
       "source": "https://github.com/obophenotype/uberon/releases/download",
       "filename": "uberon.owl",
       "cross_ontology_mapping": "uberon.sssom.tsv"
     },
     "PATO": {
-      "version": "v2025-02-01",
+      "version": "v2025-05-14",
       "source": "https://github.com/pato-ontology/pato/raw",
       "filename": "pato.owl"
     },
     "FBbt": {
-      "version": "v2025-02-13",
+      "version": "v2025-03-27",
       "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
       "filename": "fbbt.owl",
       "map_to": [
@@ -57,7 +57,7 @@
       ]
     },
     "FBdv": {
-      "version": "v2025-02-12",
+      "version": "v2025-03-26",
       "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download",
       "filename": "fbdv.owl"
     },
@@ -74,12 +74,12 @@
       ]
     },
     "WBls": {
-      "version": "vWS296",
+      "version": "vWS297",
       "source": "https://github.com/obophenotype/c-elegans-development-ontology/raw/",
       "filename": "wbls.owl"
     },
     "WBbt": {
-      "version": "v2025-01-02",
+      "version": "v2025-03-26",
       "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw",
       "filename": "wbbt.owl",
       "map_to": [
