@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.6.0...ontology-assets-v1.6.1) (2025-06-03)
+
+
+### Misc
+
+* remove old NCBITaxon ([#285](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/285)) ([197e925](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/197e92565f380d5db5f823799576ebbd62ab9da2))
+
 ## [1.6.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.5.0...ontology-assets-v1.6.0) (2025-06-02)
 
 
