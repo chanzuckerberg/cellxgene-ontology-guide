@@ -186,8 +186,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
-        {'CL:0000003': {'CL:0000003': 0}, 'CL:0000005': {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3,
-        'CL:0000005': 0}}
+        {'CL:0000003': {'CL:0000003': 0}, 'CL:0000005': {'CL:0000057': 1, 'CL:0000499': 2, 'CL:0002320': 3, 'CL:0000255': 4, 'CL:0000000': 5, 'CL:0000005': 0}}
 
         :param term_ids: list of str ontology terms to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -415,7 +414,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_children("CL:0000526")
-        ['CL:0000101']
+        ['CL:0000101', 'CL:4042034']
 
         :param term_id: str ontology term to find children for
         :return: List[str] of children terms
