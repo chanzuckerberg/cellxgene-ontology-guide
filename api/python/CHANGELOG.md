@@ -1,6 +1,6 @@
 # Changelog
 
-## [1.0.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.6.0...python-api-v1.0.0) (2025-06-02)
+## [1.6.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.6.0...python-api-v1.6.0) (2025-06-02)
 
 
 ### Features
@@ -55,7 +55,7 @@
 * Fix typo in python readme ([#216](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/216)) ([30a6ba8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/30a6ba87156d8b5fb223be0332407cf824f16926))
 * move pytest configs to pyproject.toml ([#175](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/175)) ([a90341b](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a90341bdd16ae347f1f5e8b8db698afc38f37b80))
 * reformat examples in docstrings ([#157](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/157)) ([e5528e1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/e5528e195cceacff33c46c008230c13cccce641e))
-* release 1.0.0 ([60eef67](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/60eef67d69fa3f4f776e67eeefef27391a307785))
+* release 1.6.0 ([60eef67](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/60eef67d69fa3f4f776e67eeefef27391a307785))
 * release main ([#130](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/130)) ([0b37dc8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0b37dc85fea679874d51cfc7a22aeaee3e1d94b9))
 * release main ([#132](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/132)) ([8509bbf](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/8509bbff3e6388e50bbced57c3fa59e5f58cbb15))
 * release main ([#134](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/134)) ([5f876cc](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/5f876cc09aa56dd27c9b968d2918ac92a506683a))
