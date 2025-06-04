@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [1.6.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.6.0...ontology-assets-v1.6.1) (2025-06-04)
+## [1.6.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.5.0...ontology-assets-v1.6.1) (2025-06-04)
 
 
 ### Misc
@@ -9,14 +9,6 @@
 * release main ([#286](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/286)) ([0815e66](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/0815e664843e47998ab3fb7a3baa9f7162cd495f))
 * remove old NCBITaxon ([#285](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/285)) ([197e925](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/197e92565f380d5db5f823799576ebbd62ab9da2))
 * trigger new release ([#287](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/287)) ([74b517a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/74b517a0712ff0166e073ad7d224aea61c73b33c))
-
-## [1.6.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.5.0...ontology-assets-v1.6.0) (2025-06-02)
-
-
-### Features
-
-* pinned ontologies for schema 6.0.0 ([#279](https://app.zenhub.com/workspaces/single-cell-5e2a191dad828d52cc78b028/issues/gh/chanzuckerberg/cellxgene-ontology-guide/279)) ([96d17de](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/96d17de8c0a3ef776e9b1195181b2b025d28b15e))
-* remove old NCBITaxon ([#285](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/285)) ([197e925](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/197e92565f380d5db5f823799576ebbd62ab9da2))
 
 ## [1.5.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.4.0-alpha...ontology-assets-v1.5.0-alpha) (2025-03-05)
 
