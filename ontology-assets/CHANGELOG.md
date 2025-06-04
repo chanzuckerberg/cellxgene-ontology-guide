@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.6.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.6.1...ontology-assets-v1.6.2) (2025-06-04)
+
+
+### Misc
+
+* remove all older assets ([#289](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/289)) ([76660a4](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/76660a41db195d81dae4af20acd131721ed92727))
+
 ## [1.6.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.5.0...ontology-assets-v1.6.1) (2025-06-04)
 
 
