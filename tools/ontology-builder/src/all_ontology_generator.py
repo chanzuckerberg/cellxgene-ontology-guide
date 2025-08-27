@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+import subprocess
 import sys
 import urllib.request
 from datetime import datetime, timedelta
@@ -66,9 +67,18 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
         output_file = os.path.join(output_dir, _ontology + ".owl")
+
         if download_format == "tsv":
             output_file = os.path.join(output_dir, _ontology + ".sssom.tsv")
             urllib.request.urlretrieve(_url, output_file)
+        elif download_format == "obo":
+            # Download OBO file first
+            temp_obo_file = os.path.join(output_dir, _ontology + ".obo")
+            urllib.request.urlretrieve(_url, temp_obo_file)
+            # Convert OBO to OWL using Docker
+            _convert_obo_to_owl(temp_obo_file, output_file)
+            # Clean up temporary OBO file
+            os.remove(temp_obo_file)
         elif download_format == "gz":
             urllib.request.urlretrieve(_url, output_file + ".gz")
             _decompress(output_file + ".gz", output_file)
@@ -79,7 +89,11 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
-        base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
+        base_url_list = [onto_ref_data["source"]]
+        if version := onto_ref_data.get("version"):
+            # if version is specified, use it to build the URL
+            base_url_list.append(version)
+        base_url = "/".join(base_url_list)
 
         download_urls = [f"{base_url}/{onto_ref_data['filename']}"]
         # this assumes the cross-ontology-map is part of the same repository.
@@ -120,6 +134,59 @@ def _decompress(infile: str, tofile: str) -> None:
     with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:
         decom_str = gzip.decompress(inf.read()).decode("utf-8")
         tof.write(decom_str)
+
+
+def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
+    """
+    Convert an OBO file to OWL format using Docker with obolibrary/robot
+
+    :param str obo_file: path to input OBO file (should be in raw-files directory)
+    :param str owl_output_file: path to output OWL file (should be in raw-files directory)
+
+    :rtype None
+    """
+    # Get relative paths from project root
+    obo_relative_path = os.path.relpath(obo_file, env.RAW_ONTOLOGY_DIR)
+    owl_relative_path = os.path.relpath(owl_output_file, env.RAW_ONTOLOGY_DIR)
+
+    # Docker command to convert OBO to OWL
+    docker_cmd = [
+        "docker",
+        "run",
+        "-v",
+        f"{env.RAW_ONTOLOGY_DIR}:/work",
+        "-w",
+        "/work",
+        "--rm",
+        "obolibrary/robot",
+        "robot",
+        "convert",
+        "--input",
+        f"./{obo_relative_path}",
+        "--format",
+        "owx",
+        "-o",
+        f"./{owl_relative_path}",
+    ]
+
+    logging.info(f"Converting {obo_file} to OWL format using Docker")
+    logging.info(f"Running command: {' '.join(docker_cmd)}")
+
+    try:
+        result = subprocess.run(docker_cmd, check=True, capture_output=True, text=True)
+        logging.info(f"Successfully converted {obo_file} to {owl_output_file}")
+        if result.stdout:
+            logging.info(f"Docker output: {result.stdout}")
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Failed to convert {obo_file} to OWL format: {e}")
+        if e.stdout:
+            logging.error(f"Docker stdout: {e.stdout}")
+        if e.stderr:
+            logging.error(f"Docker stderr: {e.stderr}")
+        raise
+    except FileNotFoundError:
+        logging.error("Docker not found. Please make sure Docker is installed and available in PATH")
+        raise
 
 
 def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
@@ -244,11 +311,12 @@ def _extract_ontology_term_metadata(
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
+    separator = "_" if onto.name == "CVCL" else ":"
     for onto_term in onto.classes():
-        term_id = onto_term.name.replace("_", ":")
+        term_id = onto_term.name.replace("_", separator)
 
         # Skip terms that are not direct children from this ontology
-        term_id_parts = term_id.split(":")
+        term_id_parts = term_id.split(separator)
         if len(term_id_parts) > 2 or term_id_parts[0] not in allowed_ontologies:
             continue
         # Gets ancestors
@@ -343,7 +411,7 @@ def _parse_ontologies(
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
 
-        version = ontology_info[onto.name]["version"]
+        version = ontology_info[onto.name].get("version", "unknown")
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
@@ -378,7 +446,7 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
         ontology_files = set()
         for version in schema_versions:
             for ontology, info in ontology_info[version]["ontologies"].items():
-                ontology_files.add(get_ontology_file_name(ontology, info["version"]))
+                ontology_files.add(get_ontology_file_name(ontology, info.get("version", "unknown")))
         return ontology_files
 
     expired_files = _get_ontology_files(expired)  # find all ontology files that are in the expired versions
