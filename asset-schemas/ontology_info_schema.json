@@ -4,7 +4,7 @@
   "description": "A schema for the set of valid ontology reference files mapping to a CZ CellXGene Dataset Schema Versions",
   "type": "object",
   "patternProperties": {
-    "^[0-9]+\\.[0-9]+\\.[0-9]+$": {
+    "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$": {
       "description": "The version of CellxGene schema that maps to this set of ontology versions",
       "type": "object",
       "properties": {
@@ -14,35 +14,12 @@
         },
         "ontologies": {
           "type": "object",
-          "properties": {
-            "CL": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "EFO": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "HANCESTRO": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "HsapDv": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "MONDO": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "MmusDv": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "NCBITaxon": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "UBERON": {
-              "$ref": "#/definitions/ontologyEntry"
-            },
-            "PATO": {
+          "patternProperties": {
+            "^[A-Za-z0-9]+$": {
               "$ref": "#/definitions/ontologyEntry"
             }
-          }
+          },
+          "additionalProperties": false
         }
       },
       "required": [
@@ -67,15 +44,31 @@
         "filename": {
           "type": "string",
           "description": "name of ontology file used to build generated artifacts for this ontology data release"
+        },
+        "additional_ontologies": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of additional term id prefixes to extracted from the source ontology file."
+        },
+        "cross_ontology_mapping": {
+          "type": "string",
+          "description": "name of SSSOM file mapping this ontology's terms to cross-species equivalent ontology terms."
+        },
+        "map_to": {
+          "type": "array",
+            "items": {
+                "type": "string"
+            },
+          "description": "List of ontologies to map equivalent terms to this ontology"
         }
       },
       "required": [
         "version",
         "source",
         "filename"
-      ],
-      "additionalProperties": false
+      ]
     }
   }
 }
-

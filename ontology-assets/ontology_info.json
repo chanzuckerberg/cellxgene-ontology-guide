@@ -1,13 +1,14 @@
 {
-  "5.1.0": {
+  "6.0.0": {
     "ontologies": {
       "CL": {
-        "version": "v2024-04-05",
+        "version": "v2025-04-10",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download",
-        "filename": "cl.owl"
+        "filename": "cl.owl",
+        "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.65.0",
+        "version": "v3.78.0",
         "source": "https://github.com/EBISPOT/efo/releases/download",
         "filename": "efo.owl"
       },
@@ -17,46 +18,88 @@
         "filename": "hancestro.owl"
       },
       "HsapDv": {
-        "version": "11",
-        "source": "http://aber-owl.net/media/ontologies/HSAPDV",
+        "version": "v2025-01-23",
+        "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
         "filename": "hsapdv.owl"
       },
       "MONDO": {
-        "version": "v2024-05-08",
+        "version": "v2025-05-06",
         "source": "https://github.com/monarch-initiative/mondo/releases/download",
         "filename": "mondo.owl"
       },
       "MmusDv": {
-        "version": "9",
-        "source": "http://aber-owl.net/media/ontologies/MMUSDV",
+        "version": "v2025-01-23",
+        "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2023-06-20",
+        "version": "v2025-03-13",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
         "filename": "ncbitaxon.owl.gz"
       },
       "UBERON": {
-        "version": "v2024-03-22",
+        "version": "v2025-05-28",
         "source": "https://github.com/obophenotype/uberon/releases/download",
-        "filename": "uberon.owl"
+        "filename": "uberon.owl",
+        "cross_ontology_mapping": "uberon.sssom.tsv"
       },
       "PATO": {
-        "version": "v2023-05-18",
+        "version": "v2025-05-14",
         "source": "https://github.com/pato-ontology/pato/raw",
         "filename": "pato.owl"
+      },
+      "FBbt": {
+        "version": "v2025-03-27",
+        "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
+        "filename": "fbbt.owl",
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
+      },
+      "FBdv": {
+        "version": "v2025-03-26",
+        "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download",
+        "filename": "fbdv.owl"
+      },
+      "ZFA": {
+        "version": "v2025-01-28",
+        "source": "https://github.com/ZFIN/zebrafish-anatomical-ontology/raw",
+        "filename": "zfa.owl",
+        "additional_ontologies": [
+          "ZFS"
+        ],
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
+      },
+      "WBls": {
+        "version": "vWS297",
+        "source": "https://github.com/obophenotype/c-elegans-development-ontology/raw/",
+        "filename": "wbls.owl"
+      },
+      "WBbt": {
+        "version": "v2025-03-26",
+        "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw",
+        "filename": "wbbt.owl",
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
       }
     }
   },
-  "5.0.0": {
+  "5.3.0": {
     "ontologies": {
       "CL": {
-        "version": "v2024-01-04",
+        "version": "v2025-02-13",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download",
-        "filename": "cl.owl"
+        "filename": "cl.owl",
+        "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.62.0",
+        "version": "v3.75.0",
         "source": "https://github.com/EBISPOT/efo/releases/download",
         "filename": "efo.owl"
       },
@@ -66,36 +109,77 @@
         "filename": "hancestro.owl"
       },
       "HsapDv": {
-        "version": "11",
-        "source": "http://aber-owl.net/media/ontologies/HSAPDV",
+        "version": "v2025-01-23",
+        "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
         "filename": "hsapdv.owl"
       },
       "MONDO": {
-        "version": "v2024-01-03",
+        "version": "v2025-02-04",
         "source": "https://github.com/monarch-initiative/mondo/releases/download",
         "filename": "mondo.owl"
       },
       "MmusDv": {
-        "version": "9",
-        "source": "http://aber-owl.net/media/ontologies/MMUSDV",
+        "version": "v2025-01-23",
+        "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2023-06-20",
+        "version": "v2024-11-25",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
         "filename": "ncbitaxon.owl.gz"
       },
       "UBERON": {
-        "version": "v2024-01-18",
+        "version": "v2025-01-15",
         "source": "https://github.com/obophenotype/uberon/releases/download",
-        "filename": "uberon.owl"
+        "filename": "uberon.owl",
+        "cross_ontology_mapping": "uberon.sssom.tsv"
       },
       "PATO": {
-        "version": "v2023-05-18",
+        "version": "v2025-02-01",
         "source": "https://github.com/pato-ontology/pato/raw",
         "filename": "pato.owl"
+      },
+      "FBbt": {
+        "version": "v2025-02-13",
+        "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
+        "filename": "fbbt.owl",
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
+      },
+      "FBdv": {
+        "version": "v2025-02-12",
+        "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download",
+        "filename": "fbdv.owl"
+      },
+      "ZFA": {
+        "version": "v2025-01-28",
+        "source": "https://github.com/ZFIN/zebrafish-anatomical-ontology/raw",
+        "filename": "zfa.owl",
+        "additional_ontologies": [
+          "ZFS"
+        ],
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
+      },
+      "WBls": {
+        "version": "vWS296",
+        "source": "https://github.com/obophenotype/c-elegans-development-ontology/raw/",
+        "filename": "wbls.owl"
+      },
+      "WBbt": {
+        "version": "v2025-01-02",
+        "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw",
+        "filename": "wbbt.owl",
+        "map_to": [
+          "CL",
+          "UBERON"
+        ]
       }
     },
-    "deprecated_on": "2024-05-10"
+    "deprecated_on": "2025-06-02"
   }
 }

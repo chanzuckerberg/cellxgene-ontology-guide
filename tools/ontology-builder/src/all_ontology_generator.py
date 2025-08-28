@@ -1,3 +1,4 @@
+import argparse
 import gzip
 import json
 import logging
@@ -29,7 +30,12 @@ def get_ontology_info_file(ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> 
         return json.load(f)
 
 
-def save_ontology_info(ontology_info: Dict[str, Any], ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> None:
+def save_ontology_info(
+    ontology_info: Dict[str, Any],
+    latest_ontology_info: Dict[str, Any],
+    ontology_info_file: str = env.ONTOLOGY_INFO_FILE,
+    latest_ontology_info_file: str = env.LATEST_ONTOLOGY_INFO_FILE,
+) -> None:
     """
     Save ontology information to file
 
@@ -40,6 +46,9 @@ def save_ontology_info(ontology_info: Dict[str, Any], ontology_info_file: str = 
     """
     with open(ontology_info_file, "w") as f:
         json.dump(ontology_info, f, indent=2)
+
+    with open(latest_ontology_info_file, "w") as f:
+        json.dump(latest_ontology_info, f, indent=2)
 
 
 def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RAW_ONTOLOGY_DIR) -> None:
@@ -53,36 +62,47 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     """
 
     def download(_ontology: str, _url: str) -> None:
-        logging.info(f"Start Downloading {_ontology}")
+        logging.info(f"Start Downloading {_url}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
-
         output_file = os.path.join(output_dir, _ontology + ".owl")
-        if download_format == "gz":
+        if download_format == "tsv":
+            output_file = os.path.join(output_dir, _ontology + ".sssom.tsv")
+            urllib.request.urlretrieve(_url, output_file)
+        elif download_format == "gz":
             urllib.request.urlretrieve(_url, output_file + ".gz")
             _decompress(output_file + ".gz", output_file)
             os.remove(output_file + ".gz")
         else:
             urllib.request.urlretrieve(_url, output_file)
-        logging.info(f"Finish Downloading {_ontology}")
+        logging.info(f"Finish Downloading {_url}")
 
-    def _build_url(_ontology: str) -> str:
+    def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
-        return f"{onto_ref_data['source']}/{onto_ref_data['version']}/{onto_ref_data['filename']}"
+        base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
+
+        download_urls = [f"{base_url}/{onto_ref_data['filename']}"]
+        # this assumes the cross-ontology-map is part of the same repository.
+        if onto_ref_data.get("cross_ontology_mapping"):
+            download_urls.append(f"{base_url}/{onto_ref_data['cross_ontology_mapping']}")
+        return download_urls
+
+    def _check_url(_ontology: str, _url: str) -> None:
+        try:
+            urllib.request.urlopen(_url)
+        except HTTPError as e:
+            raise Exception(f"{_ontology} with pinned URL {_url} returns status code {e.code}") from e
+        except URLError as e:
+            raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
 
     threads = []
     for ontology, _ in ontology_info.items():
-        url = _build_url(ontology)
-        try:
-            urllib.request.urlopen(url)
-        except HTTPError as e:
-            raise Exception(f"{ontology} with pinned URL {url} returns status code {e.code}") from e
-        except URLError as e:
-            raise Exception(f"{ontology} with pinned URL {url} fails due to {e.reason}") from e
-
-        t = Thread(target=download, args=(ontology, url))
-        t.start()
-        threads.append(t)
+        urls = _build_urls(ontology)
+        for url in urls:
+            _check_url(ontology, url)
+            t = Thread(target=download, args=(ontology, url))
+            t.start()
+            threads.append(t)
 
     for t in threads:
         t.join()
@@ -116,14 +136,41 @@ def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
     return onto
 
 
-def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> Dict[str, int]:
+def _load_cross_ontology_map(working_dir: str, ontology_info: Any) -> Dict[str, Dict[str, str]]:
+    """
+    Load cross ontology mapping from file and write into python dict
+
+    :param str working_dir: path to folder with ontology files
+    :param ANY ontology_info: the ontology references used to download the ontology files. It follows this [schema](
+    ./asset-schemas/ontology_info_schema.json)
+    :return Dict[str, Dict[str, str]]: per ontology, a dict of known equivalent term IDs in other ontologies
+    """
+    cross_ontology_map: Dict[str, Dict[str, str]] = {}
+    cross_ontologies = [
+        ontology for ontology, info in ontology_info.items() if info.get("cross_ontology_mapping") is not None
+    ]
+    for cross_ontology in cross_ontologies:
+        cross_ontology_map[cross_ontology] = {}
+        # load tsv, assume SSSOM format for now
+        try:
+            with open(os.path.join(working_dir, f"{cross_ontology}.sssom.tsv"), "r") as f:
+                for line in f:
+                    if not line.startswith("#") and not line.startswith("subject_id"):
+                        cols = line.split("\t")
+                        cross_ontology_map[cross_ontology][cols[3]] = cols[0]
+        except FileNotFoundError:
+            logging.warning(f"Cross ontology mapping file for {cross_ontology} not found")
+    return cross_ontology_map
+
+
+def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: list[str]) -> Dict[str, int]:
     """
     Returns a list of unique ancestor ontology term ids of the given onto class. Only returns those belonging to
     ontology_name, it will format the id from the form CL_xxxx to CL:xxxx. Ancestors are returned in ascending order
     of distance from the given term.
 
     :param owlready2.entity.ThingClass onto_class: the class for which ancestors will be retrieved
-    :param str onto_name: only ancestors from this ontology will be kept
+    :param listp[str] allowed_ontologies: only ancestors from these ontologies will be kept
 
     :rtype List[str]
     :return list of ancestors (term ids), it could be empty
@@ -144,7 +191,7 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> D
                     ancestors[branch_ancestor_name] = min(ancestors[branch_ancestor_name], distance)
                 else:
                     queue.append((parent.value, distance + 1))
-                    if branch_ancestor_name.split(":")[0] == onto_name:
+                    if branch_ancestor_name.split(":")[0] in allowed_ontologies:
                         ancestors[branch_ancestor_name] = distance
             elif hasattr(parent, "name") and not hasattr(parent, "Classes"):
                 parent_name = parent.name.replace("_", ":")
@@ -158,15 +205,42 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, onto_name: str) -> D
     return {
         ancestor: distance
         for ancestor, distance in sorted(ancestors.items(), key=lambda item: item[1])
-        if ancestor.split(":")[0] == onto_name
+        if ancestor.split(":")[0] in allowed_ontologies
     }
 
 
-def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[str, Any]:
+def _extract_cross_ontology_terms(
+    term_id: str, map_to_cross_ontologies: List[str], cross_ontology_map: Dict[str, Dict[str, str]]
+) -> Dict[str, str]:
+    """
+    Extract mapping of ontology term ID to equivalent term IDs in another ontology.
+
+    :param: term_id: Ontology Term ID to find equivalent terms for
+    :param: map_to_cross_ontologies: List of ontologies to map equivalent terms to
+    :param: cross_ontology_map: str for each ontology with a mapping, map to known equivalent terms in other ontologies
+    :return: Dict[str, str] map of ontology to the equivalent term ID in that ontology for the given
+    term_id, i.e. ZFA:0000001 -> {"UBERON": "UBERON:0000001", "CL": "CL:0000001",...}
+    """
+    cross_ontology_terms = {}
+    for cross_ontology in map_to_cross_ontologies:
+        if term_id in cross_ontology_map[cross_ontology]:
+            cross_ontology_terms[cross_ontology] = cross_ontology_map[cross_ontology][term_id]
+    return cross_ontology_terms
+
+
+def _extract_ontology_term_metadata(
+    onto: owlready2.entity.ThingClass,
+    allowed_ontologies: List[str],
+    map_to_cross_ontologies: List[str],
+    cross_ontology_map: Dict[str, Dict[str, str]],
+) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
+    :param: allowed_ontologies: List of term prefixes to filter out terms that are not direct children from this ontology
+    :param: map_to_cross_ontologies: List of ontologies to map equivalent terms to
+    :param: cross_ontology_map: str for each ontology with a mapping, map to known equivalent terms in other ontologies
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
@@ -174,20 +248,21 @@ def _extract_ontology_term_metadata(onto: owlready2.entity.ThingClass) -> Dict[s
         term_id = onto_term.name.replace("_", ":")
 
         # Skip terms that are not direct children from this ontology
-        if onto.name != term_id.split(":")[0]:
+        term_id_parts = term_id.split(":")
+        if len(term_id_parts) > 2 or term_id_parts[0] not in allowed_ontologies:
             continue
         # Gets ancestors
-        ancestors = _get_ancestors(onto_term, onto.name)
+        ancestors = _get_ancestors(onto_term, allowed_ontologies)
 
-        # Special Case: skip the current term if it is an NCBI Term, but not a descendant of 'NCBITaxon:33208'.
+        # Special Case: skip the current term if it is an NCBI Term, but not a descendant of 'NCBITaxon:33208' (Animal)
         if onto.name == "NCBITaxon" and "NCBITaxon:33208" not in ancestors:
             continue
 
         term_dict[term_id] = dict()
+        term_dict[term_id]["ancestors"] = ancestors
 
-        # only write the ancestors if it's not NCBITaxon, as this saves a lot of disk space and there is
-        # no current use-case for NCBITaxon
-        term_dict[term_id]["ancestors"] = {} if onto.name == "NCBITaxon" else ancestors
+        if cross_ontology_terms := _extract_cross_ontology_terms(term_id, map_to_cross_ontologies, cross_ontology_map):
+            term_dict[term_id]["cross_ontology_terms"] = cross_ontology_terms
 
         term_dict[term_id]["label"] = onto_term.label[0] if onto_term.label else ""
 
@@ -259,16 +334,23 @@ def _parse_ontologies(
     :rtype str
     :return: path to the output json file
     """
+    cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
     for onto_file in os.listdir(working_dir):
-        if onto_file.startswith("."):
+        if not onto_file.endswith(".owl"):
+            continue
+        elif onto_file.rstrip(".owl") not in ontology_info:
+            logging.info(f"Skipping {onto_file} as it is not in the ontology_info.json")
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
+
         version = ontology_info[onto.name]["version"]
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
-
-        onto_dict = _extract_ontology_term_metadata(onto)
-
+        allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
+        map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
+        onto_dict = _extract_ontology_term_metadata(
+            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map
+        )
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
         yield output_file
@@ -342,21 +424,49 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--diff",
+        action="store_true",
+        help="If set to true, only download and parse ontologies that have changed since the last run.",
+    )
+    args = parser.parse_args()
+
     ontology_info = get_ontology_info_file()
     current_version = get_latest_schema_version(ontology_info.keys())
     latest_ontology_version = ontology_info[current_version]
-    latest_ontologies = latest_ontology_version["ontologies"]
-    _download_ontologies(latest_ontologies)
-    _parse_ontologies(latest_ontologies)
+    ontologies_to_process = latest_ontology_version["ontologies"]
+
+    # only process ontologies that have changed since the last run
+    if args.diff:
+        previous_ontology_info = get_ontology_info_file(env.LATEST_ONTOLOGY_INFO_FILE)
+        previous_ontologies = previous_ontology_info["ontologies"]
+        diff_ontologies = {
+            ontology: info
+            for ontology, info in ontologies_to_process.items()
+            if previous_ontologies.get(ontology) != info
+        }
+        ontologies_to_process = diff_ontologies
+        logging.info(
+            "Processing the following ontologies that have changed since the last run:\n\t",
+            "\t\n".join(diff_ontologies.keys()),
+        )
+
+    # download and parse ontologies and generate ontology assets
+    _download_ontologies(ontologies_to_process)
+    _parse_ontologies(ontologies_to_process)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
     for file in expired_files:
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
-    save_ontology_info(ontology_info)
+    save_ontology_info(ontology_info, latest_ontology_version)
+
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
     registry = register_schemas()
-    result = [verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(latest_ontologies)]
+    result = [
+        verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontologies_to_process)
+    ]
     if not all(result):
         sys.exit(1)

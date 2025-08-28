@@ -14,7 +14,7 @@ concurrency:
 name: release-please
 jobs:
   release-please:
-    runs-on: [self-hosted, ARM64]
+    runs-on: ARM64
     steps:
       - name: release please
         uses: google-github-actions/release-please-action@v4.1.1
