@@ -40,16 +40,17 @@ class OntologyParser:
 
         :param ontology_name: str name of ontology to get map of term labels to term IDs
         """
-        if ontology_name not in self.cxg_schema.supported_ontologies:
-            raise ValueError(f"{ontology_name} is not a supported ontology, its metadata cannot be fetched.")
+        supported_ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_name)
+        if not supported_ontology_name:
+            raise ValueError(f"{supported_ontology_name} is not a supported ontology, its metadata cannot be fetched.")
 
-        if self.term_label_to_id_map[ontology_name]:
-            return self.term_label_to_id_map[ontology_name]
+        if self.term_label_to_id_map[supported_ontology_name]:
+            return self.term_label_to_id_map[supported_ontology_name].copy()
 
-        for term_id, term_metadata in self.cxg_schema.ontology(ontology_name).items():
-            self.term_label_to_id_map[ontology_name][term_metadata["label"]] = term_id
+        for term_id, term_metadata in self.cxg_schema.ontology(supported_ontology_name).items():
+            self.term_label_to_id_map[supported_ontology_name][term_metadata["label"]] = term_id
 
-        return self.term_label_to_id_map[ontology_name]
+        return self.term_label_to_id_map[supported_ontology_name].copy()
 
     def _parse_ontology_name(self, term_id: str) -> str:
         """
@@ -63,11 +64,30 @@ class OntologyParser:
         if not re.match(pattern, term_id):
             raise ValueError(f"{term_id} does not conform to expected regex pattern {pattern} and cannot be queried.")
 
-        ontology_name = term_id.split(":")[0]
-        if ontology_name not in self.cxg_schema.supported_ontologies:
+        ontology_term_prefix = term_id.split(":")[0]
+        ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_term_prefix)
+        if not ontology_name:
             raise ValueError(f"{term_id} is not part of a supported ontology, its metadata cannot be fetched.")
 
         return ontology_name
+
+    def _get_supported_ontology_name(self, ontology_term_prefix: str) -> Optional[str]:
+        """
+        Get the source ontology name for a given ontology term prefix, if it is supported by the CxG schema.
+
+        If ontology_term_prefix is directly supported by the CxG schema, returns ontology_term_prefix.
+        If ontology_term_prefix is supported as an import from another ontology, returns the name of the source ontology
+        it is imported in.
+        Otherwise, returns None.
+
+        :param ontology_term_prefix: str ontology term prefix to check
+        :return: str name of ontology that term belongs to, or None if it is not directly supported nor imported in
+        a supported ontology in the CxG schema.
+        """
+        if ontology_term_prefix in self.cxg_schema.supported_ontologies:
+            return ontology_term_prefix
+        supported_ontology_name: Optional[str] = self.cxg_schema.imported_ontologies.get(ontology_term_prefix)
+        return supported_ontology_name
 
     def is_valid_term_id(self, term_id: str, ontology: Optional[str] = None) -> bool:
         """
@@ -151,10 +171,8 @@ class OntologyParser:
         if term_id in VALID_NON_ONTOLOGY_TERMS:
             return {}
         ontology_name = self._parse_ontology_name(term_id)
-        ancestors: Dict[str, int] = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"]
-        if include_self:
-            ancestors[term_id] = 0
-        return ancestors
+        ancestors: Dict[str, int] = self.cxg_schema.ontology(ontology_name)[term_id]["ancestors"].copy()
+        return ancestors | {term_id: 0} if include_self else ancestors
 
     def map_term_ancestors_with_distances(
         self, term_ids: Iterable[str], include_self: bool = False
@@ -168,8 +186,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.map_term_ancestors_with_distances(["CL:0000003", "CL:0000005"], include_self=True)
-        {'CL:0000003': {'CL:0000003': 0}, 'CL:0000005': {'CL:0000057': 1, 'CL:0002320': 2, 'CL:0000000': 3,
-        'CL:0000005': 0}}
+        {'CL:0000003': {'CL:0000003': 0}, 'CL:0000005': {'CL:0000057': 1, 'CL:0000499': 2, 'CL:0002320': 3, 'CL:0000255': 4, 'CL:0000000': 5, 'CL:0000005': 0}}
 
         :param term_ids: list of str ontology terms to find ancestors for
         :param include_self: boolean flag to include the term itself as an ancestor
@@ -397,7 +414,7 @@ class OntologyParser:
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
         >>> ontology_parser.get_term_children("CL:0000526")
-        ['CL:0000101']
+        ['CL:0000101', 'CL:4042034']
 
         :param term_id: str ontology term to find children for
         :return: List[str] of children terms
@@ -581,8 +598,8 @@ class OntologyParser:
         Example
         >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
         >>> ontology_parser = OntologyParser()
-        >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000006"])
-        {'CL:0000005': 'Any fibroblast that is derived from the neural crest.', 'CL:0000006': None}
+        >>> ontology_parser.map_term_descriptions(["CL:0000005", "CL:0000146"])
+        {'CL:0000005': 'Any fibroblast that is derived from the neural crest.', 'CL:0000146': None}
 
         :param term_ids: list of str ontology terms to fetch descriptions for
         :return: Dict[str, str] mapping term IDs to their respective descriptions
@@ -606,7 +623,7 @@ class OntologyParser:
         if term_id in VALID_NON_ONTOLOGY_TERMS:
             return []
         ontology_name = self._parse_ontology_name(term_id)
-        synonyms: List[str] = self.cxg_schema.ontology(ontology_name)[term_id].get("synonyms", [])
+        synonyms: List[str] = list(self.cxg_schema.ontology(ontology_name)[term_id].get("synonyms", []))
         return synonyms
 
     def map_term_synonyms(self, term_ids: List[str]) -> Dict[str, List[str]]:
@@ -644,3 +661,64 @@ class OntologyParser:
         """
         ontology_term_label_to_id_map = self.get_term_label_to_id_map(ontology_name)
         return ontology_term_label_to_id_map.get(term_label)
+
+    def get_bridge_term_id(self, term_id: str, cross_ontology: str) -> Optional[str]:
+        """
+        For a given term ID, fetch the equivalent term ID from a given ontology. Only returns exact match if it exists.
+
+        If no applicable match is found, returns None.
+
+        Raises ValueError if term ID or cross_ontology are not valid member of a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_bridge_term_id("FBbt:00000001", "UBERON")
+        'UBERON:0000468'
+
+        :param term_id: str ontology term to find equivalent term for
+        :param cross_ontology: str name of ontology to search for equivalent term in
+        :return: Optional[str] equivalent term ID from the cross_ontology
+        """
+        if cross_ontology not in self.cxg_schema.cross_ontology_mappings:
+            raise ValueError(
+                f"{cross_ontology} is not in the set of supported cross ontology mappings "
+                f"{self.cxg_schema.cross_ontology_mappings}."
+            )
+        ontology_name = self._parse_ontology_name(term_id)
+        cross_ontology_terms = self.cxg_schema.ontology(ontology_name)[term_id].get("cross_ontology_terms")
+        bridge_term_id: Optional[str] = None
+        if cross_ontology_terms:
+            bridge_term_id = cross_ontology_terms.get(cross_ontology)
+        return bridge_term_id
+
+    def get_closest_bridge_term_ids(self, term_id: str, cross_ontology: str) -> List[str]:
+        """
+        For a given term ID, fetch the equivalent term ID from a given ontology. If match is found,
+        returns a list of 1 with the exact match. If no exact match is found, traverses the ancestors
+        of the term for the closest match.
+
+        If no applicable match is found, returns an empty list.
+
+        If multiple ancestors of the same distance have matches, returns all possible closest matches.
+
+        Raises ValueError if term ID or cross_ontology are not valid member of a supported ontology.
+
+        Example
+        >>> from cellxgene_ontology_guide.ontology_parser import OntologyParser
+        >>> ontology_parser = OntologyParser()
+        >>> ontology_parser.get_closest_bridge_term_ids("FBbt:00000039", "UBERON")
+        ['UBERON:0000476', 'UBERON:0000920']
+
+        :param term_id: str ontology term to find closest term for
+        :param cross_ontology: str name of ontology to search for closest term in
+        :return: List[str] list of closest term IDs from the cross_ontology
+        """
+        closest_bridge_terms: List[str] = []
+        terms_to_match = [term_id]
+        while terms_to_match and not closest_bridge_terms:
+            for term in terms_to_match:
+                if closest_bridge_term := self.get_bridge_term_id(term, cross_ontology):
+                    closest_bridge_terms.append(closest_bridge_term)
+            terms_to_match = [parent for child in terms_to_match for parent in self.get_term_parents(child)]
+        return closest_bridge_terms
