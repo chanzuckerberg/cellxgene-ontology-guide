@@ -58,10 +58,15 @@
         },
         "map_to": {
           "type": "array",
-            "items": {
-                "type": "string"
-            },
+          "items": {
+            "type": "string"
+          },
           "description": "List of ontologies to map equivalent terms to this ontology"
+        },
+        "version_uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI that resolves to the version IRI of the ontology"
         }
       },
       "required": [

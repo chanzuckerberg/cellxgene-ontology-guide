@@ -411,7 +411,15 @@ def _parse_ontologies(
             continue
         onto = _load_ontology_object(os.path.join(working_dir, onto_file))
 
-        version = ontology_info[onto.name].get("version", "unknown")
+        version = ontology_info[onto.name].get("version")
+        # Special case for Cellosauras
+        if not version and onto.name == "CVCL":
+            request = urllib.request.urlretrieve(ontology_info[onto.name].pop("version_url"))
+            with open(request[0], "r") as f:
+                version_info = json.load(f)
+                version = ontology_info[onto.name]["version"] = version_info["Cellosaurus"]["header"]["release"][
+                    "version"
+                ]
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
@@ -528,7 +536,6 @@ if __name__ == "__main__":
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
     for file in expired_files:
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
-    save_ontology_info(ontology_info, latest_ontology_version)
 
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
@@ -536,5 +543,6 @@ if __name__ == "__main__":
     result = [
         verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontologies_to_process)
     ]
+    save_ontology_info(ontology_info, latest_ontology_version)
     if not all(result):
         sys.exit(1)
