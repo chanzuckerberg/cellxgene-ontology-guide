@@ -67,6 +67,10 @@
           "type": "string",
           "format": "uri",
           "description": "URI that resolves to the version IRI of the ontology"
+        },
+        "id_separator": {
+          "type": "string",
+          "description": "Character that separates the ontology prefix from the identifier in CURIEs. The default is ':' (colon)."
         }
       },
       "required": [

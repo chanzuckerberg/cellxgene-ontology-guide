@@ -1,5 +1,4 @@
 import argparse
-import copy
 import gzip
 import json
 import logging
@@ -50,6 +49,9 @@ def save_ontology_info(
         json.dump(ontology_info, f, indent=2)
 
     with open(latest_ontology_info_file, "w") as f:
+        # iterate through the dict and only keep version and source for each ontology
+        for info in latest_ontology_info["ontologies"].values():
+            info.pop("version_url", None)
         json.dump(latest_ontology_info, f, indent=2)
 
 
@@ -90,16 +92,12 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
-        base_url_list = [onto_ref_data["source"]]
-        if version := onto_ref_data.get("version"):
-            # if version is specified, use it to build the URL
-            base_url_list.append(version)
-        base_url = "/".join(base_url_list)
+        base_url = onto_ref_data["source"].replace("{version}", onto_ref_data["version"])
 
-        download_urls = [f"{base_url}/{onto_ref_data['filename']}"]
+        download_urls = [base_url.replace("{filename}", onto_ref_data["filename"])]
         # this assumes the cross-ontology-map is part of the same repository.
         if onto_ref_data.get("cross_ontology_mapping"):
-            download_urls.append(f"{base_url}/{onto_ref_data['cross_ontology_mapping']}")
+            download_urls.append(base_url.replace("{filename}", onto_ref_data["cross_ontology_mapping"]))
         return download_urls
 
     def _check_url(_ontology: str, _url: str) -> None:
@@ -301,23 +299,25 @@ def _extract_ontology_term_metadata(
     allowed_ontologies: List[str],
     map_to_cross_ontologies: List[str],
     cross_ontology_map: Dict[str, Dict[str, str]],
+    id_separator: str,
 ) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
 
     :param: onto: Ontology Object to Process
-    :param: allowed_ontologies: List of term prefixes to filter out terms that are not direct children from this ontology
+    :param: allowed_ontologies: List of term prefixes to filter out terms that are not direct children from this
+    ontology
     :param: map_to_cross_ontologies: List of ontologies to map equivalent terms to
     :param: cross_ontology_map: str for each ontology with a mapping, map to known equivalent terms in other ontologies
+    :param: id_separator: separator to use for ontology term IDs, typically ":" or "_"
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
-    separator = "_" if onto.name == "CVCL" else ":"
     for onto_term in onto.classes():
-        term_id = onto_term.name.replace("_", separator)
+        term_id = onto_term.name.replace("_", id_separator)
 
         # Skip terms that are not direct children from this ontology
-        term_id_parts = term_id.split(separator)
+        term_id_parts = term_id.split(id_separator)
         if len(term_id_parts) > 2 or term_id_parts[0] not in allowed_ontologies:
             continue
         # Gets ancestors
@@ -433,22 +433,15 @@ def _parse_ontologies(
         onto = _load_ontology_object(onto_file_path)
 
         version = ontology_info[onto.name].get("version")
-        # Special case for Cellosauras
-        if not version and onto.name == "CVCL":
-            request = urllib.request.urlretrieve(ontology_info[onto.name].pop("version_url"))
-            with open(request[0], "r") as f:
-                version_info = json.load(f)
-                version = ontology_info[onto.name]["version"] = version_info["Cellosaurus"]["header"]["release"][
-                    "version"
-                ]
         check_version(onto_file_path, version)
 
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
         map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
+        id_separator = ontology_info[onto.name].get("id_separator", ":")
         onto_dict = _extract_ontology_term_metadata(
-            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map
+            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
         )
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
@@ -477,7 +470,7 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
         ontology_files = set()
         for version in schema_versions:
             for ontology, info in ontology_info[version]["ontologies"].items():
-                ontology_files.add(get_ontology_file_name(ontology, info.get("version", "unknown")))
+                ontology_files.add(get_ontology_file_name(ontology, info["version"]))
         return ontology_files
 
     expired_files = _get_ontology_files(expired)  # find all ontology files that are in the expired versions
@@ -500,6 +493,30 @@ def deprecate_previous_cellxgene_schema_versions(ontology_info: Dict[str, Any], 
     for schema_version in ontology_info:
         if schema_version != current_version and "deprecated_on" not in ontology_info[schema_version]:
             ontology_info[schema_version]["deprecated_on"] = datetime.now().strftime("%Y-%m-%d")
+
+
+def resolve_version(schema_info: Dict[str, Any]) -> None:
+    """
+    Resolve the version of each ontology in the schema. If the version is not specified, it will be
+    parsed from the version_url. This modifies the schema dict in place.
+    :param schema_info: the schema information from ontology_info.json
+    :return:
+    """
+    for ontology, info in schema_info["ontologies"].items():
+        if info.get("version"):
+            continue
+        elif info.get("version_url"):
+            try:
+                # Special case for Cellosauras
+                if ontology == "CVCL":
+                    request = urllib.request.urlretrieve(info["version_url"])
+                    with open(request[0], "r") as f:
+                        version_info = json.load(f)
+                        info["version"] = version_info["Cellosaurus"]["header"]["release"]["version"]
+            except Exception as e:
+                raise ValueError(f"Could not retrieve version from {info['version_url']}: {e}") from e
+        else:
+            raise ValueError(f"Version not specified for ontology {ontology} and no version_url provided")
 
 
 def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List[str]:
@@ -533,7 +550,8 @@ if __name__ == "__main__":
 
     ontology_info = get_ontology_info_file()
     current_version = get_latest_schema_version(ontology_info.keys())
-    latest_ontology_version = copy.deepcopy(ontology_info[current_version])
+    resolve_version(ontology_info[current_version])
+    latest_ontology_version = ontology_info[current_version]
     ontologies_to_process = latest_ontology_version["ontologies"]
 
     # only process ontologies that have changed since the last run
@@ -559,6 +577,7 @@ if __name__ == "__main__":
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
     for file in expired_files:
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
+    save_ontology_info(ontology_info, latest_ontology_version)
 
     # validate against the schema
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
@@ -566,6 +585,5 @@ if __name__ == "__main__":
     result = [
         verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontologies_to_process)
     ]
-    save_ontology_info(ontology_info, latest_ontology_version)
     if not all(result):
         sys.exit(1)

@@ -167,6 +167,12 @@ def mock_CXGSchema(
                     "filename": "zfa.owl",
                     "map_to": ["CL"],
                 },
+                "CVCL": {
+                    "source": "http://example.com",
+                    "filename": "cellosaurus.obo",
+                    "id_separator": "_",
+                    "version": "53.0",
+                },
             }
         }
     }
@@ -175,6 +181,7 @@ def mock_CXGSchema(
         "CL": "CL-ontology-2024-01-01.json.gz",
         "HANCESTRO": "HANCESTRO-ontology-2024-01-01.json.gz",
         "ZFA": "ZFA-ontology-2024-01-01.json.gz",
+        "CVCL": "CVCL-ontology-53.0.json.gz",
     }
 
     def get_mock_ontology_dict(file_name):
@@ -184,6 +191,19 @@ def mock_CXGSchema(
             return ontology_dict_with_imports
         if "ZFA" in file_name:
             return ontology_dict_with_cross_ontology_terms
+        if "CVCL" in file_name:
+            return {
+                "CVCL:1ABC": {
+                    "ancestors": {},
+                    "label": "Cellosaurus Cell Line A",
+                    "deprecated": False,
+                },
+                "CVCL:2DEF": {
+                    "ancestors": {"CVCL:1ABC": 1},
+                    "label": "Cellosaurus Cell Line B",
+                    "deprecated": False,
+                },
+            }
         return None
 
     mock_load_ontology_file.side_effect = get_mock_ontology_dict
@@ -197,8 +217,14 @@ def ontology_parser(mock_CXGSchema):
     return OntologyParser(schema_version="5.0.0")
 
 
-def test_parse_ontology_name(ontology_parser):
-    assert ontology_parser._parse_ontology_name("CL:0000001") == "CL"
+@pytest.mark.parametrize("term_id,expected", [("CL:0000001", "CL"), ("CVCL_1ABC", "CVCL")])
+def test_parse_ontology_name(ontology_parser, term_id, expected):
+    assert ontology_parser._parse_ontology_name(term_id) == expected
+
+
+def test_parse_ontology_name__invalid_separator(ontology_parser):
+    with pytest.raises(ValueError):
+        ontology_parser._parse_ontology_name("CL_0000001")
 
 
 @pytest.mark.parametrize("term_id", ["AfPO:0000001", "HANCESTRO:0000000"])
@@ -208,7 +234,7 @@ def test_parse_ontology_name__imported_term(ontology_parser, term_id):
 
 def test_parse_ontology_name__wrong_format(ontology_parser):
     with pytest.raises(ValueError):
-        ontology_parser._parse_ontology_name("CL_0000001")
+        ontology_parser._parse_ontology_name("CL/0000001")
 
 
 def test_parse_ontology_name__not_supported(ontology_parser):
