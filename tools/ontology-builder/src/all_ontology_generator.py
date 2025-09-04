@@ -370,11 +370,11 @@ def check_version(onto_file: str, version: str) -> None:
     version_iri = version_info = ""
     with open(onto_file, "r") as f:
         for line in f:
-            if "versionIRI" in line:
+            if "versioniri" in line.lower():
                 if version in line or version.strip("v") in line:
                     return
                 version_iri = line
-            elif "versionINFO" in line:
+            elif "versioninfo" in line.lower():
                 if version in line or version.strip("v") in line:
                     return
                 version_info = line
