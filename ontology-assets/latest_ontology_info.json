@@ -1,5 +1,10 @@
 {
   "ontologies": {
+    "CVCL": {
+      "source": "https://ftp.expasy.org/databases/cellosaurus/",
+      "filename": "cellosaurus.obo",
+      "version": "53.0"
+    },
     "CL": {
       "version": "v2025-04-10",
       "source": "https://github.com/obophenotype/cell-ontology/releases/download",

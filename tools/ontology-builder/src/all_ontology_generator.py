@@ -1,4 +1,5 @@
 import argparse
+import copy
 import gzip
 import json
 import logging
@@ -164,7 +165,7 @@ def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
         "--input",
         f"./{obo_relative_path}",
         "--format",
-        "owx",
+        "owl",
         "-o",
         f"./{owl_relative_path}",
     ]
@@ -365,6 +366,25 @@ def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
     return f"{ontology_name}-ontology-{ontology_version}.json.gz"
 
 
+def check_version(onto_file: str, version: str) -> None:
+    version_iri = version_info = ""
+    with open(onto_file, "r") as f:
+        for line in f:
+            if "versionIRI" in line:
+                if version in line or version.strip("v") in line:
+                    return
+                version_iri = line
+            elif "versionINFO" in line:
+                if version in line or version.strip("v") in line:
+                    return
+                version_info = line
+            elif version_iri and version_info:
+                logging.warning(f"VersionIRI mismatch in {onto_file}: {version_iri.strip()}")
+                logging.warning(f"VersionINFO mismatch in {onto_file}: {version_info.strip()}")
+                break
+        logging.warning(f"No version match found in {onto_file} for version {version}")
+
+
 def _parse_ontologies(
     ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
@@ -409,7 +429,8 @@ def _parse_ontologies(
         elif onto_file.rstrip(".owl") not in ontology_info:
             logging.info(f"Skipping {onto_file} as it is not in the ontology_info.json")
             continue
-        onto = _load_ontology_object(os.path.join(working_dir, onto_file))
+        onto_file_path = os.path.join(working_dir, onto_file)
+        onto = _load_ontology_object(onto_file_path)
 
         version = ontology_info[onto.name].get("version")
         # Special case for Cellosauras
@@ -420,6 +441,8 @@ def _parse_ontologies(
                 version = ontology_info[onto.name]["version"] = version_info["Cellosaurus"]["header"]["release"][
                     "version"
                 ]
+        check_version(onto_file_path, version)
+
         output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
         logging.info(f"Processing {output_file}")
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
@@ -510,7 +533,7 @@ if __name__ == "__main__":
 
     ontology_info = get_ontology_info_file()
     current_version = get_latest_schema_version(ontology_info.keys())
-    latest_ontology_version = ontology_info[current_version]
+    latest_ontology_version = copy.deepcopy(ontology_info[current_version])
     ontologies_to_process = latest_ontology_version["ontologies"]
 
     # only process ontologies that have changed since the last run
