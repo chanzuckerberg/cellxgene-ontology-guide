@@ -1,17 +1,12 @@
 {
-  "7.0.0": {
-    "ontologies": {
-      "CVCL": {
-        "source": "https://ftp.expasy.org/databases/cellosaurus/{filename}",
-        "filename": "cellosaurus.obo",
-        "version_url": "https://api.cellosaurus.org/release-info",
-        "id_separator": "_",
-        "version": "53.0"
-      }
-    }
-  },
   "6.0.0": {
     "ontologies": {
+      "CVCL": {
+      "source": "https://ftp.expasy.org/databases/cellosaurus/{filename}",
+      "filename": "cellosaurus.obo",
+      "id_separator": "_",
+      "version": "53.0"
+    },
       "CL": {
         "version": "v2025-04-10",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download/{version}/{filename}",
