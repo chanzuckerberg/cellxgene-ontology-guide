@@ -52,7 +52,7 @@
           },
           "description": "List of ontologies to map equivalent terms."
         },
-        "version_uri": {
+        "version_url": {
           "type": "string",
           "format": "uri",
           "description": "URI that resolves to the version of the ontology. The resolved version will be used to verify the version of the download ontology file, and backfill the version in ontology_info.json if not provided."
