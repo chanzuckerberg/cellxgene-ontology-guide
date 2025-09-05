@@ -299,7 +299,7 @@ def _extract_ontology_term_metadata(
     allowed_ontologies: List[str],
     map_to_cross_ontologies: List[str],
     cross_ontology_map: Dict[str, Dict[str, str]],
-    id_separator: str,
+    id_separator: str = ":",
 ) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
@@ -513,8 +513,10 @@ def resolve_version(schema_info: Dict[str, Any]) -> None:
                     with open(request[0], "r") as f:
                         version_info = json.load(f)
                         info["version"] = version_info["Cellosaurus"]["header"]["release"]["version"]
+                else:
+                    raise NotImplementedError()
             except Exception as e:
-                raise ValueError(f"Could not retrieve version from {info['version_url']}: {e}") from e
+                raise ValueError(f"Could not retrieve version for {ontology} from {info['version_url']}: {e}") from e
         else:
             raise ValueError(f"Version not specified for ontology {ontology} and no version_url provided")
 
