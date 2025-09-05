@@ -60,15 +60,21 @@ class OntologyParser:
         :param term_id: str ontology term to parse
         :return: str name of ontology that term belongs to
         """
-        pattern = r"[A-Za-z]+:\d+"
-        if not re.match(pattern, term_id):
+        # use names groups
+        patterns = [r"([A-Za-z]+):[0-9]+", r"([A-Za-z]+)_[A-Za-z0-9]+"]
+        pattern = "|".join(patterns)
+        match = re.match(pattern, term_id)
+        if not match:
             raise ValueError(f"{term_id} does not conform to expected regex pattern {pattern} and cannot be queried.")
 
-        ontology_term_prefix = term_id.split(":")[0]
+        ontology_term_prefix = match.group(1) or match.group(2)
         ontology_name: Optional[str] = self._get_supported_ontology_name(ontology_term_prefix)
         if not ontology_name:
             raise ValueError(f"{term_id} is not part of a supported ontology, its metadata cannot be fetched.")
 
+        id_separator = self.cxg_schema.supported_ontologies.get(ontology_name).get("id_separator", ":")
+        if id_separator not in term_id:
+            raise ValueError(f"{term_id} does not conform to expected format for {ontology_term_prefix} terms.")
         return ontology_name
 
     def _get_supported_ontology_name(self, ontology_term_prefix: str) -> Optional[str]:

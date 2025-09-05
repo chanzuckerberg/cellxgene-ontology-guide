@@ -22,6 +22,7 @@ class Ontology(Enum):
     ZFA = "zfa"
     WBbt = "wbbt"
     WBls = "wbls"
+    CVCL = "cvcl"
 
 
 class CuratedOntologyTermList(Enum):
