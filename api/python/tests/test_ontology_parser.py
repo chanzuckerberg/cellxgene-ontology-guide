@@ -185,25 +185,26 @@ def mock_CXGSchema(
     }
 
     def get_mock_ontology_dict(file_name):
+        # For testing order matters. First check for CVCL, since CL is a substring of CVCL
+        if "CVCL" in file_name:
+            return {
+                "CVCL_1ABC": {
+                    "ancestors": {},
+                    "label": "Cellosaurus Cell Line A",
+                    "deprecated": False,
+                },
+                "CVCL_2DEF": {
+                    "ancestors": {"CVCL_1ABC": 1},
+                    "label": "Cellosaurus Cell Line B",
+                    "deprecated": False,
+                },
+            }
         if "CL" in file_name:
             return ontology_dict
         if "HANCESTRO" in file_name:
             return ontology_dict_with_imports
         if "ZFA" in file_name:
             return ontology_dict_with_cross_ontology_terms
-        if "CVCL" in file_name:
-            return {
-                "CVCL:1ABC": {
-                    "ancestors": {},
-                    "label": "Cellosaurus Cell Line A",
-                    "deprecated": False,
-                },
-                "CVCL:2DEF": {
-                    "ancestors": {"CVCL:1ABC": 1},
-                    "label": "Cellosaurus Cell Line B",
-                    "deprecated": False,
-                },
-            }
         return None
 
     mock_load_ontology_file.side_effect = get_mock_ontology_dict
@@ -244,7 +245,15 @@ def test_parse_ontology_name__not_supported(ontology_parser):
 
 @pytest.mark.parametrize(
     "term_id,expected",
-    [("CL:0000001", True), ("CL:0000003", True), ("CL:0000009", False), ("GO:0000001", False), ("AfPO:0000000", True)],
+    [
+        ("CL:0000001", True),
+        ("CL:0000003", True),
+        ("CL:0000009", False),
+        ("GO:0000001", False),
+        ("AfPO:0000000", True),
+        ("CVCL_1ABC", True),
+        ("CVCL:1ABC", False),
+    ],
 )
 def test_is_valid_term_id(ontology_parser, term_id, expected):
     assert ontology_parser.is_valid_term_id(term_id) == expected
@@ -259,6 +268,9 @@ def test_is_valid_term_id(ontology_parser, term_id, expected):
         ("AfPO:0000000", "HANCESTRO", True),
         ("AfPO:0000000", "AfPO", False),
         ("HANCESTRO:0000001", "AfPO", False),
+        ("CVCL_1ABC", "CVCL", True),
+        ("CVCL:1ABC", "CVCL", False),
+        ("CVCL_1ABC", "CL", False),
     ],
 )
 def test_is_valid_term_id__with_ontology(ontology_parser, term_id, ontology, expected):
