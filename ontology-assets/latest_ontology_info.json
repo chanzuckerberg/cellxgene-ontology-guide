@@ -3,7 +3,7 @@
     "CVCL": {
       "source": "https://ftp.expasy.org/databases/cellosaurus/{filename}",
       "filename": "cellosaurus.obo",
-      "version_url": "https://api.cellosaurus.org/release-info",
+      "version_uri": "https://api.cellosaurus.org/release-info",
       "id_separator": "_",
       "version": "53.0"
     },
