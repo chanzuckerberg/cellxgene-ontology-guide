@@ -507,7 +507,7 @@ def resolve_version(schema_info: Dict[str, Any]) -> None:
             continue
         elif info.get("version_url"):
             try:
-                # Special case for Cellosauras
+                # Special case for Cellosaurus
                 if ontology == "CVCL":
                     request = urllib.request.urlretrieve(info["version_url"])
                     with open(request[0], "r") as f:
