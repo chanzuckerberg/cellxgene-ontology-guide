@@ -49,9 +49,6 @@ def save_ontology_info(
         json.dump(ontology_info, f, indent=2)
 
     with open(latest_ontology_info_file, "w") as f:
-        # iterate through the dict and only keep version and source for each ontology
-        for info in latest_ontology_info["ontologies"].values():
-            info.pop("version_url", None)
         json.dump(latest_ontology_info, f, indent=2)
 
 

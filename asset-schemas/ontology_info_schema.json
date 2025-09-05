@@ -66,7 +66,7 @@
         "version_uri": {
           "type": "string",
           "format": "uri",
-          "description": "URI that resolves to the version IRI of the ontology"
+          "description": "URI that resolves to the version of the ontology. The resolved version will be used to verify the version of the download ontology file, and backfill the version in ontology_info.json if not provided."
         },
         "id_separator": {
           "type": "string",
