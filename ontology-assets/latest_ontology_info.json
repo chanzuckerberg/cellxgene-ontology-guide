@@ -1,5 +1,11 @@
 {
   "ontologies": {
+    "CVCL": {
+      "source": "https://ftp.expasy.org/databases/cellosaurus/{filename}",
+      "filename": "cellosaurus.obo",
+      "id_separator": "_",
+      "version": "53.0"
+    },
     "CL": {
       "version": "v2025-04-10",
       "source": "https://github.com/obophenotype/cell-ontology/releases/download/{version}/{filename}",
@@ -87,5 +93,6 @@
         "UBERON"
       ]
     }
-  }
+  },
+  "deprecated_on": "2025-09-04"
 }
