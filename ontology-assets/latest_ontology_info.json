@@ -19,7 +19,7 @@
       "filename": "efo.owl"
     },
     "HANCESTRO": {
-      "version": "3.0",
+      "version": "v2025-04-01",
       "source": "https://github.com/EBISPOT/hancestro/raw/{version}/{filename}",
       "filename": "hancestro.owl"
     },
