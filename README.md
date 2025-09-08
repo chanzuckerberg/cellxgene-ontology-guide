@@ -76,3 +76,4 @@ The GHA workflow [tag-latest-ontology-assets.yml](.github/workflows/tag-latest-o
 
 1. Update the [ontology_info.json](./ontology-assets/ontology_info.json) file with the new schema version
 2. Leave the older versions in the file for backward compatibility. They will be deprecated and removed automatically after 6 months. That process is handled in [deprecate_previous_cellxgene_schema_versions](https://github.com/chanzuckerberg/cellxgene-ontology/blob/main/tools/ontology-builder/src/all_ontology_generator.py#L311-L311).
+3. hello
