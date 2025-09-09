@@ -1,6 +1,15 @@
 # Changelog
 
 
+## [1.7.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.6.2...ontology-assets-v1.7.0-alpha) (2025-09-09)
+
+
+### Features
+
+* cellxgene schema 7.0.0 update Hancestor to v2025-04-01 ([#296](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/296)) ([96cf8a3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/96cf8a3e9297d4e4836798216676bac636790e59))
+* put out alpha release of 7.0.0 ([#297](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/297)) ([46e22e8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/46e22e86d359f04c3796bf665f52fcdf362be236))
+* support cellosauras ontology ([#294](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/294)) ([93972f1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/93972f185b229e77f4b63fdb37ddd96faa7fcdaf))
+
 ## [1.6.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.5.0...ontology-assets-v1.6.2) (2025-06-04)
 
 
