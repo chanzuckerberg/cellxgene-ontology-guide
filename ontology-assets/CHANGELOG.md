@@ -1,7 +1,7 @@
 # Changelog
 
 
-## [1.7.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.6.2...ontology-assets-v1.7.0) (2025-09-09)
+## [1.7.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.6.2...ontology-assets-v1.7.0-alpha) (2025-09-09)
 
 
 ### Features
