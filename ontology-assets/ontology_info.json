@@ -1,5 +1,5 @@
 {
-  "7.0.0": {
+  "7.0.0-alpha": {
     "ontologies": {
       "CVCL": {
         "source": "https://ftp.expasy.org/databases/cellosaurus/{filename}",
