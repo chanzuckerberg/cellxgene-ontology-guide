@@ -15,7 +15,7 @@
         "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.81.0",
+        "version": "v3.82.0",
         "source": "https://github.com/EBISPOT/efo/releases/download/{version}/{filename}",
         "filename": "efo.owl"
       },
@@ -40,7 +40,7 @@
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2025-03-13",
+        "version": "v2025-09-11",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download/{version}/{filename}",
         "filename": "ncbitaxon.owl.gz"
       },
@@ -70,7 +70,7 @@
         "filename": "fbdv.owl"
       },
       "ZFA": {
-        "version": "v2025-01-28",
+        "version": "v2025-09-05",
         "source": "https://github.com/ZFIN/zebrafish-anatomical-ontology/raw/{version}/{filename}",
         "filename": "zfa.owl",
         "additional_ontologies": [
