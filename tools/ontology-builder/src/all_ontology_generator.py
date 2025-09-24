@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 import gzip
 import json
 import logging
@@ -8,7 +9,6 @@ import subprocess
 import sys
 import urllib.request
 from datetime import datetime, timedelta
-from threading import Thread
 from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
 
@@ -62,7 +62,16 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     :rtype None
     """
 
+    def _check_url(_ontology: str, _url: str) -> None:
+        try:
+            urllib.request.urlopen(_url)
+        except HTTPError as e:
+            raise Exception(f"{_ontology} with pinned URL {_url} returns status code {e.code}") from e
+        except URLError as e:
+            raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
+
     def download(_ontology: str, _url: str) -> None:
+        _check_url(_ontology, _url)
         logging.info(f"Start Downloading {_url}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
@@ -101,25 +110,12 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             download_urls.append(base_url.replace("{filename}", onto_ref_data["cross_ontology_mapping"]))
         return download_urls
 
-    def _check_url(_ontology: str, _url: str) -> None:
-        try:
-            urllib.request.urlopen(_url)
-        except HTTPError as e:
-            raise Exception(f"{_ontology} with pinned URL {_url} returns status code {e.code}") from e
-        except URLError as e:
-            raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
-
-    threads = []
-    for ontology, _ in ontology_info.items():
-        urls = _build_urls(ontology)
-        for url in urls:
-            _check_url(ontology, url)
-            t = Thread(target=download, args=(ontology, url))
-            t.start()
-            threads.append(t)
-
-    for t in threads:
-        t.join()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(download, ontology, url) for ontology in ontology_info for url in _build_urls(ontology)
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            future.result()
 
 
 def _decompress(infile: str, tofile: str) -> None:
@@ -264,9 +260,12 @@ def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
 
     :return: owlready2.entity.ThingClass: Ontology Term Object, with metadata parsed from ontology file
     """
-    world = owlready2.World()
-    onto = world.get_ontology(onto_file)
-    onto.load()
+    try:
+        world = owlready2.World()
+        onto = world.get_ontology(onto_file)
+        onto.load()
+    except Exception as e:
+        raise ValueError(f"Could not load ontology from {onto_file}: {e}") from e
     return onto
 
 
@@ -453,6 +452,39 @@ def check_version(onto_file: str, version: str) -> None:
         logging.warning(f"No version match found in {onto_file} for version {version}")
 
 
+def process_ontology_file(
+    onto_file: str,
+    ontology_info: Dict[str, Any],
+    cross_ontology_map: Dict[str, Any],
+    working_dir: str,
+    output_path: str,
+) -> str | None:
+    try:
+        if not onto_file.endswith(".owl"):
+            return None
+        if onto_file.rstrip(".owl") not in ontology_info:
+            logging.info(f"Skipping {onto_file} as it is not in the ontology_info.json")
+            return None
+        onto_file_path = os.path.join(working_dir, onto_file)
+        onto = _load_ontology_object(onto_file_path)
+        version = ontology_info[onto.name].get("version")
+        check_version(onto_file_path, version)
+        output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
+        logging.info(f"Processing {output_file}")
+        allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
+        map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
+        id_separator = ontology_info[onto.name].get("id_separator", ":")
+        onto_dict = _extract_ontology_term_metadata(
+            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
+        )
+        with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
+            fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
+        return output_file
+    except Exception:
+        logging.exception(f"Error processing {onto_file}")
+        return None
+
+
 def _parse_ontologies(
     ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
@@ -491,29 +523,17 @@ def _parse_ontologies(
     :return: path to the output json file
     """
     cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
-    for onto_file in os.listdir(working_dir):
-        if not onto_file.endswith(".owl"):
-            continue
-        elif onto_file.rstrip(".owl") not in ontology_info:
-            logging.info(f"Skipping {onto_file} as it is not in the ontology_info.json")
-            continue
-        onto_file_path = os.path.join(working_dir, onto_file)
-        onto = _load_ontology_object(onto_file_path)
 
-        version = ontology_info[onto.name].get("version")
-        check_version(onto_file_path, version)
-
-        output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
-        logging.info(f"Processing {output_file}")
-        allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
-        map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
-        id_separator = ontology_info[onto.name].get("id_separator", ":")
-        onto_dict = _extract_ontology_term_metadata(
-            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
-        )
-        with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
-            fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
-        yield output_file
+    onto_files = [f for f in os.listdir(working_dir) if f.endswith(".owl")]
+    with concurrent.futures.ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
+        futures = [
+            executor.submit(process_ontology_file, f, ontology_info, cross_ontology_map, working_dir, output_path)
+            for f in onto_files
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            result = future.result()
+            if result:
+                yield result
 
 
 def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
@@ -641,7 +661,6 @@ if __name__ == "__main__":
 
     # download and parse ontologies and generate ontology assets
     _download_ontologies(ontologies_to_process)
-    _parse_ontologies(ontologies_to_process)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
