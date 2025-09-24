@@ -85,6 +85,10 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             os.remove(output_file + ".gz")
         else:
             urllib.request.urlretrieve(_url, output_file)
+
+        if _ontology == "CL" and output_file.endswith(".owl"):
+            _remove_punning_terms_from_cl(output_file)
+
         logging.info(f"Finish Downloading {_url}")
 
     def _build_urls(_ontology: str) -> List[str]:
@@ -175,6 +179,73 @@ def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
             logging.info(f"Docker output: {result.stdout}")
     except subprocess.CalledProcessError as e:
         logging.error(f"Failed to convert {obo_file} to OWL format: {e}")
+        if e.stdout:
+            logging.error(f"Docker stdout: {e.stdout}")
+        if e.stderr:
+            logging.error(f"Docker stderr: {e.stderr}")
+        raise
+    except FileNotFoundError:
+        logging.error("Docker not found. Please make sure Docker is installed and available in PATH")
+        raise
+
+
+def _remove_punning_terms_from_cl(onto_file: str) -> None:
+    """
+    Remove punning terms from CL ontology file using robot running in docker.
+    This is due to owlready2 not supporting "punning" see:
+    https://github.com/obophenotype/cell-ontology/issues/3237#issuecomment-3207136184
+
+    robot remove --input cl.owl \
+             --term http://purl.obolibrary.org/obo/STATO_0000416 \
+             --term http://purl.obolibrary.org/obo/STATO_0000663 \
+             --allow-punning true \
+             --output cl-without-stato.owl
+
+    :param str onto_file: path to input OWL file (should be in raw-files directory)
+
+    :rtype None
+    """
+    # Get relative paths from project root
+    owl_relative_path = os.path.relpath(onto_file, env.RAW_ONTOLOGY_DIR)
+    cleaned_owl_output_file = onto_file.replace(".owl", "-cleaned.owl")
+    cleaned_owl_relative_path = os.path.relpath(cleaned_owl_output_file, env.RAW_ONTOLOGY_DIR)
+
+    # Docker command to remove punning terms using robot
+    docker_cmd = [
+        "docker",
+        "run",
+        "-v",
+        f"{env.RAW_ONTOLOGY_DIR}:/work",
+        "-w",
+        "/work",
+        "--rm",
+        "obolibrary/robot",
+        "robot",
+        "remove",
+        "--input",
+        f"./{owl_relative_path}",
+        "--term",
+        "http://purl.obolibrary.org/obo/STATO_0000416",
+        "--term",
+        "http://purl.obolibrary.org/obo/STATO_0000663",
+        "--allow-punning",
+        "true",
+        "--output",
+        f"./{cleaned_owl_relative_path}",
+    ]
+
+    logging.info(f"Removing punning terms from {onto_file} using Docker")
+    logging.info(f"Running command: {' '.join(docker_cmd)}")
+
+    try:
+        result = subprocess.run(docker_cmd, check=True, capture_output=True, text=True)
+        logging.info(f"Successfully removed punning terms from {onto_file}, output saved to {cleaned_owl_output_file}")
+        if result.stdout:
+            logging.info(f"Docker output: {result.stdout}")
+        # Replace original file with cleaned file
+        os.replace(cleaned_owl_output_file, onto_file)
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Failed to remove punning terms from {onto_file}: {e}")
         if e.stdout:
             logging.error(f"Docker stdout: {e.stdout}")
         if e.stderr:
