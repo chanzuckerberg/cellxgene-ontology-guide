@@ -8,6 +8,18 @@ import re
 import subprocess
 import sys
 import urllib.request
+
+
+def setup_logging() -> None:
+    """Configure logging format for both main and worker processes"""
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [PID %(process)d/TID %(thread)d] %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        force=True,  # Ensure we override any existing configuration
+    )
+
+
 from datetime import datetime, timedelta
 from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
@@ -71,6 +83,8 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
 
     def download(_ontology: str, _url: str) -> None:
+        # Configure logging for this thread
+        setup_logging()
         _check_url(_ontology, _url)
         logging.info(f"Starting download of {_ontology} from {_url}")
         # Format of ontology (handles cases where they are compressed)
@@ -388,6 +402,8 @@ def process_ontology_file(
     working_dir: str,
     output_path: str,
 ) -> str | None:
+    # Configure logging for this process
+    setup_logging()
     try:
         logging.info(f"Starting processing of {onto_file}")
         if not onto_file.endswith(".owl"):
@@ -456,15 +472,20 @@ def _parse_ontologies(
     cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
 
     onto_files = [f for f in os.listdir(working_dir) if f.endswith(".owl")]
-    with concurrent.futures.ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
+    cpu_count = os.cpu_count() or 1
+    max_workers = max(1, cpu_count - 1)
+    with concurrent.futures.ProcessPoolExecutor(max_workers=max_workers) as executor:
         futures = [
             executor.submit(process_ontology_file, f, ontology_info, cross_ontology_map, working_dir, output_path)
             for f in onto_files
         ]
         for future in concurrent.futures.as_completed(futures):
-            result = future.result()
-            if result:
-                yield result
+            try:
+                result = future.result()
+                if result:
+                    yield result
+            except Exception as e:
+                logging.error(f"Process failed with error: {e}")
 
 
 def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
@@ -476,7 +497,7 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
     """
     expired = list_expired_cellxgene_schema_version(ontology_info)  # find expired cellxgene schema versions
     current = set(ontology_info.keys()) - set(expired)  # find current cellxgene schema versions
-    logging.info("Expired versions:\n\t", "\t\n".join(expired))
+    logging.info("Expired versions:\n%s", "\t\n".join(expired))
 
     def _get_ontology_files(schema_versions: List[str]) -> Set[str]:
         """
@@ -560,11 +581,8 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s [PID %(process)d/TID %(thread)d] %(levelname)s: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
+    # Initialize logging for the main process
+    setup_logging()
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--diff",
@@ -590,7 +608,7 @@ if __name__ == "__main__":
         }
         ontologies_to_process = diff_ontologies
         logging.info(
-            "Processing the following ontologies that have changed since the last run:\n\t",
+            "Processing the following ontologies that have changed since the last run:\n%s",
             "\t\n".join(diff_ontologies.keys()),
         )
 
@@ -598,7 +616,7 @@ if __name__ == "__main__":
     _download_ontologies(ontologies_to_process)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
-    logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
+    logging.info("Removing expired files:\n%s", "\t\n".join(expired_files))
     for file in expired_files:
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
     save_ontology_info(ontology_info, latest_ontology_version)
