@@ -94,7 +94,6 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             os.remove(output_file + ".gz")
         else:
             urllib.request.urlretrieve(_url, output_file)
-        logging.info(f"Finish Downloading {_url}")
         logging.info(f"Finished downloading {_ontology} from {_url}")
 
     def _build_urls(_ontology: str) -> List[str]:
