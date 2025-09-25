@@ -72,7 +72,7 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     def download(_ontology: str, _url: str) -> None:
         _check_url(_ontology, _url)
-        logging.info(f"Start Downloading {_url}")
+        logging.info(f"Starting download of {_ontology} from {_url}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
         output_file = os.path.join(output_dir, _ontology + ".owl")
@@ -98,7 +98,7 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
         if _ontology == "CL" and output_file.endswith(".owl"):
             _remove_punning_terms_from_cl(output_file)
 
-        logging.info(f"Finish Downloading {_url}")
+        logging.info(f"Finished downloading {_ontology} from {_url}")
 
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
@@ -460,6 +460,7 @@ def process_ontology_file(
     output_path: str,
 ) -> str | None:
     try:
+        logging.info(f"Starting processing of {onto_file}")
         if not onto_file.endswith(".owl"):
             return None
         if onto_file.rstrip(".owl") not in ontology_info:
@@ -479,6 +480,7 @@ def process_ontology_file(
         )
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
+        logging.info(f"Finished processing {onto_file}")
         return output_file
     except Exception:
         logging.exception(f"Error processing {onto_file}")
@@ -629,7 +631,11 @@ def list_expired_cellxgene_schema_version(ontology_info: Dict[str, Any]) -> List
 
 # Download and parse ontology files upon execution
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s [PID %(process)d/TID %(thread)d] %(levelname)s: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--diff",
