@@ -76,6 +76,35 @@ def mock_cross_ontology_map():
 
 
 @pytest.fixture
+def mock_onto():
+    """Mock ontology object for testing."""
+    mock = MagicMock()
+    mock.name = "TEST"
+    return mock
+
+
+@pytest.fixture
+def mock_metadata():
+    """Mock metadata for testing."""
+    return {"TEST:001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+
+
+@pytest.fixture
+def mock_ontology_patches(mock_onto, mock_metadata):
+    """Common patches for ontology processing tests."""
+    with (
+        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto) as mock_load,
+        patch("all_ontology_generator.check_version") as mock_check_version,
+        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata) as mock_extract,
+    ):
+        yield {
+            "load": mock_load,
+            "check_version": mock_check_version,
+            "extract": mock_extract,
+        }
+
+
+@pytest.fixture
 def mock_working_dir(tmpdir):
     sub_dir_name = "working_dir"
     sub_dir = tmpdir.mkdir(sub_dir_name)
@@ -177,39 +206,34 @@ def test_process_ontology_file_not_in_ontology_info(
 
 
 def test_process_ontology_file_successful(
-    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    mock_ontology_info,
+    mock_cross_ontology_map,
+    mock_working_dir,
+    mock_output_dir,
+    mock_onto,
+    mock_metadata,
+    mock_ontology_patches,
 ):
     """Test successful processing of an OWL file."""
-    # Create mock ontology object
-    mock_onto = MagicMock()
-    mock_onto.name = "TEST"
+    result = process_ontology_file(
+        "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    )
 
-    # Create mock ontology metadata
-    mock_metadata = {"TEST:001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+    # Verify the function calls
+    mock_ontology_patches["load"].assert_called_once()
+    mock_ontology_patches["check_version"].assert_called_once()
+    mock_ontology_patches["extract"].assert_called_once_with(
+        mock_onto, ["TEST", "EXTRA"], ["MAP"], mock_cross_ontology_map, ":"
+    )
 
-    with (
-        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto) as mock_load,
-        patch("all_ontology_generator.check_version") as mock_check_version,
-        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata) as mock_extract,
-    ):
+    # Verify the output file
+    expected_output_file = os.path.join(mock_output_dir, "TEST-ontology-1.0.0.json.gz")
+    assert result == expected_output_file
 
-        result = process_ontology_file(
-            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
-        )
-
-        # Verify the function calls
-        mock_load.assert_called_once()
-        mock_check_version.assert_called_once()
-        mock_extract.assert_called_once_with(mock_onto, ["TEST", "EXTRA"], ["MAP"], mock_cross_ontology_map, ":")
-
-        # Verify the output file
-        expected_output_file = os.path.join(mock_output_dir, "TEST-ontology-1.0.0.json.gz")
-        assert result == expected_output_file
-
-        # Verify file contents
-        with gzip.open(expected_output_file, "rb") as f:
-            saved_data = json.loads(f.read().decode("utf-8"))
-            assert saved_data == mock_metadata
+    # Verify file contents
+    with gzip.open(expected_output_file, "rb") as f:
+        saved_data = json.loads(f.read().decode("utf-8"))
+        assert saved_data == mock_metadata
 
 
 def test_process_ontology_file_load_error(
@@ -224,40 +248,23 @@ def test_process_ontology_file_load_error(
 
 
 def test_process_ontology_file_extraction_error(
-    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir, mock_ontology_patches
 ):
     """Test handling of metadata extraction errors."""
-    mock_onto = MagicMock()
-    mock_onto.name = "TEST"
+    # Override the extract patch to raise an exception
+    mock_ontology_patches["extract"].side_effect = Exception("Extraction failed")
 
-    with (
-        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto),
-        patch("all_ontology_generator.check_version"),
-        patch("all_ontology_generator._extract_ontology_term_metadata", side_effect=Exception("Extraction failed")),
-    ):
-
-        result = process_ontology_file(
-            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
-        )
-        assert result is None
+    result = process_ontology_file(
+        "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    )
+    assert result is None
 
 
 def test_process_ontology_file_write_error(
-    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir, mock_ontology_patches
 ):
     """Test handling of file write errors."""
-    mock_onto = MagicMock()
-    mock_onto.name = "TEST"
-
-    mock_metadata = {"TEST:001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
-
-    with (
-        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto),
-        patch("all_ontology_generator.check_version"),
-        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata),
-        patch("gzip.GzipFile", side_effect=Exception("Write failed")),
-    ):
-
+    with patch("gzip.GzipFile", side_effect=Exception("Write failed")):
         result = process_ontology_file(
             "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
         )
@@ -265,29 +272,22 @@ def test_process_ontology_file_write_error(
 
 
 def test_process_ontology_file_custom_separator(
-    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir, mock_onto, mock_ontology_patches
 ):
     """Test processing with a custom ID separator."""
     # Modify ontology info to use custom separator
     mock_ontology_info["TEST"]["id_separator"] = "_"
 
-    mock_onto = MagicMock()
-    mock_onto.name = "TEST"
+    # Create custom metadata with underscore separator
+    custom_metadata = {"TEST_001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+    mock_ontology_patches["extract"].return_value = custom_metadata
 
-    mock_metadata = {"TEST_001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+    process_ontology_file("TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir)
 
-    with (
-        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto),
-        patch("all_ontology_generator.check_version"),
-        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata) as mock_extract,
-    ):
-
-        process_ontology_file(
-            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
-        )
-
-        # Verify custom separator was used
-        mock_extract.assert_called_once_with(mock_onto, ["TEST", "EXTRA"], ["MAP"], mock_cross_ontology_map, "_")
+    # Verify custom separator was used
+    mock_ontology_patches["extract"].assert_called_once_with(
+        mock_onto, ["TEST", "EXTRA"], ["MAP"], mock_cross_ontology_map, "_"
+    )
 
 
 def test_download_ontologies_http_error(mock_ontology_info, mock_raw_ontology_dir):
