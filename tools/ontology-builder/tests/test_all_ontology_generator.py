@@ -1,3 +1,4 @@
+import gzip
 import json
 import os
 import urllib.request
@@ -15,6 +16,7 @@ from all_ontology_generator import (
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
     list_expired_cellxgene_schema_version,
+    process_ontology_file,
     resolve_version,
     update_ontology_info,
 )
@@ -23,11 +25,14 @@ from all_ontology_generator import (
 @pytest.fixture
 def mock_ontology_info():
     return {
-        "ontology_name": {
+        "TEST": {
             "source": "http://example.com",
-            "version": "v1",
-            "filename": "ontology_name.owl",
-            "cross_ontology_mapping": "ontology_name.sssom.tsv",
+            "version": "1.0.0",
+            "filename": "TEST.owl",
+            "cross_ontology_mapping": "TEST.sssom.tsv",
+            "additional_ontologies": ["EXTRA"],
+            "map_to": ["MAP"],
+            "id_separator": ":",
         }
     }
 
@@ -46,11 +51,11 @@ def mock_raw_ontology_dir(tmpdir):
     # Create a temporary ontology file
     sub_dir_name = "raw_ontology"
     sub_dir = tmpdir.mkdir(sub_dir_name)
-    onto_owl_file = tmpdir.join(sub_dir_name, "ontology_name.owl")
+    onto_owl_file = tmpdir.join(sub_dir_name, "TEST.owl")
     onto_owl_file.write("")
-    cross_onto_tsv_file = tmpdir.join(sub_dir_name, "ontology_name.sssom.tsv")
+    cross_onto_tsv_file = tmpdir.join(sub_dir_name, "TEST.sssom.tsv")
     cross_onto_tsv_file.write(
-        """subject_id\tsubject_label\tpredicate_id\tobject_id\tobject_label\nFOO:000002\tTest Term\tsemapv:crossSpeciesExactMatch\tOOF:000002\ttest match term"""
+        """subject_id\tsubject_label\tpredicate_id\tobject_id\tobject_label\nMAP:001\tTest Term\tsemapv:crossSpeciesExactMatch\tTEST:001\ttest match term"""
     )
     return str(sub_dir)
 
@@ -63,6 +68,25 @@ def mock_owl(tmpdir):
     onto.name = "FAKE"
 
     return onto
+
+
+@pytest.fixture
+def mock_cross_ontology_map():
+    return {"TEST": {"MAP:001": "TEST:001"}}
+
+
+@pytest.fixture
+def mock_working_dir(tmpdir):
+    sub_dir_name = "working_dir"
+    sub_dir = tmpdir.mkdir(sub_dir_name)
+    return str(sub_dir)
+
+
+@pytest.fixture
+def mock_output_dir(tmpdir):
+    sub_dir_name = "output_dir"
+    sub_dir = tmpdir.mkdir(sub_dir_name)
+    return str(sub_dir)
 
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):
@@ -88,46 +112,182 @@ def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
         assert mock_urlretrieve.call_count == len(os.listdir(mock_raw_ontology_dir))
 
 
-def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
-    # Mocking _load_ontology_object and _extract_ontology_term_metadata
-    with (
-        patch("all_ontology_generator._load_ontology_object") as mock_load_ontology,
-        patch("all_ontology_generator._load_cross_ontology_map") as mock_load_cross_ontology_map,
-        patch("all_ontology_generator._extract_ontology_term_metadata") as mock_extract_metadata,
-        patch("all_ontology_generator._extract_cross_ontology_terms") as mock_extract_cross_ontology_terms,
-    ):
-        # Mock return values
-        MockOntologyObject = MagicMock()
-        MockOntologyObject.name = "ontology_name"  # Must match the name of the ontology file
-        mock_load_ontology.return_value = MockOntologyObject
-        mock_extract_metadata.return_value = {"term_id": {"label": "Term Label", "deprecated": False, "ancestors": {}}}
-        mock_load_cross_ontology_map.return_value = {}
-        mock_extract_cross_ontology_terms.return_value = {}
+def test_parse_ontologies_yields_files(mock_raw_ontology_dir, mock_output_dir):
+    # Create test OWL files
+    owl1 = os.path.join(mock_raw_ontology_dir, "ontology1.owl")
+    owl2 = os.path.join(mock_raw_ontology_dir, "ontology2.owl")
+    with open(owl1, "w") as f:
+        f.write("")
+    with open(owl2, "w") as f:
+        f.write("")
 
-        # Mock output path
-        output_path = tmpdir.mkdir("output")
-        # Call the function
-        output_files = _parse_ontologies(
-            ontology_info=mock_ontology_info, working_dir=mock_raw_ontology_dir, output_path=output_path
+    # Create test ontology info
+    mock_ontology_info = {"ontology1": {"version": "v1"}, "ontology2": {"version": "v2"}}
+
+    # Run the function
+    results = list(
+        _parse_ontologies(
+            ontology_info=mock_ontology_info,
+            working_dir=mock_raw_ontology_dir,
+            output_path=mock_output_dir,
+        )
+    )
+
+    # Verify results
+    assert len(results) == 2
+    assert all(result is None or os.path.exists(result) for result in results)
+
+
+def test_parse_ontologies_no_owl_files(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
+    with (
+        patch("all_ontology_generator._load_cross_ontology_map", return_value={}),
+        patch("all_ontology_generator.process_ontology_file") as mock_process,
+        patch("os.cpu_count", return_value=1),
+        patch("os.listdir", return_value=[]),
+    ):
+        results = list(
+            _parse_ontologies(
+                ontology_info=mock_ontology_info,
+                working_dir=mock_raw_ontology_dir,
+                output_path=tmpdir,
+            )
+        )
+        assert results == []
+        assert mock_process.call_count == 0
+
+
+def test_process_ontology_file_non_owl_file(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test that non-OWL files are skipped."""
+    result = process_ontology_file(
+        "test.txt", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    )
+    assert result is None
+
+
+def test_process_ontology_file_not_in_ontology_info(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test that OWL files not in ontology_info are skipped."""
+    result = process_ontology_file(
+        "unknown.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+    )
+    assert result is None
+
+
+def test_process_ontology_file_successful(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test successful processing of an OWL file."""
+    # Create mock ontology object
+    mock_onto = MagicMock()
+    mock_onto.name = "TEST"
+
+    # Create mock ontology metadata
+    mock_metadata = {"TEST:001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+
+    with (
+        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto) as mock_load,
+        patch("all_ontology_generator.check_version") as mock_check_version,
+        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata) as mock_extract,
+    ):
+
+        result = process_ontology_file(
+            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
         )
 
-        num_cross_ontology_files = 1
-        num_ontologies = len(os.listdir(mock_raw_ontology_dir)) - num_cross_ontology_files
+        # Verify the function calls
+        mock_load.assert_called_once()
+        mock_check_version.assert_called_once()
+        mock_extract.assert_called_once_with(mock_onto, ["TEST", "EXTRA"], ["MAP"], mock_cross_ontology_map, ":")
 
-        # Assert the output file is created
-        assert all(os.path.isfile(file) for file in output_files)
+        # Verify the output file
+        expected_output_file = os.path.join(mock_output_dir, "TEST-ontology-1.0.0.json.gz")
+        assert result == expected_output_file
 
-        # Assert output_path has the same number of files as mock_raw_ontology_dir, minus the cross_ontology files
-        assert len(os.listdir(output_path)) == num_ontologies
+        # Verify file contents
+        with gzip.open(expected_output_file, "rb") as f:
+            saved_data = json.loads(f.read().decode("utf-8"))
+            assert saved_data == mock_metadata
 
-        # Assert _load_ontology_object is called for each ontology file, minus the cross_ontology files
-        assert mock_load_ontology.call_count == num_ontologies
 
-        # Assert _extract_ontology_term_metadata is called for each ontology object, minus the cross_ontology files
-        assert mock_extract_metadata.call_count == num_ontologies
+def test_process_ontology_file_load_error(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test handling of ontology loading errors."""
+    with patch("all_ontology_generator._load_ontology_object", side_effect=Exception("Load failed")):
+        result = process_ontology_file(
+            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+        )
+        assert result is None
 
-        # Assert _load_cross_ontology_map is called once, no matter how many cross_ontology files
-        assert mock_load_cross_ontology_map.call_count == 1
+
+def test_process_ontology_file_extraction_error(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test handling of metadata extraction errors."""
+    mock_onto = MagicMock()
+    mock_onto.name = "TEST"
+
+    with (
+        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto),
+        patch("all_ontology_generator.check_version"),
+        patch("all_ontology_generator._extract_ontology_term_metadata", side_effect=Exception("Extraction failed")),
+    ):
+
+        result = process_ontology_file(
+            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+        )
+        assert result is None
+
+
+def test_process_ontology_file_write_error(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test handling of file write errors."""
+    mock_onto = MagicMock()
+    mock_onto.name = "TEST"
+
+    mock_metadata = {"TEST:001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+
+    with (
+        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto),
+        patch("all_ontology_generator.check_version"),
+        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata),
+        patch("gzip.GzipFile", side_effect=Exception("Write failed")),
+    ):
+
+        result = process_ontology_file(
+            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+        )
+        assert result is None
+
+
+def test_process_ontology_file_custom_separator(
+    mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+):
+    """Test processing with a custom ID separator."""
+    # Modify ontology info to use custom separator
+    mock_ontology_info["TEST"]["id_separator"] = "_"
+
+    mock_onto = MagicMock()
+    mock_onto.name = "TEST"
+
+    mock_metadata = {"TEST_001": {"label": "Test Term", "deprecated": False, "ancestors": {}}}
+
+    with (
+        patch("all_ontology_generator._load_ontology_object", return_value=mock_onto),
+        patch("all_ontology_generator.check_version"),
+        patch("all_ontology_generator._extract_ontology_term_metadata", return_value=mock_metadata) as mock_extract,
+    ):
+
+        process_ontology_file(
+            "TEST.owl", mock_ontology_info, mock_cross_ontology_map, mock_working_dir, mock_output_dir
+        )
+
+        # Verify custom separator was used
+        mock_extract.assert_called_once_with(mock_onto, ["TEST", "EXTRA"], ["MAP"], mock_cross_ontology_map, "_")
 
 
 def test_download_ontologies_http_error(mock_ontology_info, mock_raw_ontology_dir):
@@ -381,11 +541,11 @@ def test_extract_ontology_term_metadata_multiple_allowed_ontologies(sample_ontol
 def test_extract_cross_ontology_terms(mock_raw_ontology_dir, mock_ontology_info):
     cross_ontology_map = _load_cross_ontology_map(mock_raw_ontology_dir, mock_ontology_info)
 
-    assert cross_ontology_map == {"ontology_name": {"OOF:000002": "FOO:000002"}}
+    assert cross_ontology_map == {"TEST": {"TEST:001": "MAP:001"}}
 
-    result = _extract_cross_ontology_terms("OOF:000002", ["ontology_name"], cross_ontology_map)
+    result = _extract_cross_ontology_terms("TEST:001", ["TEST"], cross_ontology_map)
 
-    expected_result = {"ontology_name": "FOO:000002"}
+    expected_result = {"TEST": "MAP:001"}
 
     assert result == expected_result
 
