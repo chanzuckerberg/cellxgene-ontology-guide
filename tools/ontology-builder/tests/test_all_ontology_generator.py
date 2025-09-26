@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import urllib.request
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -11,6 +12,7 @@ from all_ontology_generator import (
     _extract_ontology_term_metadata,
     _load_cross_ontology_map,
     _parse_ontologies,
+    _remove_punning_terms_from_cl,
     check_version,
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
@@ -656,3 +658,46 @@ def test_resolve_version_modifies_in_place():
             assert schema_info["ontologies"]["EXISTING"]["version"] == "1.0.0"
             # Should have added new version
             assert schema_info["ontologies"]["CVCL"]["version"] == "46"
+
+
+class TestRemovePunningTermsFromCL:
+    def test_success(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+        cleaned_file = str(owl_file).replace(".owl", "-cleaned.owl")
+        with open(cleaned_file, "w") as f:
+            f.write("cleaned content")
+
+        with patch("subprocess.run") as mock_run, patch("os.replace") as mock_replace:
+            mock_run.return_value = MagicMock(stdout="docker output", returncode=0)
+            _remove_punning_terms_from_cl(str(owl_file))
+            mock_run.assert_called_once()
+            mock_replace.assert_called_once_with(cleaned_file, str(owl_file))
+
+    def test_docker_error(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+
+        with (
+            patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "docker")),
+            patch("os.replace") as mock_replace,
+        ):
+            with pytest.raises(subprocess.CalledProcessError):
+                _remove_punning_terms_from_cl(str(owl_file))
+            mock_replace.assert_not_called()
+
+    def test_file_not_found(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+
+        with patch("subprocess.run", side_effect=FileNotFoundError), patch("os.replace") as mock_replace:
+            with pytest.raises(FileNotFoundError):
+                _remove_punning_terms_from_cl(str(owl_file))
+            mock_replace.assert_not_called()
+
+    def test_oserror_on_replace(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+        cleaned_file = str(owl_file).replace(".owl", "-cleaned.owl")
+        with open(cleaned_file, "w") as f:
+            f.write("cleaned content")
