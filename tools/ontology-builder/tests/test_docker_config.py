@@ -3,8 +3,8 @@
 import os
 from unittest.mock import mock_open, patch
 
+import docker_config
 import pytest
-from src import docker_config
 
 
 @pytest.fixture
@@ -49,8 +49,11 @@ def test_load_docker_images_caching(mock_env_file, reset_docker_images):
         # Second call should use cache
         images2 = docker_config._load_docker_images()
 
-        assert images1 != images2
+        # Check that we got the same dict object (cached version)
+        assert images1 is images2
+        # And it includes our test addition
         assert "TEST" in images2
+        assert images2["TEST"] == "test"
 
 
 def test_load_docker_images_file_not_found(reset_docker_images):
