@@ -6,3 +6,7 @@
 .coverage*
 /htmlcov/
 /api/python/docs/
+/.vscode
+**/__pycache__/
+*.owl
+*.sssom.tsv
