@@ -34,7 +34,7 @@ jobs:
       - name: install requirements
         run: |
           cd tools/ontology-builder
-          pip install -r requirements.txt
+          make install
       - name: setup git
         run: |
           git config user.name github-actions
