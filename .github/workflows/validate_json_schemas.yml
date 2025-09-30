@@ -31,7 +31,7 @@ jobs:
       - name: install requirements
         run: |
           cd ./tools/ontology-builder/
-          pip install -r requirements.txt
+          make install
       - name: validate json schemas
         run: |
           python3 ./tools/ontology-builder/src/validate_json_schemas.py
