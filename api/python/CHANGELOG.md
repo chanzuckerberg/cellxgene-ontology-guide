@@ -1,5 +1,62 @@
 # Changelog
 
+## [1.8.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.7.2...python-api-v1.8.0-alpha) (2025-09-09)
+
+
+### Features
+
+* cellxgene schema 7.0.0 update Hancestor to v2025-04-01 ([#296](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/296)) ([96cf8a3](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/96cf8a3e9297d4e4836798216676bac636790e59))
+* put out alpha release of 7.0.0 ([#297](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/297)) ([46e22e8](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/46e22e86d359f04c3796bf665f52fcdf362be236))
+* support cellosauras ontology ([#294](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/294)) ([93972f1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/93972f185b229e77f4b63fdb37ddd96faa7fcdaf))
+
+## [1.7.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.6.0-alpha...python-api-v1.7.2) (2025-06-02)
+
+
+### Features
+
+* pinned ontologies for schema 6.0.0 ([#279](https://app.zenhub.com/workspaces/single-cell-5e2a191dad828d52cc78b028/issues/gh/chanzuckerberg/cellxgene-ontology-guide/279)) ([96d17de](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/96d17de8c0a3ef776e9b1195181b2b025d28b15e))
+
+## [1.6.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.5.0-alpha...python-api-v1.6.0-alpha) (2025-03-05)
+
+
+### Features
+
+* pinned ontologies for schema 5.3.0 ([#275](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/275)) ([cd6a15e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/cd6a15e0b5ef8a9b95a956f6373b85de665225e7))
+* set up new github workflow for only ontologies that have changed ([#264](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/264)) ([45d0fce](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/45d0fce7fc168fd59961bd624af1c6097beda0ab))
+
+
+### Misc
+
+* remove 5.3.1-alpha ([#273](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/273)) ([a930332](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a9303329e95e800ac8186ed833d7b45d146f6448))
+
+## [1.5.0-alpha](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.2...python-api-v1.5.0) (2025-02-13)
+
+
+### Features
+
+* add experimental release + cl terms in efo ([#263](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/263)) ([#267](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/267)) ([508dc12](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/508dc12e26c0a2a4ce17578624dd7164b3546f34))
+
+## [1.4.2](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.1...python-api-v1.4.2) (2025-02-06)
+
+
+### BugFixes
+
+* parse through NCBITaxon ancestors ([#259](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/259)) ([c461251](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c461251d7b5becc5f2c268a52d3848a3f96474da))
+
+## [1.4.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.4.0...python-api-v1.4.1) (2025-01-28)
+
+
+### BugFixes
+
+* upgrade EFO from 3.69 to 3.74 ([#257](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/257)) ([c38e905](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c38e905c22113c8c83bc632e1e9cdd140510f5b3))
+
+## [1.4.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.3.1...python-api-v1.4.0) (2025-01-28)
+
+
+### Features
+
+* additional species-specific ontologies for cxg 5.3 multispecies schema ([#255](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/255)) ([64c32fe](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/64c32fe91256323e3d5a2eff4153aa4ec63f528e))
+
 ## [1.3.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.3.0...python-api-v1.3.1) (2024-11-21)
 
 

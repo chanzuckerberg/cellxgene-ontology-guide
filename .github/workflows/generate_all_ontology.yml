@@ -3,10 +3,14 @@ name: Updates to Ontology Files
 on:
   push:
     paths:
+      # TODO: This workflow may execute alongside the generate_diff_ontology.yml workflow if
+      # updates are made to ontology_info.json and any of the files that trigger this
+      # generate_all_ontology.yml workflow. For now, you can cancel the workflow you don't
+      # need to run, but ideally we should ensure only one workflow executes.
       - "**/asset-schemas/ontology_info_schema.json"
       - "**/asset-schemas/all_ontology_schema.json"
-      - "**/ontology-assets/ontology_info.json"
       - "**/tools/ontology-builder/src/all_ontology_generator.py"
+      - "**/ontology-assets/ontology_info.json"
     branches-ignore:
       - main
 
@@ -32,7 +36,7 @@ jobs:
       - name: install requirements
         run: |
           cd tools/ontology-builder
-          pip install -r requirements.txt
+          make install
       - name: setup git
         run: |
           git config user.name github-actions
@@ -42,11 +46,12 @@ jobs:
           python3 ./tools/ontology-builder/src/all_ontology_generator.py
           git add ./ontology-assets/*.json.gz
           git add ./ontology-assets/ontology_info.json
+          git add ./ontology-assets/latest_ontology_info.json
       - name: update API
         run: |
           echo "${{ github.sha }}" > ./api/python/ontology-assets-version.txt
           git add ./api/python/ontology-assets-version.txt
       - name: Commit
         run: |
-          git commit -m "AUTO: update ontologies"
+          git commit -m "AUTO: update all ontologies"
           git push

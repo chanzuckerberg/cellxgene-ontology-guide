@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import urllib.request
 from datetime import datetime
 from unittest.mock import MagicMock, patch
@@ -7,11 +8,16 @@ from unittest.mock import MagicMock, patch
 import pytest
 from all_ontology_generator import (
     _download_ontologies,
+    _extract_cross_ontology_terms,
     _extract_ontology_term_metadata,
+    _load_cross_ontology_map,
     _parse_ontologies,
+    _remove_punning_terms_from_cl,
+    check_version,
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
     list_expired_cellxgene_schema_version,
+    resolve_version,
     update_ontology_info,
 )
 
@@ -23,6 +29,7 @@ def mock_ontology_info():
             "source": "http://example.com",
             "version": "v1",
             "filename": "ontology_name.owl",
+            "cross_ontology_mapping": "ontology_name.sssom.tsv",
         }
     }
 
@@ -43,6 +50,10 @@ def mock_raw_ontology_dir(tmpdir):
     sub_dir = tmpdir.mkdir(sub_dir_name)
     onto_owl_file = tmpdir.join(sub_dir_name, "ontology_name.owl")
     onto_owl_file.write("")
+    cross_onto_tsv_file = tmpdir.join(sub_dir_name, "ontology_name.sssom.tsv")
+    cross_onto_tsv_file.write(
+        """subject_id\tsubject_label\tpredicate_id\tobject_id\tobject_label\nFOO:000002\tTest Term\tsemapv:crossSpeciesExactMatch\tOOF:000002\ttest match term"""
+    )
     return str(sub_dir)
 
 
@@ -76,20 +87,24 @@ def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
         # Call the function
         _download_ontologies(ontology_info=mock_ontology_info, output_dir=mock_raw_ontology_dir)
 
-        mock_urlretrieve.assert_called_once()
+        assert mock_urlretrieve.call_count == len(os.listdir(mock_raw_ontology_dir))
 
 
 def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
     # Mocking _load_ontology_object and _extract_ontology_term_metadata
     with (
         patch("all_ontology_generator._load_ontology_object") as mock_load_ontology,
+        patch("all_ontology_generator._load_cross_ontology_map") as mock_load_cross_ontology_map,
         patch("all_ontology_generator._extract_ontology_term_metadata") as mock_extract_metadata,
+        patch("all_ontology_generator._extract_cross_ontology_terms") as mock_extract_cross_ontology_terms,
     ):
         # Mock return values
         MockOntologyObject = MagicMock()
         MockOntologyObject.name = "ontology_name"  # Must match the name of the ontology file
         mock_load_ontology.return_value = MockOntologyObject
         mock_extract_metadata.return_value = {"term_id": {"label": "Term Label", "deprecated": False, "ancestors": {}}}
+        mock_load_cross_ontology_map.return_value = {}
+        mock_extract_cross_ontology_terms.return_value = {}
 
         # Mock output path
         output_path = tmpdir.mkdir("output")
@@ -98,17 +113,23 @@ def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
             ontology_info=mock_ontology_info, working_dir=mock_raw_ontology_dir, output_path=output_path
         )
 
+        num_cross_ontology_files = 1
+        num_ontologies = len(os.listdir(mock_raw_ontology_dir)) - num_cross_ontology_files
+
         # Assert the output file is created
         assert all(os.path.isfile(file) for file in output_files)
 
-        # Assert output_path has the same number of files as mock_raw_ontology_dir.
-        assert len(os.listdir(output_path)) == len(os.listdir(mock_raw_ontology_dir))
+        # Assert output_path has the same number of files as mock_raw_ontology_dir, minus the cross_ontology files
+        assert len(os.listdir(output_path)) == num_ontologies
 
-        # Assert _load_ontology_object is called for each ontology file
-        assert mock_load_ontology.call_count == len(os.listdir(mock_raw_ontology_dir))
+        # Assert _load_ontology_object is called for each ontology file, minus the cross_ontology files
+        assert mock_load_ontology.call_count == num_ontologies
 
-        # Assert _extract_ontology_term_metadata is called for each ontology object
-        assert mock_extract_metadata.call_count == len(os.listdir(mock_raw_ontology_dir))
+        # Assert _extract_ontology_term_metadata is called for each ontology object, minus the cross_ontology files
+        assert mock_extract_metadata.call_count == num_ontologies
+
+        # Assert _load_cross_ontology_map is called once, no matter how many cross_ontology files
+        assert mock_load_cross_ontology_map.call_count == 1
 
 
 def test_download_ontologies_http_error(mock_ontology_info, mock_raw_ontology_dir):
@@ -277,7 +298,9 @@ def sample_ontology(tmp_path):
 
 def test_extract_ontology_term_metadata(sample_ontology):
     allowed_ontologies = ["FOO"]
-    result = _extract_ontology_term_metadata(sample_ontology, allowed_ontologies)
+    result = _extract_ontology_term_metadata(
+        sample_ontology, allowed_ontologies, map_to_cross_ontologies=[], cross_ontology_map={}
+    )
 
     expected_result = {
         "FOO:000001": {
@@ -312,7 +335,9 @@ def test_extract_ontology_term_metadata(sample_ontology):
 
 def test_extract_ontology_term_metadata_multiple_allowed_ontologies(sample_ontology):
     allowed_ontologies = ["FOO", "OOF"]
-    result = _extract_ontology_term_metadata(sample_ontology, allowed_ontologies)
+    result = _extract_ontology_term_metadata(
+        sample_ontology, allowed_ontologies, map_to_cross_ontologies=[], cross_ontology_map={}
+    )
 
     expected_result = {
         "FOO:000001": {
@@ -353,3 +378,326 @@ def test_extract_ontology_term_metadata_multiple_allowed_ontologies(sample_ontol
     }
 
     assert result == expected_result
+
+
+def test_extract_cross_ontology_terms(mock_raw_ontology_dir, mock_ontology_info):
+    cross_ontology_map = _load_cross_ontology_map(mock_raw_ontology_dir, mock_ontology_info)
+
+    assert cross_ontology_map == {"ontology_name": {"OOF:000002": "FOO:000002"}}
+
+    result = _extract_cross_ontology_terms("OOF:000002", ["ontology_name"], cross_ontology_map)
+
+    expected_result = {"ontology_name": "FOO:000002"}
+
+    assert result == expected_result
+
+
+# Tests for check_version function
+@pytest.fixture
+def sample_owl_file(tmp_path):
+    """Create a sample OWL file with version information."""
+    owl_file = tmp_path / "test_ontology.owl"
+    content = """<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.obolibrary.org/obo/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/test.owl">
+        <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/test/releases/2023-12-01/test.owl"/>
+        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2023-12-01</owl:versionInfo>
+    </owl:Ontology>
+</rdf:RDF>"""
+    owl_file.write_text(content)
+    return str(owl_file)
+
+
+@pytest.fixture
+def sample_owl_file_with_v_prefix(tmp_path):
+    """Create a sample OWL file with version information that includes 'v' prefix."""
+    owl_file = tmp_path / "test_ontology_v.owl"
+    content = """<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.obolibrary.org/obo/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/test.owl">
+        <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/test/releases/v2023-12-01/test.owl"/>
+        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">v2023-12-01</owl:versionInfo>
+    </owl:Ontology>
+</rdf:RDF>"""
+    owl_file.write_text(content)
+    return str(owl_file)
+
+
+@pytest.fixture
+def sample_owl_file_no_version(tmp_path):
+    """Create a sample OWL file without version information."""
+    owl_file = tmp_path / "test_ontology_no_version.owl"
+    content = """<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.obolibrary.org/obo/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/test.owl">
+        <rdfs:comment>Test ontology without version</rdfs:comment>
+    </owl:Ontology>
+</rdf:RDF>"""
+    owl_file.write_text(content)
+    return str(owl_file)
+
+
+def test_check_version_found_in_versioniri(sample_owl_file, caplog):
+    """Test check_version when version is found in versionIRI line."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file, "2023-12-01")
+
+    # Should not log any warnings if version is found
+    assert len(caplog.records) == 0
+
+
+def test_check_version_found_in_versioninfo(sample_owl_file, caplog):
+    """Test check_version when version is found in versionInfo line."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file, "2023-12-01")
+
+    # Should not log any warnings if version is found
+    assert len(caplog.records) == 0
+
+
+def test_check_version_with_v_prefix_matching_without_v(sample_owl_file, caplog):
+    """Test check_version when input version has 'v' prefix but file doesn't."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file, "v2023-12-01")
+
+    # Should not log any warnings if version matches after stripping 'v'
+    assert len(caplog.records) == 0
+
+
+def test_check_version_without_v_prefix_matching_with_v(sample_owl_file_with_v_prefix, caplog):
+    """Test check_version when input version has no 'v' prefix but file does."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file_with_v_prefix, "2023-12-01")
+
+    # Should not log any warnings if version matches
+    assert len(caplog.records) == 0
+
+
+def test_check_version_with_v_prefix_matching_with_v(sample_owl_file_with_v_prefix, caplog):
+    """Test check_version when both input version and file have 'v' prefix."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file_with_v_prefix, "v2023-12-01")
+
+    # Should not log any warnings if version matches
+    assert len(caplog.records) == 0
+
+
+def test_check_version_no_match_found(sample_owl_file, caplog):
+    """Test check_version when version is not found in the file."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file, "2024-01-01")
+
+    # Should log warnings for version mismatch and no match found
+    # The function logs version_iri mismatch, version_info mismatch, then no match found
+    assert len(caplog.records) == 3
+    assert "VersionIRI mismatch" in caplog.records[0].message
+    assert "VersionINFO mismatch" in caplog.records[1].message
+    assert "No version match found" in caplog.records[2].message
+    assert "2024-01-01" in caplog.records[2].message
+
+
+def test_check_version_no_version_info(sample_owl_file_no_version, caplog):
+    """Test check_version when file has no version information."""
+    with caplog.at_level("WARNING"):
+        check_version(sample_owl_file_no_version, "2023-12-01")
+
+    # Should log a warning about no version match found
+    assert len(caplog.records) == 1
+    assert "No version match found" in caplog.records[0].message
+
+
+def test_check_version_version_mismatch(tmp_path, caplog):
+    """Test check_version when both versionIRI and versionInfo exist but neither matches."""
+    owl_file = tmp_path / "mismatch_ontology.owl"
+    content = """<?xml version="1.0"?>
+<rdf:RDF xmlns="http://purl.obolibrary.org/obo/"
+         xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/test.owl">
+        <owl:versionIRI rdf:resource="http://purl.obolibrary.org/obo/test/releases/2023-10-01/test.owl"/>
+        <owl:versionInfo rdf:datatype="http://www.w3.org/2001/XMLSchema#string">2023-11-01</owl:versionInfo>
+    </owl:Ontology>
+</rdf:RDF>"""
+    owl_file.write_text(content)
+
+    with caplog.at_level("WARNING"):
+        check_version(str(owl_file), "2024-01-01")
+
+    # Should log warnings about version mismatches and no match found
+    assert len(caplog.records) == 3
+    assert "VersionIRI mismatch" in caplog.records[0].message
+    assert "VersionINFO mismatch" in caplog.records[1].message
+    assert "No version match found" in caplog.records[2].message
+
+
+# Tests for resolve_version function
+def test_resolve_version_version_already_specified():
+    """Test resolve_version when version is already specified."""
+    schema_info = {
+        "ontologies": {
+            "TEST": {"version": "1.0.0", "source": "http://example.com"},
+            "ANOTHER": {"version": "2.0.0", "source": "http://example2.com"},
+        }
+    }
+    original_schema = schema_info.copy()
+
+    resolve_version(schema_info)
+
+    # Should not modify the schema_info if versions are already specified
+    assert schema_info == original_schema
+
+
+def test_resolve_version_cvcl_with_version_url():
+    """Test resolve_version for CVCL ontology with version_url."""
+    schema_info = {
+        "ontologies": {
+            "CVCL": {"version_url": "http://example.com/cellosaurus_version.json", "source": "http://example.com"}
+        }
+    }
+
+    # Mock the JSON response for CVCL version
+    mock_version_data = {"Cellosaurus": {"header": {"release": {"version": "46"}}}}
+
+    with patch("urllib.request.urlretrieve") as mock_retrieve, patch("builtins.open", create=True) as mock_open:
+
+        # Set up the mock to return a temporary file path
+        mock_retrieve.return_value = ("/tmp/mock_file", None)
+
+        # Set up the mock file to return our test JSON data
+        mock_file = MagicMock()
+        mock_file.__enter__.return_value = mock_file
+        mock_file.read.return_value = json.dumps(mock_version_data)
+        mock_open.return_value = mock_file
+
+        # Mock json.load to return our test data
+        with patch("json.load", return_value=mock_version_data):
+            resolve_version(schema_info)
+
+    # Should have added the version to the CVCL ontology
+    assert schema_info["ontologies"]["CVCL"]["version"] == "46"
+
+
+def test_resolve_version_non_cvcl_with_version_url():
+    """Test resolve_version for non-CVCL ontology with version_url."""
+    schema_info = {
+        "ontologies": {"TEST": {"version_url": "http://example.com/version.json", "source": "http://example.com"}}
+    }
+
+    with pytest.raises(ValueError):
+        resolve_version(schema_info)
+
+
+def test_resolve_version_url_error():
+    """Test resolve_version when URL retrieval fails."""
+    schema_info = {
+        "ontologies": {"CVCL": {"version_url": "http://invalid-url.com/version.json", "source": "http://example.com"}}
+    }
+
+    with patch("urllib.request.urlretrieve") as mock_retrieve:
+        mock_retrieve.side_effect = Exception("URL retrieval failed")
+
+        with pytest.raises(ValueError) as exc_info:
+            resolve_version(schema_info)
+
+        assert "Could not retrieve version for CVCL from" in str(exc_info.value)
+        assert "URL retrieval failed" in str(exc_info.value)
+
+
+def test_resolve_version_no_version_no_url():
+    """Test resolve_version when neither version nor version_url is provided."""
+    schema_info = {
+        "ontologies": {
+            "TEST": {
+                "source": "http://example.com"
+                # No version or version_url
+            }
+        }
+    }
+
+    with pytest.raises(ValueError) as exc_info:
+        resolve_version(schema_info)
+
+    assert "Version not specified for ontology TEST and no version_url provided" in str(exc_info.value)
+
+
+def test_resolve_version_modifies_in_place():
+    """Test that resolve_version modifies the schema_info dictionary in place."""
+    schema_info = {
+        "ontologies": {
+            "EXISTING": {"version": "1.0.0", "source": "http://example.com"},
+            "CVCL": {"version_url": "http://example.com/version.json", "source": "http://example2.com"},
+        }
+    }
+
+    mock_version_data = {"Cellosaurus": {"header": {"release": {"version": "46"}}}}
+
+    with patch("urllib.request.urlretrieve") as mock_retrieve, patch("builtins.open", create=True) as mock_open:
+
+        mock_retrieve.return_value = ("/tmp/mock_file", None)
+        mock_file = MagicMock()
+        mock_file.__enter__.return_value = mock_file
+        mock_open.return_value = mock_file
+
+        with patch("json.load", return_value=mock_version_data):
+            original_id = id(schema_info)
+            resolve_version(schema_info)
+
+            # Should be the same object (modified in place)
+            assert id(schema_info) == original_id
+            # Should have preserved existing version
+            assert schema_info["ontologies"]["EXISTING"]["version"] == "1.0.0"
+            # Should have added new version
+            assert schema_info["ontologies"]["CVCL"]["version"] == "46"
+
+
+class TestRemovePunningTermsFromCL:
+    def test_success(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+        cleaned_file = str(owl_file).replace(".owl", "-cleaned.owl")
+        with open(cleaned_file, "w") as f:
+            f.write("cleaned content")
+
+        with patch("subprocess.run") as mock_run, patch("os.replace") as mock_replace:
+            mock_run.return_value = MagicMock(stdout="docker output", returncode=0)
+            _remove_punning_terms_from_cl(str(owl_file))
+            mock_run.assert_called_once()
+            mock_replace.assert_called_once_with(cleaned_file, str(owl_file))
+
+    def test_docker_error(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+
+        with (
+            patch("subprocess.run", side_effect=subprocess.CalledProcessError(1, "docker")),
+            patch("os.replace") as mock_replace,
+        ):
+            with pytest.raises(subprocess.CalledProcessError):
+                _remove_punning_terms_from_cl(str(owl_file))
+            mock_replace.assert_not_called()
+
+    def test_file_not_found(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+
+        with patch("subprocess.run", side_effect=FileNotFoundError), patch("os.replace") as mock_replace:
+            with pytest.raises(FileNotFoundError):
+                _remove_punning_terms_from_cl(str(owl_file))
+            mock_replace.assert_not_called()
+
+    def test_oserror_on_replace(self, tmp_path):
+        owl_file = tmp_path / "CL.owl"
+        owl_file.write_text("dummy content")
+        cleaned_file = str(owl_file).replace(".owl", "-cleaned.owl")
+        with open(cleaned_file, "w") as f:
+            f.write("cleaned content")

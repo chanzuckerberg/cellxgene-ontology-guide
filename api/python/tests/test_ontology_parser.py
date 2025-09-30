@@ -72,16 +72,106 @@ def ontology_dict_with_imports():
 
 
 @pytest.fixture
-def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supported_versions, mock_load_ontology_file):
+def ontology_dict_with_cross_ontology_terms():
+    return {
+        # test cases: terms with exact matches + ancestors of terms without exact matches
+        "ZFA:0000000": {
+            "ancestors": {},
+            "cross_ontology_terms": {
+                "CL": "CL:0000000",
+            },
+        },
+        "ZFA:0000001": {
+            "ancestors": {
+                "ZFA:0000000": 1,
+            },
+            "cross_ontology_terms": {
+                "CL": "CL:0000001",
+            },
+        },
+        "ZFA:0000002": {
+            "ancestors": {
+                "ZFA:0000000": 1,
+            },
+            "cross_ontology_terms": {
+                "CL": "CL:0000002",
+            },
+        },
+        "ZFA:0000003": {
+            "ancestors": {
+                "ZFA:0000000": 1,
+            },
+            "cross_ontology_terms": {
+                "CL": "CL:0000003",
+            },
+        },
+        # test case: term with no exact term and multiple closest terms 1 edge away
+        "ZFA:0000004": {
+            "ancestors": {
+                "ZFA:0000001": 1,
+                "ZFA:0000002": 1,
+                "ZFA:0000000": 2,
+            },
+        },
+        # test case: term with no exact term and 1 closest term, 1 edge away
+        "ZFA:0000005": {
+            "ancestors": {
+                "ZFA:0000003": 1,
+                "ZFA:0000000": 2,
+            },
+        },
+        # test case: term with no exact term and multiple closest terms 2 edges away
+        "ZFA:0000006": {
+            "ancestors": {
+                "ZFA:0000004": 1,
+                "ZFA:0000005": 1,
+                "ZFA:0000001": 2,
+                "ZFA:0000002": 2,
+                "ZFA:0000003": 2,
+                "ZFA:0000000": 3,
+            },
+        },
+        # test case: term with no exact or closest term
+        "ZFA:0000007": {
+            "ancestors": {},
+        },
+    }
+
+
+@pytest.fixture
+def mock_CXGSchema(
+    ontology_dict,
+    ontology_dict_with_imports,
+    ontology_dict_with_cross_ontology_terms,
+    mock_load_supported_versions,
+    mock_load_ontology_file,
+):
     mock_load_supported_versions.return_value = {
         "5.0.0": {
             "ontologies": {
-                "CL": {"version": "2024-01-01", "source": "http://example.com", "filename": "cl.owl"},
+                "CL": {
+                    "version": "2024-01-01",
+                    "source": "http://example.com",
+                    "filename": "cl.owl",
+                    "cross_ontology_mapping": "cl.sssom",
+                },
                 "HANCESTRO": {
                     "version": "2024-01-01",
                     "source": "http://example.com",
                     "filename": "cl.owl",
                     "additional_ontologies": ["AfPO"],
+                },
+                "ZFA": {
+                    "version": "2024-01-01",
+                    "source": "http://example.com",
+                    "filename": "zfa.owl",
+                    "map_to": ["CL"],
+                },
+                "CVCL": {
+                    "source": "http://example.com",
+                    "filename": "cellosaurus.obo",
+                    "id_separator": "_",
+                    "version": "53.0",
                 },
             }
         }
@@ -90,13 +180,31 @@ def mock_CXGSchema(ontology_dict, ontology_dict_with_imports, mock_load_supporte
     cxg_schema.ontology_file_names = {
         "CL": "CL-ontology-2024-01-01.json.gz",
         "HANCESTRO": "HANCESTRO-ontology-2024-01-01.json.gz",
+        "ZFA": "ZFA-ontology-2024-01-01.json.gz",
+        "CVCL": "CVCL-ontology-53.0.json.gz",
     }
 
     def get_mock_ontology_dict(file_name):
+        # For testing order matters. First check for CVCL, since CL is a substring of CVCL
+        if "CVCL" in file_name:
+            return {
+                "CVCL_1ABC": {
+                    "ancestors": {},
+                    "label": "Cellosaurus Cell Line A",
+                    "deprecated": False,
+                },
+                "CVCL_2DEF": {
+                    "ancestors": {"CVCL_1ABC": 1},
+                    "label": "Cellosaurus Cell Line B",
+                    "deprecated": False,
+                },
+            }
         if "CL" in file_name:
             return ontology_dict
         if "HANCESTRO" in file_name:
             return ontology_dict_with_imports
+        if "ZFA" in file_name:
+            return ontology_dict_with_cross_ontology_terms
         return None
 
     mock_load_ontology_file.side_effect = get_mock_ontology_dict
@@ -110,8 +218,14 @@ def ontology_parser(mock_CXGSchema):
     return OntologyParser(schema_version="5.0.0")
 
 
-def test_parse_ontology_name(ontology_parser):
-    assert ontology_parser._parse_ontology_name("CL:0000001") == "CL"
+@pytest.mark.parametrize("term_id,expected", [("CL:0000001", "CL"), ("CVCL_1ABC", "CVCL")])
+def test_parse_ontology_name(ontology_parser, term_id, expected):
+    assert ontology_parser._parse_ontology_name(term_id) == expected
+
+
+def test_parse_ontology_name__invalid_separator(ontology_parser):
+    with pytest.raises(ValueError):
+        ontology_parser._parse_ontology_name("CL_0000001")
 
 
 @pytest.mark.parametrize("term_id", ["AfPO:0000001", "HANCESTRO:0000000"])
@@ -121,7 +235,7 @@ def test_parse_ontology_name__imported_term(ontology_parser, term_id):
 
 def test_parse_ontology_name__wrong_format(ontology_parser):
     with pytest.raises(ValueError):
-        ontology_parser._parse_ontology_name("CL_0000001")
+        ontology_parser._parse_ontology_name("CL/0000001")
 
 
 def test_parse_ontology_name__not_supported(ontology_parser):
@@ -131,7 +245,15 @@ def test_parse_ontology_name__not_supported(ontology_parser):
 
 @pytest.mark.parametrize(
     "term_id,expected",
-    [("CL:0000001", True), ("CL:0000003", True), ("CL:0000009", False), ("GO:0000001", False), ("AfPO:0000000", True)],
+    [
+        ("CL:0000001", True),
+        ("CL:0000003", True),
+        ("CL:0000009", False),
+        ("GO:0000001", False),
+        ("AfPO:0000000", True),
+        ("CVCL_1ABC", True),
+        ("CVCL:1ABC", False),
+    ],
 )
 def test_is_valid_term_id(ontology_parser, term_id, expected):
     assert ontology_parser.is_valid_term_id(term_id) == expected
@@ -146,6 +268,9 @@ def test_is_valid_term_id(ontology_parser, term_id, expected):
         ("AfPO:0000000", "HANCESTRO", True),
         ("AfPO:0000000", "AfPO", False),
         ("HANCESTRO:0000001", "AfPO", False),
+        ("CVCL_1ABC", "CVCL", True),
+        ("CVCL:1ABC", "CVCL", False),
+        ("CVCL_1ABC", "CL", False),
     ],
 )
 def test_is_valid_term_id__with_ontology(ontology_parser, term_id, ontology, expected):
@@ -584,3 +709,27 @@ def test_get_term_id_by_label(ontology_parser, label, ontology_name, expected):
 def test_get_term_id_by_label__unsupported_ontology_name(ontology_parser):
     with pytest.raises(ValueError):
         ontology_parser.get_term_id_by_label("gene A", "GO")
+
+
+@pytest.mark.parametrize("term_id,expected", [("ZFA:0000000", "CL:0000000"), ("ZFA:0000004", None)])
+def test_get_bridge_term_id(ontology_parser, term_id, expected):
+    assert ontology_parser.get_bridge_term_id(term_id, "CL") == expected
+
+
+def test_get_bridge_term_id__unsupported_cross_ontology(ontology_parser):
+    with pytest.raises(ValueError):
+        ontology_parser.get_bridge_term_id("ZFA:0000000", "HANCESTRO")
+
+
+@pytest.mark.parametrize(
+    "term_id,expected",
+    [
+        ("ZFA:0000007", []),
+        ("ZFA:0000006", ["CL:0000001", "CL:0000002", "CL:0000003"]),
+        ("ZFA:0000005", ["CL:0000003"]),
+        ("ZFA:0000004", ["CL:0000001", "CL:0000002"]),
+        ("ZFA:0000000", ["CL:0000000"]),
+    ],
+)
+def test_get_closest_bridge_term_ids(ontology_parser, term_id, expected):
+    assert ontology_parser.get_closest_bridge_term_ids(term_id, "CL") == expected

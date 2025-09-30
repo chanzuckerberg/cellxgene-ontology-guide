@@ -1,0 +1,55 @@
+name: Updates to Diff'd Ontology Files
+
+on:
+  push:
+    paths:
+      # TODO: This workflow may execute alongside the generate_all_ontology.yml workflow if
+      # updates are made to ontology_info.json and any of the files that trigger the
+      # generate_all_ontology.yml workflow. For now, you can cancel the workflow you don't
+      # need to run, but ideally we should ensure only one workflow executes.
+      - "**/ontology-assets/ontology_info.json"
+    branches-ignore:
+      - main
+
+jobs:
+  ontology-processing:
+    if: false # DISABLE. Should run instead of generate_all_ontology.yml
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Python cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+      - name: install requirements
+        run: |
+          cd tools/ontology-builder
+          make install
+      - name: setup git
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+      - name: ontology-processing
+        run: |
+          python3 ./tools/ontology-builder/src/all_ontology_generator.py --diff
+          git add ./ontology-assets/*.json.gz
+          git add ./ontology-assets/ontology_info.json
+          git add ./ontology-assets/latest_ontology_info.json
+      - name: update API
+        run: |
+          echo "${{ github.sha }}" > ./api/python/ontology-assets-version.txt
+          git add ./api/python/ontology-assets-version.txt
+      - name: Commit
+        run: |
+          git commit -m "AUTO: update diff'd ontologies"
+          git push

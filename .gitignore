@@ -10,3 +10,8 @@
 # Compiled python files
 __pycache__/
 *.py[cod]
+/.vscode
+**/__pycache__/
+
+*.owl
+*.sssom.tsv

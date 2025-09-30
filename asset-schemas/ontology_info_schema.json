@@ -4,7 +4,7 @@
   "description": "A schema for the set of valid ontology reference files mapping to a CZ CellXGene Dataset Schema Versions",
   "type": "object",
   "patternProperties": {
-    "^[0-9]+\\.[0-9]+\\.[0-9]+$": {
+    "^[0-9]+\\.[0-9]+\\.[0-9]+(-.+)?$": {
       "description": "The version of CellxGene schema that maps to this set of ontology versions",
       "type": "object",
       "properties": {
@@ -51,15 +51,32 @@
             "type": "string"
           },
           "description": "List of additional term id prefixes to extracted from the source ontology file."
+        },
+        "cross_ontology_mapping": {
+          "type": "string",
+          "description": "name of SSSOM file mapping this ontology's terms to cross-species equivalent ontology terms."
+        },
+        "map_to": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of ontologies to map equivalent terms to this ontology"
+        },
+        "version_uri": {
+          "type": "string",
+          "format": "uri",
+          "description": "URI that resolves to the version of the ontology. The resolved version will be used to verify the version of the download ontology file, and backfill the version in ontology_info.json if not provided."
+        },
+        "id_separator": {
+          "type": "string",
+          "description": "Character that separates the ontology prefix from the identifier in CURIEs. The default is ':' (colon)."
         }
       },
       "required": [
-        "version",
         "source",
         "filename"
-      ],
-      "additionalProperties": false
+      ]
     }
   }
 }
-
