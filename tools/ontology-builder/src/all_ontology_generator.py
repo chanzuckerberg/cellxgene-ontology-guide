@@ -1,4 +1,5 @@
 import argparse
+import concurrent.futures
 import gzip
 import json
 import logging
@@ -8,10 +9,10 @@ import subprocess
 import sys
 import urllib.request
 from datetime import datetime, timedelta
-from threading import Thread
 from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
 
+import docker_config
 import env
 import owlready2
 from cellxgene_ontology_guide.supported_versions import get_latest_schema_version
@@ -62,8 +63,17 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     :rtype None
     """
 
+    def _check_url(_ontology: str, _url: str) -> None:
+        try:
+            urllib.request.urlopen(_url)
+        except HTTPError as e:
+            raise Exception(f"{_ontology} with pinned URL {_url} returns status code {e.code}") from e
+        except URLError as e:
+            raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
+
     def download(_ontology: str, _url: str) -> None:
-        logging.info(f"Start Downloading {_url}")
+        _check_url(_ontology, _url)
+        logging.info(f"Starting download of {_ontology} from {_url}")
         # Format of ontology (handles cases where they are compressed)
         download_format = _url.split(".")[-1]
         output_file = os.path.join(output_dir, _ontology + ".owl")
@@ -85,7 +95,11 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             os.remove(output_file + ".gz")
         else:
             urllib.request.urlretrieve(_url, output_file)
-        logging.info(f"Finish Downloading {_url}")
+
+        if _ontology == "CL" and output_file.endswith(".owl"):
+            _remove_punning_terms_from_cl(output_file)
+
+        logging.info(f"Finished downloading {_ontology} from {_url}")
 
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
@@ -97,25 +111,12 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
             download_urls.append(base_url.replace("{filename}", onto_ref_data["cross_ontology_mapping"]))
         return download_urls
 
-    def _check_url(_ontology: str, _url: str) -> None:
-        try:
-            urllib.request.urlopen(_url)
-        except HTTPError as e:
-            raise Exception(f"{_ontology} with pinned URL {_url} returns status code {e.code}") from e
-        except URLError as e:
-            raise Exception(f"{_ontology} with pinned URL {_url} fails due to {e.reason}") from e
-
-    threads = []
-    for ontology, _ in ontology_info.items():
-        urls = _build_urls(ontology)
-        for url in urls:
-            _check_url(ontology, url)
-            t = Thread(target=download, args=(ontology, url))
-            t.start()
-            threads.append(t)
-
-    for t in threads:
-        t.join()
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(download, ontology, url) for ontology in ontology_info for url in _build_urls(ontology)
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            future.result()
 
 
 def _decompress(infile: str, tofile: str) -> None:
@@ -154,7 +155,7 @@ def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
         "-w",
         "/work",
         "--rm",
-        "obolibrary/robot",
+        docker_config.get_docker_image("ROBOT_DOCKER_IMAGE"),
         "robot",
         "convert",
         "--input",
@@ -185,6 +186,77 @@ def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
         raise
 
 
+def _remove_punning_terms_from_cl(onto_file: str) -> None:
+    """
+    Remove punning terms from CL ontology file using robot running in docker.
+    This is due to owlready2 not supporting "punning" see:
+    https://github.com/obophenotype/cell-ontology/issues/3237#issuecomment-3207136184
+
+    robot remove --input cl.owl \
+             --term http://purl.obolibrary.org/obo/STATO_0000416 \
+             --term http://purl.obolibrary.org/obo/STATO_0000663 \
+             --allow-punning true \
+             --output cl-without-stato.owl
+
+    :param str onto_file: path to input OWL file (should be in raw-files directory)
+
+    :rtype None
+    """
+    # Get relative paths from project root
+    owl_relative_path = os.path.relpath(onto_file, env.RAW_ONTOLOGY_DIR)
+    cleaned_owl_output_file = onto_file.replace(".owl", "-cleaned.owl")
+    cleaned_owl_relative_path = os.path.relpath(cleaned_owl_output_file, env.RAW_ONTOLOGY_DIR)
+
+    # Docker command to remove punning terms using robot
+    docker_cmd = [
+        "docker",
+        "run",
+        "-v",
+        f"{env.RAW_ONTOLOGY_DIR}:/work",
+        "-w",
+        "/work",
+        "--rm",
+        docker_config.get_docker_image("ROBOT_DOCKER_IMAGE"),
+        "robot",
+        "remove",
+        "--input",
+        f"./{owl_relative_path}",
+        "--term",
+        "http://purl.obolibrary.org/obo/STATO_0000416",
+        "--term",
+        "http://purl.obolibrary.org/obo/STATO_0000663",
+        "--allow-punning",
+        "true",
+        "--output",
+        f"./{cleaned_owl_relative_path}",
+    ]
+
+    logging.info(f"Removing punning terms from {onto_file} using Docker")
+    logging.info(f"Running command: {' '.join(docker_cmd)}")
+
+    try:
+        result = subprocess.run(docker_cmd, check=True, capture_output=True, text=True)
+        logging.info(f"Successfully removed punning terms from {onto_file}, output saved to {cleaned_owl_output_file}")
+        if result.stdout:
+            logging.info(f"Docker output: {result.stdout}")
+        # Replace original file with cleaned file
+        try:
+            os.replace(cleaned_owl_output_file, onto_file)
+        except OSError as e:
+            logging.error(f"Failed to replace {onto_file} with cleaned file {cleaned_owl_output_file}: {e}")
+            raise
+    except subprocess.CalledProcessError as e:
+        logging.error(f"Failed to remove punning terms from {onto_file}: {e}")
+        if e.stdout:
+            logging.error(f"Docker stdout: {e.stdout}")
+        if e.stderr:
+            logging.error(f"Docker stderr: {e.stderr}")
+        raise
+    except FileNotFoundError:
+        logging.error("Docker not found. Please make sure Docker is installed and available in PATH")
+        raise
+
+
 def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
     """
     Read ontology data from file and write into a python object
@@ -193,9 +265,12 @@ def _load_ontology_object(onto_file: str) -> owlready2.entity.ThingClass:
 
     :return: owlready2.entity.ThingClass: Ontology Term Object, with metadata parsed from ontology file
     """
-    world = owlready2.World()
-    onto = world.get_ontology(onto_file)
-    onto.load()
+    try:
+        world = owlready2.World()
+        onto = world.get_ontology(onto_file)
+        onto.load()
+    except Exception as e:
+        raise ValueError(f"Could not load ontology from {onto_file}: {e}") from e
     return onto
 
 
@@ -570,7 +645,6 @@ if __name__ == "__main__":
 
     # download and parse ontologies and generate ontology assets
     _download_ontologies(ontologies_to_process)
-    _parse_ontologies(ontologies_to_process)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
