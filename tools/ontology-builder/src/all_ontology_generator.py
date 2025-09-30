@@ -12,6 +12,7 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
 
+import docker_config
 import env
 import owlready2
 from cellxgene_ontology_guide.supported_versions import get_latest_schema_version
@@ -154,7 +155,7 @@ def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
         "-w",
         "/work",
         "--rm",
-        "obolibrary/robot",
+        docker_config.get_docker_image("ROBOT_DOCKER_IMAGE"),
         "robot",
         "convert",
         "--input",
@@ -215,7 +216,7 @@ def _remove_punning_terms_from_cl(onto_file: str) -> None:
         "-w",
         "/work",
         "--rm",
-        "obolibrary/robot",
+        docker_config.get_docker_image("ROBOT_DOCKER_IMAGE"),
         "robot",
         "remove",
         "--input",
