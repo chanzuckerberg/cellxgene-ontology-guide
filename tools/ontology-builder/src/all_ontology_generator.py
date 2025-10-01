@@ -142,6 +142,9 @@ def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
 
     :rtype None
     """
+    if not os.path.exists(obo_file):
+        raise FileNotFoundError(f"Input OBO file not found: {obo_file}")
+
     # Get relative paths from project root
     obo_relative_path = os.path.relpath(obo_file, env.RAW_ONTOLOGY_DIR)
     owl_relative_path = os.path.relpath(owl_output_file, env.RAW_ONTOLOGY_DIR)
