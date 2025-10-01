@@ -685,7 +685,6 @@ class TestDecompress:
 
     def test_decompress_zstd(self, tmp_path):
         """Test decompressing a zstandard file."""
-        import zstandard as zstd
 
         # Create a test zstd file
         test_content = "Test content for zstd"
