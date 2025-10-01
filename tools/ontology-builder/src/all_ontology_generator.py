@@ -15,6 +15,7 @@ from urllib.error import HTTPError, URLError
 import docker_config
 import env
 import owlready2
+import zstandard as zstd
 from cellxgene_ontology_guide.supported_versions import get_latest_schema_version
 from validate_json_schemas import register_schemas, verify_json
 
@@ -121,16 +122,25 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
 def _decompress(infile: str, tofile: str) -> None:
     """
-    Decompresses a gziped file
+    Decompresses a compressed file (gzip or zstandard)
 
-    :param str infile: path gziped file
+    :param str infile: path to compressed file
     :param str tofile: path to output decompressed file
 
     :rtype None
     """
-    with open(infile, "rb") as inf, open(tofile, "w", encoding="utf8") as tof:
-        decom_str = gzip.decompress(inf.read()).decode("utf-8")
-        tof.write(decom_str)
+    with open(infile, "rb") as inf:
+        data = inf.read()
+        if infile.endswith(".gz"):
+            decom_str = gzip.decompress(data).decode("utf-8")
+        elif infile.endswith(".zst"):
+            dctx = zstd.ZstdDecompressor()
+            decom_str = dctx.decompress(data).decode("utf-8")
+        else:
+            raise ValueError(f"Unsupported compression format for file: {infile}")
+
+        with open(tofile, "w", encoding="utf8") as tof:
+            tof.write(decom_str)
 
 
 def _convert_obo_to_owl(obo_file: str, owl_output_file: str) -> None:
@@ -435,7 +445,7 @@ def _extract_ontology_term_metadata(
 
 
 def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
-    return f"{ontology_name}-ontology-{ontology_version}.json.gz"
+    return f"{ontology_name}-ontology-{ontology_version}.json.zst"
 
 
 def check_version(onto_file: str, version: str) -> None:
@@ -515,8 +525,11 @@ def _parse_ontologies(
         onto_dict = _extract_ontology_term_metadata(
             onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
         )
-        with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
-            fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
+        # Use maximum compression and no indentation for smaller file size
+        cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
+        compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
+        with open(output_file, "wb") as fp:
+            fp.write(compressed)
         yield output_file
 
 
@@ -529,7 +542,7 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
     """
     expired = list_expired_cellxgene_schema_version(ontology_info)  # find expired cellxgene schema versions
     current = set(ontology_info.keys()) - set(expired)  # find current cellxgene schema versions
-    logging.info("Expired versions:\n\t", "\t\n".join(expired))
+    logging.info("Expired versions:\n%s", "\t\n".join(expired))
 
     def _get_ontology_files(schema_versions: List[str]) -> Set[str]:
         """

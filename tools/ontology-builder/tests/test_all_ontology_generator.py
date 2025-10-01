@@ -5,8 +5,11 @@ import urllib.request
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
+import owlready2
 import pytest
-from all_ontology_generator import (
+import zstandard as zstd
+from all_ontology_generator import (  # noqa: E402
+    _decompress,
     _download_ontologies,
     _extract_cross_ontology_terms,
     _extract_ontology_term_metadata,
@@ -59,7 +62,6 @@ def mock_raw_ontology_dir(tmpdir):
 
 @pytest.fixture
 def mock_owl(tmpdir):
-    import owlready2
 
     onto = owlready2.get_ontology("http://example.com/ontology_name.owl")
     onto.name = "FAKE"
@@ -161,6 +163,7 @@ def mock_datetime():
     with patch("all_ontology_generator.datetime") as mock_datetime:
         mock_datetime.strptime = datetime.strptime
         mock_datetime.now.return_value = datetime(2024, 1, 1)
+        mock_datetime.now.side_effect = None  # Ensure side_effect doesn't override return_value
         yield mock_datetime
 
 
@@ -228,7 +231,7 @@ def test_update_ontology_info(mock_datetime):
     expected_ontology_info = {
         "v2": {"deprecated_on": "2023-07-05", "ontologies": {"A": {"version": 2}, "B": {"version": 1}}},  # Not expired
     }
-    expected_removed_files = {"A-ontology-1.json.gz"}
+    expected_removed_files = {"A-ontology-1.json.zst"}
 
     # Call the function
     removed_files = update_ontology_info(ontology_info)
@@ -261,7 +264,6 @@ def test_deprecate_previous_cellxgene_schema_versions(mock_datetime):
 @pytest.fixture
 def sample_ontology(tmp_path):
     # Create a new ontology
-    import owlready2
 
     onto = owlready2.get_ontology("http://test.org/onto.owl")
     onto.name = "FOO"
@@ -658,6 +660,92 @@ def test_resolve_version_modifies_in_place():
             assert schema_info["ontologies"]["EXISTING"]["version"] == "1.0.0"
             # Should have added new version
             assert schema_info["ontologies"]["CVCL"]["version"] == "46"
+
+
+class TestDecompress:
+    def test_decompress_gzip(self, tmp_path):
+        """Test decompressing a gzip file."""
+        import gzip
+
+        # Create a test gzip file
+        test_content = "Test content for gzip"
+        input_file = tmp_path / "test.gz"
+        with gzip.open(input_file, "wt") as f:
+            f.write(test_content)
+
+        # Create output file path
+        output_file = tmp_path / "test.txt"
+
+        # Test decompression
+        _decompress(str(input_file), str(output_file))
+
+        # Verify the content
+        with open(output_file, "r") as f:
+            assert f.read() == test_content
+
+    def test_decompress_zstd(self, tmp_path):
+        """Test decompressing a zstandard file."""
+        import zstandard as zstd
+
+        # Create a test zstd file
+        test_content = "Test content for zstd"
+        input_file = tmp_path / "test.zst"
+        cctx = zstd.ZstdCompressor()
+        with open(input_file, "wb") as f:
+            f.write(cctx.compress(test_content.encode("utf-8")))
+
+        # Create output file path
+        output_file = tmp_path / "test.txt"
+
+        # Test decompression
+        _decompress(str(input_file), str(output_file))
+
+        # Verify the content
+        with open(output_file, "r") as f:
+            assert f.read() == test_content
+
+    def test_decompress_unsupported_format(self, tmp_path):
+        """Test attempting to decompress an unsupported format."""
+        # Create a test file with unsupported extension
+        input_file = tmp_path / "test.unsupported"
+        with open(input_file, "w") as f:
+            f.write("Test content")
+
+        # Create output file path
+        output_file = tmp_path / "test.txt"
+
+        # Test that attempting to decompress raises ValueError
+        with pytest.raises(ValueError) as exc_info:
+            _decompress(str(input_file), str(output_file))
+        assert "Unsupported compression format" in str(exc_info.value)
+
+    def test_decompress_invalid_gzip(self, tmp_path):
+        """Test attempting to decompress an invalid gzip file."""
+        # Create an invalid gzip file
+        input_file = tmp_path / "test.gz"
+        with open(input_file, "wb") as f:
+            f.write(b"Invalid gzip content")
+
+        # Create output file path
+        output_file = tmp_path / "test.txt"
+
+        # Test that attempting to decompress raises an error
+        with pytest.raises(OSError):
+            _decompress(str(input_file), str(output_file))
+
+    def test_decompress_invalid_zstd(self, tmp_path):
+        """Test attempting to decompress an invalid zstd file."""
+        # Create an invalid zstd file
+        input_file = tmp_path / "test.zst"
+        with open(input_file, "wb") as f:
+            f.write(b"Invalid zstd content")
+
+        # Create output file path
+        output_file = tmp_path / "test.txt"
+
+        # Test that attempting to decompress raises an error
+        with pytest.raises(zstd.ZstdError):
+            _decompress(str(input_file), str(output_file))
 
 
 class TestRemovePunningTermsFromCL:
