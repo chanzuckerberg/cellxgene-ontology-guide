@@ -63,7 +63,7 @@ class TestVerifyJson:
         assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is True
 
     def test_valid_json_zst(self, schema_file_fixture, tmpdir, registry_fixture):
-        # Create a valid JSON GZ file
+        # Create a valid JSON ZST file
         json_data = {"name": "John", "age": 30}
         json_file = tmpdir.join("valid.json.zst")
         cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
