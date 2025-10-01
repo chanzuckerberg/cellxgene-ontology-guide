@@ -542,7 +542,7 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
     """
     expired = list_expired_cellxgene_schema_version(ontology_info)  # find expired cellxgene schema versions
     current = set(ontology_info.keys()) - set(expired)  # find current cellxgene schema versions
-    logging.info("Expired versions:\n%s", "\t\n".join(expired))
+    logging.info("Expired versions:\n\t%s", "\n\t".join(expired))
 
     def _get_ontology_files(schema_versions: List[str]) -> Set[str]:
         """
