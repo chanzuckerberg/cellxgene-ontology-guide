@@ -1,11 +1,11 @@
 import functools
-import gzip
 import json
 import os
 import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import zstandard as zstd
 from semantic_version import Version
 
 from cellxgene_ontology_guide._constants import DATA_ROOT, ONTOLOGY_FILENAME_SUFFIX, ONTOLOGY_INFO_FILENAME
@@ -15,8 +15,11 @@ from cellxgene_ontology_guide.entities import Ontology
 @functools.cache
 def load_ontology_file(file_name: str) -> Any:
     """Load the ontology file from the data directory and return it as a dict."""
-    with gzip.open(os.path.join(DATA_ROOT, file_name), "rt") as f:
-        return json.load(f)
+    file_path = os.path.join(DATA_ROOT, file_name)
+    with open(file_path, "rb") as f:
+        dctx = zstd.ZstdDecompressor()
+        decompressed = dctx.stream_reader(f)
+        return json.load(decompressed)
 
 
 def clear_ontology_file_cache() -> None:

@@ -1,4 +1,3 @@
-import gzip
 import json
 import logging
 import os.path
@@ -6,6 +5,7 @@ import sys
 from typing import Iterable, Tuple
 
 import env
+import zstandard as zstd
 from jsonschema import validate
 from referencing import Registry, Resource
 
@@ -55,9 +55,12 @@ def verify_json(schema_file_name: str, json_file_name: str, registry: Registry) 
         return False
 
     try:
-        if json_file_name.endswith(".json.gz"):
-            with gzip.open(json_file_name, "rt") as f:
-                data = json.load(f)
+        if json_file_name.endswith(".json.zst"):
+            with open(json_file_name, "rb") as inf:
+                data = inf.read()
+            dctx = zstd.ZstdDecompressor()
+            decom_str = dctx.decompress(data).decode("utf-8")
+            data = json.loads(decom_str)
         else:
             with open(json_file_name) as f:
                 data = json.load(f)
