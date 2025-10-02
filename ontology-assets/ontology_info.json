@@ -116,10 +116,7 @@
       "HANCESTRO": {
         "version": "3.0",
         "source": "https://github.com/EBISPOT/hancestro/raw/{version}/{filename}",
-        "filename": "hancestro.owl",
-        "additional_ontologies": [
-          "AfPO"
-        ]
+        "filename": "hancestro.owl"
       },
       "HsapDv": {
         "version": "v2025-01-23",
@@ -211,10 +208,7 @@
       "HANCESTRO": {
         "version": "3.0",
         "source": "https://github.com/EBISPOT/hancestro/raw/{version}/{filename}",
-        "filename": "hancestro.owl",
-        "additional_ontologies": [
-          "AfPO"
-        ]
+        "filename": "hancestro.owl"
       },
       "HsapDv": {
         "version": "v2025-01-23",
