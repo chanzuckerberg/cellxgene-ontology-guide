@@ -4,7 +4,7 @@
   "definitions": {
     "AfPO_term_id": {
       "type": "string",
-      "pattern": "^AfPO+:[0-9]+$"
+      "pattern": "^AfPO:[0-9]+$"
     },
     "CVCL_term_id": {
       "type": "string",
