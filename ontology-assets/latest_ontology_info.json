@@ -21,7 +21,10 @@
     "HANCESTRO": {
       "version": "v2025-04-01",
       "source": "https://github.com/EBISPOT/hancestro/raw/{version}/{filename}",
-      "filename": "hancestro.owl"
+      "filename": "hancestro.owl",
+      "additional_ontologies": [
+        "AfPO"
+      ]
     },
     "HsapDv": {
       "version": "v2025-01-23",

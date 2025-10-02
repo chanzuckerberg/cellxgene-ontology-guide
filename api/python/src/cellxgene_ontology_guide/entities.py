@@ -23,6 +23,7 @@ class Ontology(Enum):
     WBbt = "wbbt"
     WBls = "wbls"
     CVCL = "cvcl"
+    AfPO = "afpo"
 
 
 class CuratedOntologyTermList(Enum):
