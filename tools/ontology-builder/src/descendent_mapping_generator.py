@@ -50,7 +50,8 @@ def save_json(data: Any, file_name: str) -> None:
     :param file_name: The name of the file to save the data to.
     """
     with open(file_name, "w") as f:
-        json.dump(data, f, indent=2)
+        # Use compact JSON format for smaller file size
+        json.dump(data, f, separators=(",", ":"))
 
 
 def extract_cell_types(datasets: List[Dict[str, Any]]) -> List[str]:

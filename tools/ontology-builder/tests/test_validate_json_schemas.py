@@ -1,4 +1,3 @@
-import gzip
 import json
 import os
 import subprocess
@@ -6,6 +5,7 @@ from unittest.mock import MagicMock, patch
 
 import owlready2
 import pytest
+import zstandard as zstd
 from all_ontology_generator import (
     _convert_obo_to_owl,
     _get_ancestors,
@@ -72,12 +72,14 @@ class TestVerifyJson:
         # Assert validation passes
         assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is True
 
-    def test_valid_json_gz(self, schema_file_fixture, tmpdir, registry_fixture):
-        # Create a valid JSON GZ file
+    def test_valid_json_zst(self, schema_file_fixture, tmpdir, registry_fixture):
+        # Create a valid JSON ZST file
         json_data = {"name": "John", "age": 30}
-        json_file = tmpdir.join("valid.json.gz")
-        with gzip.open(str(json_file), "wt") as f:
-            json.dump(json_data, f)
+        json_file = tmpdir.join("valid.json.zst")
+        cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
+        compressed = cctx.compress(json.dumps(json_data, separators=(",", ":")).encode("utf-8"))
+        with open(json_file, "wb") as fp:
+            fp.write(compressed)
 
         # Assert validation passes
         assert verify_json(schema_file_fixture, str(json_file), registry_fixture) is True

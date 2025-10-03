@@ -12,7 +12,10 @@ authors = [
 license = { file = "LICENSE" }
 readme = "pypi_README.md"
 requires-python = "~= 3.10"
-dependencies = ["semantic_version>=2.10.0,<3"]
+dependencies = [
+    "semantic_version>=2.10.0,<3",
+    "zstandard>=0.25.0,<1"
+]
 
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -44,7 +47,7 @@ docs = ["pdoc"]
 where = ["src"]
 
 [tool.setuptools.package-data]
-"*" = ["*.json", "*.json.gz"]
+"*" = ["*.json", "*.json.zst"]
 
 [tool.pytest.ini_options]
 pythonpath = ["src/cellxgene_ontology_guide"]
