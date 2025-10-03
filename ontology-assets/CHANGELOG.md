@@ -1,6 +1,19 @@
 # Changelog
 
 
+## [1.9.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.8.0...ontology-assets-v1.9.0) (2025-10-03)
+
+
+### Features
+
+* Add AfPO ontology ([#312](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/312)) ([1e65457](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/1e6545790ef432c927a6078a9a820bd806a351ca))
+* implement Zstandard compression for ontology files ([#307](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/307)) ([2e13e6d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2e13e6d8110ff71bed83acba0a6aa8909a5cc328))
+
+
+### BugFixes
+
+* change filename for HANCESTRO ontology from base ([#311](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/311)) ([db2c01a](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/db2c01ad81bde12072dcb465881a9efc64e7138a))
+
 ## [1.8.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.7.0...ontology-assets-v1.8.0) (2025-09-30)
 
 
