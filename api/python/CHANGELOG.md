@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.9.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.8.0...python-api-v1.9.0) (2025-10-03)
+
+
+### Features
+
+* Add AfPO ontology ([#312](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/312)) ([1e65457](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/1e6545790ef432c927a6078a9a820bd806a351ca))
+* implement Zstandard compression for ontology files ([#307](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/307)) ([2e13e6d](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/2e13e6d8110ff71bed83acba0a6aa8909a5cc328))
+
 ## [1.8.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.8.0...python-api-v1.8.0) (2025-09-30)
 
 
