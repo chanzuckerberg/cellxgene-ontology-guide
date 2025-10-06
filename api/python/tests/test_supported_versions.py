@@ -1,8 +1,8 @@
-import gzip
 import json
 from unittest.mock import patch
 
 import pytest
+import zstandard as zstd
 from cellxgene_ontology_guide.entities import Ontology
 from cellxgene_ontology_guide.supported_versions import (
     CXGSchema,
@@ -50,12 +50,13 @@ def test__get_latest_schema_version__OK(versions, expected):
 @pytest.fixture
 def mock_ontology_file(tmpdir):
     with patch(f"{MODULE_PATH}.DATA_ROOT", tmpdir):
-        # Create a temporary ontology file
-        test_file_name = "test_ontology.json.gz"
+        test_file_name = "test_ontology.json.zst"
         onto_file = tmpdir.join(test_file_name)
         file_contents = {"test": "file contents"}
-        with gzip.open(str(onto_file), "wt") as onto_file:
-            json.dump(file_contents, onto_file)
+        cctx = zstd.ZstdCompressor()
+        with onto_file.open("wb") as f:
+            compressed = cctx.compress(json.dumps(file_contents).encode("utf-8"))
+            f.write(compressed)
         yield test_file_name, file_contents
 
 

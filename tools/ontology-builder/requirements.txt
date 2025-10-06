@@ -3,3 +3,4 @@ owlready2==0.48
 jsonschema>=4.21.1, <5
 semantic-version>=2.10.0, <3
 referencing>=0.33
+zstandard>=0.22.0, <1
