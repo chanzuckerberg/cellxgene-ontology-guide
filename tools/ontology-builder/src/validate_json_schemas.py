@@ -1,3 +1,4 @@
+import concurrent.futures
 import json
 import logging
 import os.path
@@ -9,7 +10,7 @@ import zstandard as zstd
 from jsonschema import validate
 from referencing import Registry, Resource
 
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -84,17 +85,18 @@ def main(path: str = env.ONTOLOGY_ASSETS_DIR) -> None:
     """
     registry = register_schemas()
     files = os.listdir(path)
-    _json = [
-        verify_json(get_schema_file_name(file), os.path.join(path, file), registry)
-        for file in files
-        if file.endswith(".json")
-    ]
-    _json_gz = [
-        verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file), registry)
-        for file in files
-        if file.endswith(".json.gz")
-    ]
-    if not all(_json + _json_gz):
+
+    def verify_json_file(file: str) -> bool:
+        if file.endswith(".json"):
+            return verify_json(get_schema_file_name(file), os.path.join(path, file), registry)
+        elif file.endswith(".json.zst"):
+            return verify_json(get_schema_file_name("all_ontology"), os.path.join(path, file), registry)
+        return True  # Ignore non-json files
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=4) as executor:
+        results = list(executor.map(verify_json_file, files))
+
+    if not all(results):
         sys.exit(1)
 
 
