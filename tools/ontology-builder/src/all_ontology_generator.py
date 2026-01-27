@@ -542,7 +542,8 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
     """
     expired = list_expired_cellxgene_schema_version(ontology_info)  # find expired cellxgene schema versions
     current = set(ontology_info.keys()) - set(expired)  # find current cellxgene schema versions
-    logging.info("Expired versions:\n\t%s", "\n\t".join(expired))
+    expired_list = "\n\t".join(expired)
+    logging.info(f"Expired versions:\n\t{expired_list}")
 
     def _get_ontology_files(schema_versions: List[str]) -> Set[str]:
         """
@@ -651,16 +652,17 @@ if __name__ == "__main__":
             if previous_ontologies.get(ontology) != info
         }
         ontologies_to_process = diff_ontologies
+        diff_ontologies_list = "\t\n".join(diff_ontologies.keys())
         logging.info(
-            "Processing the following ontologies that have changed since the last run:\n\t",
-            "\t\n".join(diff_ontologies.keys()),
+            f"Processing the following ontologies that have changed since the last run:\n\t{diff_ontologies_list}"
         )
 
     # download and parse ontologies and generate ontology assets
     _download_ontologies(ontologies_to_process)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
-    logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
+    expired_files_list = "\t\n".join(expired_files)
+    logging.info(f"Removing expired files:\n\t{expired_files_list}")
     for file in expired_files:
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
     save_ontology_info(ontology_info, latest_ontology_version)
