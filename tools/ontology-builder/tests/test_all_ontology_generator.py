@@ -1,3 +1,4 @@
+import gzip
 import json
 import os
 import urllib.request
@@ -11,6 +12,7 @@ from all_ontology_generator import (
     _extract_ontology_term_metadata,
     _load_cross_ontology_map,
     _parse_ontologies,
+    _parse_uniprot_xml,
     deprecate_previous_cellxgene_schema_versions,
     get_ontology_info_file,
     list_expired_cellxgene_schema_version,
@@ -25,7 +27,11 @@ def mock_ontology_info():
             "source": "http://example.com",
             "version": "v1",
             "filename": "ontology_name.owl",
-            "cross_ontology_mapping": "ontology_name.sssom.tsv",
+            "format": "owl",
+            "cross_ontology_mapping": {
+                "filename": "ontology_name.sssom.tsv",
+                "format": "sssom.tsv",
+            },
         }
     }
 
@@ -46,6 +52,7 @@ def mock_raw_ontology_dir(tmpdir):
     sub_dir = tmpdir.mkdir(sub_dir_name)
     onto_owl_file = tmpdir.join(sub_dir_name, "ontology_name.owl")
     onto_owl_file.write("")
+    # Filename matches cross_ontology_mapping.filename in mock_ontology_info
     cross_onto_tsv_file = tmpdir.join(sub_dir_name, "ontology_name.sssom.tsv")
     cross_onto_tsv_file.write(
         """subject_id\tsubject_label\tpredicate_id\tobject_id\tobject_label\nFOO:000002\tTest Term\tsemapv:crossSpeciesExactMatch\tOOF:000002\ttest match term"""
@@ -83,7 +90,11 @@ def test_download_ontologies(mock_ontology_info, mock_raw_ontology_dir):
         # Call the function
         _download_ontologies(ontology_info=mock_ontology_info, output_dir=mock_raw_ontology_dir)
 
-        assert mock_urlretrieve.call_count == len(os.listdir(mock_raw_ontology_dir))
+        # One call per file: the main .owl + the cross_ontology_mapping .sssom.tsv
+        expected_calls = sum(
+            1 + (1 if info.get("cross_ontology_mapping") else 0) for info in mock_ontology_info.values()
+        )
+        assert mock_urlretrieve.call_count == expected_calls
 
 
 def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
@@ -96,7 +107,6 @@ def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
     ):
         # Mock return values
         MockOntologyObject = MagicMock()
-        MockOntologyObject.name = "ontology_name"  # Must match the name of the ontology file
         mock_load_ontology.return_value = MockOntologyObject
         mock_extract_metadata.return_value = {"term_id": {"label": "Term Label", "deprecated": False, "ancestors": {}}}
         mock_load_cross_ontology_map.return_value = {}
@@ -104,27 +114,28 @@ def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
 
         # Mock output path
         output_path = tmpdir.mkdir("output")
-        # Call the function
-        output_files = _parse_ontologies(
-            ontology_info=mock_ontology_info, working_dir=mock_raw_ontology_dir, output_path=output_path
+        # Call the function — _parse_ontologies now iterates ontology_info keys, not the filesystem
+        output_files = list(
+            _parse_ontologies(
+                ontology_info=mock_ontology_info, working_dir=mock_raw_ontology_dir, output_path=output_path
+            )
         )
 
-        num_cross_ontology_files = 1
-        num_ontologies = len(os.listdir(mock_raw_ontology_dir)) - num_cross_ontology_files
+        num_ontologies = len(mock_ontology_info)
 
         # Assert the output file is created
         assert all(os.path.isfile(file) for file in output_files)
 
-        # Assert output_path has the same number of files as mock_raw_ontology_dir, minus the cross_ontology files
+        # Assert one output file per ontology entry
         assert len(os.listdir(output_path)) == num_ontologies
 
-        # Assert _load_ontology_object is called for each ontology file, minus the cross_ontology files
+        # Assert _load_ontology_object is called once per non-xml.gz ontology
         assert mock_load_ontology.call_count == num_ontologies
 
-        # Assert _extract_ontology_term_metadata is called for each ontology object, minus the cross_ontology files
+        # Assert _extract_ontology_term_metadata is called once per non-xml.gz ontology
         assert mock_extract_metadata.call_count == num_ontologies
 
-        # Assert _load_cross_ontology_map is called once, no matter how many cross_ontology files
+        # Assert _load_cross_ontology_map is called once regardless of how many ontologies
         assert mock_load_cross_ontology_map.call_count == 1
 
 
@@ -386,3 +397,124 @@ def test_extract_cross_ontology_terms(mock_raw_ontology_dir, mock_ontology_info)
     expected_result = {"ontology_name": "FOO:000002"}
 
     assert result == expected_result
+
+
+# ---------------------------------------------------------------------------
+# UniProt XML streaming parser
+# ---------------------------------------------------------------------------
+
+_UNIPROT_XML = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<uniprot xmlns="http://uniprot.org/uniprot">
+  <entry dataset="Swiss-Prot">
+    <accession>P05112</accession>
+    <name>IL4_HUMAN</name>
+  </entry>
+  <entry dataset="Swiss-Prot">
+    <accession>P08575</accession>
+    <name>CD45_HUMAN</name>
+  </entry>
+</uniprot>
+"""
+
+
+@pytest.fixture
+def mock_uniprot_xml_gz(tmp_path):
+    xml_gz_path = tmp_path / "UniProt.xml.gz"
+    with gzip.open(xml_gz_path, "wb") as f:
+        f.write(_UNIPROT_XML.encode("utf-8"))
+    return str(xml_gz_path)
+
+
+def test_parse_uniprot_xml(mock_uniprot_xml_gz):
+    result = _parse_uniprot_xml(mock_uniprot_xml_gz)
+    assert result == {
+        "uniprot:P05112": {"label": "IL4_HUMAN", "deprecated": False, "ancestors": {}},
+        "uniprot:P08575": {"label": "CD45_HUMAN", "deprecated": False, "ancestors": {}},
+    }
+
+
+def test_parse_uniprot_xml_skips_entries_without_accession_or_name(tmp_path):
+    xml = """\
+<?xml version="1.0" encoding="UTF-8"?>
+<uniprot xmlns="http://uniprot.org/uniprot">
+  <entry dataset="Swiss-Prot">
+    <accession>P05112</accession>
+  </entry>
+  <entry dataset="Swiss-Prot">
+    <name>ORPHAN_HUMAN</name>
+  </entry>
+</uniprot>
+"""
+    xml_gz_path = tmp_path / "UniProt.xml.gz"
+    with gzip.open(xml_gz_path, "wb") as f:
+        f.write(xml.encode("utf-8"))
+    result = _parse_uniprot_xml(str(xml_gz_path))
+    # Entry without <name> and entry without <accession> are both skipped
+    assert result == {}
+
+
+# ---------------------------------------------------------------------------
+# xml.gz download path
+# ---------------------------------------------------------------------------
+
+
+@pytest.fixture
+def mock_xml_gz_ontology_info():
+    return {
+        "UniProt": {
+            "source": "http://example.com",
+            "version": "2025-10-08",
+            "filename": "uniprot_sprot.xml.gz",
+            "format": "xml.gz",
+            "url": "http://example.com/uniprot_sprot.xml.gz",
+        }
+    }
+
+
+def test_download_ontologies_xml_gz_format(mock_xml_gz_ontology_info, tmp_path):
+    with patch("urllib.request.urlretrieve") as mock_urlretrieve, patch("urllib.request.urlopen") as mock_urlopen:
+        mock_response = MagicMock()
+        mock_response.code = 200
+        mock_urlopen.return_value = mock_response
+
+        _download_ontologies(ontology_info=mock_xml_gz_ontology_info, output_dir=str(tmp_path))
+
+        assert mock_urlretrieve.call_count == 1
+        saved_path = mock_urlretrieve.call_args[0][1]
+        assert saved_path.endswith("UniProt.xml.gz"), f"Expected .xml.gz output, got: {saved_path}"
+
+
+def test_parse_ontologies_xml_gz(mock_uniprot_xml_gz, tmp_path):
+    xml_gz_ontology_info = {
+        "UniProt": {
+            "source": "http://example.com",
+            "version": "2025-10-08",
+            "filename": "uniprot_sprot.xml.gz",
+            "format": "xml.gz",
+        }
+    }
+    working_dir = str(tmp_path / "raw")
+    os.makedirs(working_dir)
+    # Place the pre-built xml.gz fixture where _parse_ontologies expects it
+    import shutil
+
+    shutil.copy(mock_uniprot_xml_gz, os.path.join(working_dir, "UniProt.xml.gz"))
+
+    output_dir = str(tmp_path / "output")
+    os.makedirs(output_dir)
+
+    with patch("all_ontology_generator._load_cross_ontology_map", return_value={}):
+        output_files = list(
+            _parse_ontologies(ontology_info=xml_gz_ontology_info, working_dir=working_dir, output_path=output_dir)
+        )
+
+    assert len(output_files) == 1
+    assert output_files[0].endswith("UniProt-ontology-2025-10-08.json.gz")
+    assert os.path.isfile(output_files[0])
+
+    with gzip.open(output_files[0], "rt") as f:
+        result = json.load(f)
+
+    assert "uniprot:P05112" in result
+    assert result["uniprot:P05112"] == {"label": "IL4_HUMAN", "deprecated": False, "ancestors": {}}

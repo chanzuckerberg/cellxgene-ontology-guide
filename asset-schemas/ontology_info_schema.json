@@ -53,8 +53,20 @@
           "description": "List of additional term id prefixes to extracted from the source ontology file."
         },
         "cross_ontology_mapping": {
-          "type": "string",
-          "description": "name of SSSOM file mapping this ontology's terms to cross-species equivalent ontology terms."
+          "type": "object",
+          "description": "Cross-ontology mapping file that maps this ontology's terms to cross-species equivalent ontology terms.",
+          "properties": {
+            "filename": {
+              "type": "string",
+              "description": "Name of the cross-ontology mapping file."
+            },
+            "format": {
+              "type": "string",
+              "enum": ["sssom.tsv"],
+              "description": "File format of the cross-ontology mapping file."
+            }
+          },
+          "required": ["filename", "format"]
         },
         "map_to": {
           "type": "array",
@@ -62,6 +74,16 @@
                 "type": "string"
             },
           "description": "List of ontologies to map equivalent terms to this ontology"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Direct download URL for the ontology file. When present, overrides the URL constructed from source+version+filename. Used for ontologies whose distribution does not follow the {source}/{version}/{filename} path convention."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["owl", "owl.gz", "obo", "tsv", "xml.gz"],
+          "description": "File format of the ontology source. Should be specified for all new entries; defaults to 'owl' when absent for backward compatibility with older schema versions. 'owl' is a plain OWL/XML file. 'owl.gz' is a gzip-compressed OWL file decompressed before parsing. 'obo' is a plain OBO-format file. 'tsv' is a tab-separated values file. 'xml.gz' is a gzip-compressed XML file in a non-OWL schema (e.g. UniProt) kept compressed and parsed with a format-specific streaming parser rather than owlready2."
         }
       },
       "required": [

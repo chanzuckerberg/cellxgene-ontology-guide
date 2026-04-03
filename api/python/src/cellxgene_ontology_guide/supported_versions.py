@@ -121,13 +121,18 @@ class CXGSchema:
         """
         Get the download URL for a given ontology file.
 
+        When the ontology entry carries a direct ``url`` field (used for ontologies whose
+        distribution does not follow the standard ``{source}/{version}/{filename}``
+        versioned-path convention), that URL is returned as-is.
+
         Examples:
-        get_ontology_download_url("CL") -> "http://example.com/2024-01-01/cl.owl"
+        get_ontology_download_url(Ontology.CL) -> "http://example.com/2024-01-01/cl.owl"
+        get_ontology_download_url(Ontology.UniProt) -> "https://ftp.uniprot.org/.../uniprot_sprot.xml.gz"
 
         :param ontology: Ontology enum of the ontology to fetch
         :return: str download URL for the requested ontology file
         """
-        source_url = self.supported_ontologies[ontology.name]["source"]
-        version = self.supported_ontologies[ontology.name]["version"]
-        filename = self.supported_ontologies[ontology.name]["filename"]
-        return f"{source_url}/{version}/{filename}"
+        onto_info = self.supported_ontologies[ontology.name]
+        if direct_url := onto_info.get("url"):
+            return str(direct_url)
+        return f"{onto_info['source']}/{onto_info['version']}/{onto_info['filename']}"

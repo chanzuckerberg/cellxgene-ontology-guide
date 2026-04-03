@@ -5,53 +5,69 @@
         "version": "v2024-08-16",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download",
         "filename": "cl.owl",
-        "cross_ontology_mapping": "cl.sssom.tsv"
+        "format": "owl",
+        "cross_ontology_mapping": {
+          "filename": "cl.sssom.tsv",
+          "format": "sssom.tsv"
+        }
       },
       "EFO": {
         "version": "v3.69.0",
         "source": "https://github.com/EBISPOT/efo/releases/download",
-        "filename": "efo.owl"
+        "filename": "efo.owl",
+        "format": "owl"
       },
       "HANCESTRO": {
         "version": "3.0",
         "source": "https://github.com/EBISPOT/hancestro/raw",
-        "filename": "hancestro.owl"
+        "filename": "hancestro.owl",
+        "format": "owl"
       },
       "HsapDv": {
         "version": "v2024-05-28",
         "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
-        "filename": "hsapdv.owl"
+        "filename": "hsapdv.owl",
+        "format": "owl"
       },
       "MONDO": {
         "version": "v2024-08-06",
         "source": "https://github.com/monarch-initiative/mondo/releases/download",
-        "filename": "mondo.owl"
+        "filename": "mondo.owl",
+        "format": "owl"
       },
       "MmusDv": {
         "version": "v2024-05-28",
         "source": "https://github.com/obophenotype/developmental-stage-ontologies/releases/download",
-        "filename": "mmusdv.owl"
+        "filename": "mmusdv.owl",
+        "format": "owl"
       },
       "NCBITaxon": {
         "version": "v2023-06-20",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download",
-        "filename": "ncbitaxon.owl.gz"
+        "filename": "ncbitaxon.owl.gz",
+        "format": "owl.gz"
       },
       "UBERON": {
         "version": "v2024-08-07",
         "source": "https://github.com/obophenotype/uberon/releases/download",
         "filename": "uberon.owl",
-        "cross_ontology_mapping": "uberon.sssom.tsv"
+        "format": "owl",
+        "cross_ontology_mapping": {
+          "filename": "uberon.sssom.tsv",
+          "format": "sssom.tsv"
+        }
       },
       "PATO": {
         "version": "v2023-05-18",
         "source": "https://github.com/pato-ontology/pato/raw",
-        "filename": "pato.owl"
+        "filename": "pato.owl",
+        "format": "owl"
       },
       "FBbt": {
         "version": "v2024-10-17",
         "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download",
         "filename": "fbbt.owl",
+        "format": "owl",
         "map_to": [
           "CL",
           "UBERON"
@@ -60,12 +76,14 @@
       "FBdv": {
         "version": "v2024-10-17",
         "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download",
-        "filename": "fbdv.owl"
+        "filename": "fbdv.owl",
+        "format": "owl"
       },
       "ZFA": {
         "version": "v2022-12-09",
         "source": "https://github.com/ZFIN/zebrafish-anatomical-ontology/raw",
         "filename": "zfa.owl",
+        "format": "owl",
         "additional_ontologies": [
           "ZFS"
         ],
@@ -77,16 +95,32 @@
       "WBls": {
         "version": "vWS295",
         "source": "https://github.com/obophenotype/c-elegans-development-ontology/raw/",
-        "filename": "wbls.owl"
+        "filename": "wbls.owl",
+        "format": "owl"
       },
       "WBbt": {
         "version": "v2024-09-24",
         "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw",
         "filename": "wbbt.owl",
+        "format": "owl",
         "map_to": [
           "CL",
           "UBERON"
         ]
+      },
+      "CHEBI": {
+        "version": "2026-01-06",
+        "source": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology",
+        "filename": "chebi_lite.owl.gz",
+        "format": "owl.gz",
+        "url": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.owl.gz"
+      },
+      "UniProt": {
+        "version": "2025-10-08",
+        "source": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete",
+        "filename": "uniprot_sprot.xml.gz",
+        "format": "xml.gz",
+        "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.xml.gz"
       }
     }
   },

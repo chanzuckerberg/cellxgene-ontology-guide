@@ -62,6 +62,14 @@
       "type": "string",
       "pattern": "^WBbt+:[0-9]+$"
     },
+    "CHEBI_term_id": {
+      "type": "string",
+      "pattern": "^CHEBI:[0-9]+$"
+    },
+    "UniProt_term_id": {
+      "type": "string",
+      "pattern": "^uniprot:[A-Z0-9]+$"
+    },
     "supported_term_id": {
       "anyOf": [
         {
@@ -110,6 +118,12 @@
         },
         {
           "$ref": "#/definitions/WBbt_term_id"
+        },
+        {
+          "$ref": "#/definitions/CHEBI_term_id"
+        },
+        {
+          "$ref": "#/definitions/UniProt_term_id"
         }
       ]
     }

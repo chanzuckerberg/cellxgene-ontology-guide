@@ -5,6 +5,7 @@ import os
 import re
 import sys
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from threading import Thread
 from typing import Any, Dict, Iterator, List, Set
@@ -52,29 +53,55 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     :rtype None
     """
 
-    def download(_ontology: str, _url: str) -> None:
+    def download(_ontology: str, _url: str, _fmt: str) -> None:
         logging.info(f"Start Downloading {_url}")
-        # Format of ontology (handles cases where they are compressed)
-        download_format = _url.split(".")[-1]
-        output_file = os.path.join(output_dir, _ontology + ".owl")
-        if download_format == "tsv":
-            output_file = os.path.join(output_dir, _ontology + ".sssom.tsv")
+        if _fmt == "xml.gz":
+            # Keep the file compressed; it will be parsed by a format-specific streaming parser.
+            # Do NOT decompress: these files can be multiple GB when uncompressed and
+            # would exceed GitHub Actions runner memory and disk limits.
+            output_file = os.path.join(output_dir, _ontology + ".xml.gz")
             urllib.request.urlretrieve(_url, output_file)
-        elif download_format == "gz":
+        elif _fmt == "owl.gz":
+            output_file = os.path.join(output_dir, _ontology + ".owl")
             urllib.request.urlretrieve(_url, output_file + ".gz")
             _decompress(output_file + ".gz", output_file)
             os.remove(output_file + ".gz")
-        else:
+        elif _fmt == "obo":
+            # owlready2 auto-detects OBO format from the .obo extension, so the file
+            # must be saved with that extension rather than renamed to .owl.
+            output_file = os.path.join(output_dir, _ontology + ".obo")
+            urllib.request.urlretrieve(_url, output_file)
+        elif _fmt == "sssom.tsv":
+            # Save using the filename declared in cross_ontology_mapping so that
+            # _load_cross_ontology_map can locate the file by the same JSON-defined name.
+            cross_filename = ontology_info[_ontology]["cross_ontology_mapping"]["filename"]
+            output_file = os.path.join(output_dir, cross_filename)
+            urllib.request.urlretrieve(_url, output_file)
+        elif _fmt == "tsv":
+            output_file = os.path.join(output_dir, _ontology + ".tsv")
+            urllib.request.urlretrieve(_url, output_file)
+        else:  # "owl"
+            output_file = os.path.join(output_dir, _ontology + ".owl")
             urllib.request.urlretrieve(_url, output_file)
         logging.info(f"Finish Downloading {_url}")
 
-    def _build_urls(_ontology: str) -> List[str]:
+    def _build_urls(_ontology: str) -> List[tuple[str, str]]:
         onto_ref_data = ontology_info[_ontology]
-        base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
-        download_urls = [f"{base_url}/{onto_ref_data['filename']}"]
+        onto_format = onto_ref_data.get("format", "owl")
+        # Use direct URL when provided (e.g. for ontologies whose distribution does not
+        # follow the standard {source}/{version}/{filename} versioned-path convention).
+        if onto_ref_data.get("url"):
+            main_url = onto_ref_data["url"]
+        else:
+            base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
+            main_url = f"{base_url}/{onto_ref_data['filename']}"
+        download_items = [(main_url, onto_format)]
         if onto_ref_data.get("cross_ontology_mapping"):
-            download_urls.append(f"{base_url}/{onto_ref_data['cross_ontology_mapping']}")
-        return download_urls
+            base_url = f"{onto_ref_data['source']}/{onto_ref_data['version']}"
+            cross_mapping = onto_ref_data["cross_ontology_mapping"]
+            cross_url = f"{base_url}/{cross_mapping['filename']}"
+            download_items.append((cross_url, cross_mapping["format"]))
+        return download_items
 
     def _check_url(_ontology: str, _url: str) -> None:
         try:
@@ -86,10 +113,9 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     threads = []
     for ontology, _ in ontology_info.items():
-        urls = _build_urls(ontology)
-        for url in urls:
+        for url, fmt in _build_urls(ontology):
             _check_url(ontology, url)
-            t = Thread(target=download, args=(ontology, url))
+            t = Thread(target=download, args=(ontology, url, fmt))
             t.start()
             threads.append(t)
 
@@ -140,9 +166,9 @@ def _load_cross_ontology_map(working_dir: str, ontology_info: Any) -> Dict[str, 
     ]
     for cross_ontology in cross_ontologies:
         cross_ontology_map[cross_ontology] = {}
-        # load tsv, assume SSSOM format for now
+        cross_filename = ontology_info[cross_ontology]["cross_ontology_mapping"]["filename"]
         try:
-            with open(os.path.join(working_dir, f"{cross_ontology}.sssom.tsv"), "r") as f:
+            with open(os.path.join(working_dir, cross_filename), "r") as f:
                 for line in f:
                     if not line.startswith("#") and not line.startswith("subject_id"):
                         cols = line.split("\t")
@@ -289,56 +315,87 @@ def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
     return f"{ontology_name}-ontology-{ontology_version}.json.gz"
 
 
+# UniProt XML namespace used in uniprot_sprot.xml.gz entries.
+_UNIPROT_NS = "http://uniprot.org/uniprot"
+
+
+def _parse_uniprot_xml(xml_gz_path: str) -> Dict[str, Any]:
+    """
+    Parse a gzip-compressed UniProt XML file (e.g. uniprot_sprot.xml.gz) using streaming
+    to extract a term_id → metadata mapping compatible with all_ontology_schema.json.
+
+    NOTE: UniProt is a special case. Unlike OBO/OWL ontologies, UniProt does not expose a
+    parseable is_a hierarchy through this pipeline. The ``ancestors`` field is intentionally
+    stored as an empty dict for every term. Hierarchy support (e.g. via Gene Ontology
+    molecular-function annotations embedded in UniProt entries) would require a separate
+    implementation pass and is not yet supported by cellxgene-ontology-guide.
+
+    Term IDs use the lowercase ``uniprot:`` prefix (e.g. ``uniprot:P08575``) as required
+    by the CXG schema. Labels are UniProt entry names (e.g. ``IL4_HUMAN``).
+
+    :param str xml_gz_path: path to a gzip-compressed UniProt XML file
+    :return Dict[str, Any]: mapping of ``uniprot:<accession>`` → {label, deprecated, ancestors}
+    """
+    term_dict: Dict[str, Any] = {}
+    with gzip.open(xml_gz_path, "rb") as f:
+        for _event, elem in ET.iterparse(f, events=("end",)):
+            if elem.tag != f"{{{_UNIPROT_NS}}}entry":
+                continue
+            accessions = elem.findall(f"{{{_UNIPROT_NS}}}accession")
+            name_elem = elem.find(f"{{{_UNIPROT_NS}}}name")
+            if accessions and name_elem is not None:
+                primary_accession = accessions[0].text
+                entry_name = name_elem.text  # e.g. "IL4_HUMAN"
+                term_dict[f"uniprot:{primary_accession}"] = {
+                    "label": entry_name,
+                    "deprecated": False,
+                    "ancestors": {},
+                }
+            # Free the element immediately to avoid accumulating the entire tree in memory.
+            elem.clear()
+    return term_dict
+
+
 def _parse_ontologies(
     ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
     output_path: str = env.ONTOLOGY_ASSETS_DIR,
 ) -> Iterator[str]:
     """
-    Parse all ontology files in working_dir. Extracts information from all classes in the ontology file.
-    The extracted information is written into a gzipped a json file with the following [schema](
-    asset-schemas/all_ontology_schema.json):
-    {
-        "ontology_name":
-            {
-            "term_id": {
-                "label": "..."
-                "deprecated": True
-                "ancestors": [
-                    "ancestor1_term_id_1",
-                    "ancestor2_term_id_2"
-                    ]
-                }
-            }
+    Parse all ontology files listed in ontology_info. Dispatches to a format-specific
+    parser based on each entry's ``format`` field. Extracts term metadata and writes a
+    gzipped JSON file per ontology following the schema at
+    asset-schemas/all_ontology_schema.json.
 
-            "term_id2": {
-                ...
-            }
+    :param ANY ontology_info: the ontology references used to download the ontology files.
+        Follows the schema at asset-schemas/ontology_info_schema.json.
+    :param str working_dir: path to folder containing the downloaded ontology files
+    :param str output_path: path to write output json.gz files
 
-            ...
-            }
-    }
-    :param ANY ontology_info: the ontology references used to download the ontology files. It follows this [schema](
-    ./asset-schemas/ontology_info_schema.json)
-    :param str working_dir: path to folder with ontology files
-    :param str output_path: path to output json files
-
-    :rtype str
-    :return: path to the output json file
+    :rtype Iterator[str]
+    :return: paths to the output json.gz files, yielded one at a time
     """
     cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
-    for onto_file in os.listdir(working_dir):
-        if not onto_file.endswith(".owl"):
-            continue
-        onto = _load_ontology_object(os.path.join(working_dir, onto_file))
-        version = ontology_info[onto.name]["version"]
-        output_file = os.path.join(output_path, get_ontology_file_name(onto.name, version))
+    for onto_name, onto_info in ontology_info.items():
+        onto_format = onto_info.get("format", "owl")
+        version = onto_info["version"]
+        output_file = os.path.join(output_path, get_ontology_file_name(onto_name, version))
         logging.info(f"Processing {output_file}")
-        allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
-        map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
-        onto_dict = _extract_ontology_term_metadata(
-            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map
-        )
+
+        if onto_format == "xml.gz":
+            onto_dict = _parse_uniprot_xml(os.path.join(working_dir, f"{onto_name}.xml.gz"))
+        else:
+            # owl, owl.gz (already decompressed to .owl by download), obo — all loaded by owlready2
+            onto = _load_ontology_object(os.path.join(working_dir, f"{onto_name}.owl"))
+            allowed_ontologies = [onto_name] + onto_info.get("additional_ontologies", [])
+            map_to_cross_ontologies = onto_info.get("map_to", [])
+
+            # Special case: NCBITaxon ancestor storage is skipped to save disk space;
+            # see _extract_ontology_term_metadata for details.
+            onto_dict = _extract_ontology_term_metadata(
+                onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map
+            )
+
         with gzip.GzipFile(output_file, mode="wb", mtime=0) as fp:
             fp.write(json.dumps(onto_dict, indent=2).encode("utf-8"))
         yield output_file
