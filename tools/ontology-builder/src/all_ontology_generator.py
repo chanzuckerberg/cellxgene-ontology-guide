@@ -8,6 +8,7 @@ import re
 import subprocess
 import sys
 import urllib.request
+import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
@@ -79,7 +80,13 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
         download_format = _url.split(".")[-1]
         output_file = os.path.join(output_dir, _ontology + ".owl")
 
-        if download_format == "tsv":
+        if _url.endswith(".xml.gz"):
+            # Keep the file compressed; it will be parsed by a format-specific streaming parser.
+            # Do NOT decompress: these files can be multiple GB when uncompressed and
+            # would exceed GitHub Actions runner memory and disk limits.
+            output_file = os.path.join(output_dir, _ontology + ".xml.gz")
+            urllib.request.urlretrieve(_url, output_file)
+        elif download_format == "tsv":
             output_file = os.path.join(output_dir, _ontology + ".sssom.tsv")
             urllib.request.urlretrieve(_url, output_file)
         elif download_format == "obo":
@@ -104,8 +111,10 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
+        # Use direct URL when provided (e.g. FTP ontologies without version in path)
+        if onto_ref_data.get("url"):
+            return [onto_ref_data["url"]]
         base_url = onto_ref_data["source"].replace("{version}", onto_ref_data["version"])
-
         download_urls = [base_url.replace("{filename}", onto_ref_data["filename"])]
         # this assumes the cross-ontology-map is part of the same repository.
         if onto_ref_data.get("cross_ontology_mapping"):
@@ -448,6 +457,47 @@ def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
     return f"{ontology_name}-ontology-{ontology_version}.json.zst"
 
 
+# UniProt XML namespace used in uniprot_sprot.xml.gz entries.
+_UNIPROT_NS = "http://uniprot.org/uniprot"
+
+
+def _parse_uniprot_xml(xml_gz_path: str) -> Dict[str, Any]:
+    """
+    Parse a gzip-compressed UniProt XML file (e.g. uniprot_sprot.xml.gz) using streaming
+    to extract a term_id → metadata mapping compatible with all_ontology_schema.json.
+
+    NOTE: UniProt is a special case. Unlike OBO/OWL ontologies, UniProt does not expose a
+    parseable is_a hierarchy through this pipeline. The ``ancestors`` field is intentionally
+    stored as an empty dict for every term. Hierarchy support (e.g. via Gene Ontology
+    molecular-function annotations embedded in UniProt entries) would require a separate
+    implementation pass and is not yet supported by cellxgene-ontology-guide.
+
+    Term IDs use the lowercase ``uniprot:`` prefix (e.g. ``uniprot:P08575``) as required
+    by the CXG schema. Labels are UniProt entry names (e.g. ``IL4_HUMAN``).
+
+    :param str xml_gz_path: path to a gzip-compressed UniProt XML file
+    :return Dict[str, Any]: mapping of ``uniprot:<accession>`` → {label, deprecated, ancestors}
+    """
+    term_dict: Dict[str, Any] = {}
+    with gzip.open(xml_gz_path, "rb") as f:
+        for _event, elem in ET.iterparse(f, events=("end",)):
+            if elem.tag != f"{{{_UNIPROT_NS}}}entry":
+                continue
+            accessions = elem.findall(f"{{{_UNIPROT_NS}}}accession")
+            name_elem = elem.find(f"{{{_UNIPROT_NS}}}name")
+            if accessions and name_elem is not None:
+                primary_accession = accessions[0].text
+                entry_name = name_elem.text  # e.g. "IL4_HUMAN"
+                term_dict[f"uniprot:{primary_accession}"] = {
+                    "label": entry_name,
+                    "deprecated": False,
+                    "ancestors": {},
+                }
+            # Free the element immediately to avoid accumulating the entire tree in memory.
+            elem.clear()
+    return term_dict
+
+
 def check_version(onto_file: str, version: str) -> None:
     version_iri = version_info = ""
     with open(onto_file, "r") as f:
@@ -505,6 +555,8 @@ def _parse_ontologies(
     :return: path to the output json file
     """
     cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
+    cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
+
     for onto_file in os.listdir(working_dir):
         if not onto_file.endswith(".owl"):
             continue
@@ -525,8 +577,23 @@ def _parse_ontologies(
         onto_dict = _extract_ontology_term_metadata(
             onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
         )
-        # Use maximum compression and no indentation for smaller file size
-        cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
+        compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
+        with open(output_file, "wb") as fp:
+            fp.write(compressed)
+        yield output_file
+
+    # Process xml.gz ontologies (e.g. UniProt) which are not found by the .owl filesystem scan above.
+    for onto_name, onto_info in ontology_info.items():
+        if onto_info.get("format") != "xml.gz":
+            continue
+        xml_gz_path = os.path.join(working_dir, f"{onto_name}.xml.gz")
+        if not os.path.exists(xml_gz_path):
+            logging.warning(f"Expected xml.gz file not found: {xml_gz_path}, skipping.")
+            continue
+        version = onto_info["version"]
+        output_file = os.path.join(output_path, get_ontology_file_name(onto_name, version))
+        logging.info(f"Processing {output_file}")
+        onto_dict = _parse_uniprot_xml(xml_gz_path)
         compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
         with open(output_file, "wb") as fp:
             fp.write(compressed)

@@ -23,6 +23,12 @@ class Ontology(Enum):
     WBbt = "wbbt"
     WBls = "wbls"
     CVCL = "cvcl"
+    CHEBI = "chebi"
+    # NOTE: UniProt is a special case. Unlike OBO/OWL ontologies, UniProt does not expose a
+    # parseable is-a hierarchy through this pipeline. The ``ancestors`` field is empty for
+    # all UniProt terms. Hierarchy support (e.g. via Gene Ontology molecular-function
+    # annotations) is not yet implemented in cellxgene-ontology-guide.
+    UniProt = "uniprot"
 
 
 class CuratedOntologyTermList(Enum):
