@@ -21,13 +21,13 @@ def ontology_info_content():
             "ontologies": {
                 "CL": {
                     "version": "v2024-01-01",
-                    "source": "http://example.com",
+                    "source": "http://example.com/{version}/{filename}",
                     "filename": "cl.owl",
                     "cross_ontology_mapping": "cl.sssom",
                 },
                 "HANCESTRO": {
                     "version": "v2024-01-01",
-                    "source": "http://example.com",
+                    "source": "http://example.com/{version}/{filename}",
                     "filename": "hancestro.owl",
                     "additional_ontologies": ["FOO", "OOF"],
                 },

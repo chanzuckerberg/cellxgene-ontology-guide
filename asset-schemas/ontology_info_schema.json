@@ -63,6 +63,16 @@
           },
           "description": "List of ontologies to map equivalent terms to this ontology"
         },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Direct download URL for the ontology file. When present, overrides the URL constructed from source+version+filename. Used for ontologies whose distribution does not follow the {source}/{version}/{filename} path convention."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["owl", "owl.gz", "obo", "tsv", "xml.gz", "fasta.gz"],
+          "description": "File format of the ontology source. Defaults to 'owl' when absent. 'owl.gz' is a gzip-compressed OWL file decompressed before parsing. 'xml.gz' is a gzip-compressed XML file kept compressed and parsed with a streaming parser. 'fasta.gz' is a gzip-compressed FASTA file parsed for accession and entry name (e.g. UniProt Swiss-Prot)."
+        },
         "version_uri": {
           "type": "string",
           "format": "uri",

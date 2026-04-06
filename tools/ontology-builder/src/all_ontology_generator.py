@@ -79,7 +79,17 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
         download_format = _url.split(".")[-1]
         output_file = os.path.join(output_dir, _ontology + ".owl")
 
-        if download_format == "tsv":
+        if _url.endswith(".fasta.gz"):
+            # Keep compressed; a lightweight streaming parser reads the gzip directly.
+            output_file = os.path.join(output_dir, _ontology + ".fasta.gz")
+            urllib.request.urlretrieve(_url, output_file)
+        elif _url.endswith(".xml.gz"):
+            # Keep the file compressed; it will be parsed by a format-specific streaming parser.
+            # Do NOT decompress: these files can be multiple GB when uncompressed and
+            # would exceed GitHub Actions runner memory and disk limits.
+            output_file = os.path.join(output_dir, _ontology + ".xml.gz")
+            urllib.request.urlretrieve(_url, output_file)
+        elif download_format == "tsv":
             output_file = os.path.join(output_dir, _ontology + ".sssom.tsv")
             urllib.request.urlretrieve(_url, output_file)
         elif download_format == "obo":
@@ -104,8 +114,10 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
 
     def _build_urls(_ontology: str) -> List[str]:
         onto_ref_data = ontology_info[_ontology]
+        # Use direct URL when provided (e.g. FTP ontologies without version in path)
+        if onto_ref_data.get("url"):
+            return [onto_ref_data["url"]]
         base_url = onto_ref_data["source"].replace("{version}", onto_ref_data["version"])
-
         download_urls = [base_url.replace("{filename}", onto_ref_data["filename"])]
         # this assumes the cross-ontology-map is part of the same repository.
         if onto_ref_data.get("cross_ontology_mapping"):
@@ -448,6 +460,50 @@ def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
     return f"{ontology_name}-ontology-{ontology_version}.json.zst"
 
 
+def _parse_uniprot_fasta(fasta_gz_path: str) -> Dict[str, Any]:
+    """
+    Parse a gzip-compressed UniProt Swiss-Prot FASTA file (uniprot_sprot.fasta.gz) to
+    extract a term_id → metadata mapping compatible with all_ontology_schema.json.
+
+    FASTA headers follow the UniProt format:
+        >sp|<accession>|<entry_name> <protein_name> OS=<organism> ...
+    Example:
+        >sp|P08575|CD45_HUMAN Receptor-type tyrosine-protein phosphatase C ...
+
+    Only header lines (starting with '>sp|') are read; sequence lines are skipped,
+    so memory usage is minimal regardless of file size (~35 MB compressed).
+
+    NOTE: UniProt is a special case. Unlike OBO/OWL ontologies, UniProt does not expose a
+    parseable is_a hierarchy through this pipeline. The ``ancestors`` field is intentionally
+    stored as an empty dict for every term. Hierarchy support (e.g. via Gene Ontology
+    molecular-function annotations) would require a separate implementation pass and is
+    not yet supported by cellxgene-ontology-guide.
+
+    Term IDs use the lowercase ``uniprot:`` prefix (e.g. ``uniprot:P08575``) as required
+    by the CXG schema. Labels are UniProt entry names (e.g. ``CD45_HUMAN``).
+
+    :param str fasta_gz_path: path to a gzip-compressed UniProt Swiss-Prot FASTA file
+    :return Dict[str, Any]: mapping of ``uniprot:<accession>`` → {label, deprecated, ancestors}
+    """
+    term_dict: Dict[str, Any] = {}
+    with gzip.open(fasta_gz_path, "rt", encoding="utf-8") as f:
+        for line in f:
+            if not line.startswith(">sp|"):
+                continue
+            # Header format: >sp|<accession>|<entry_name> <description>
+            parts = line[1:].split("|")  # strip leading '>'
+            if len(parts) < 3:
+                continue
+            accession = parts[1]
+            entry_name = parts[2].split()[0]  # entry name is first token before space
+            term_dict[f"uniprot:{accession}"] = {
+                "label": entry_name,
+                "deprecated": False,
+                "ancestors": {},
+            }
+    return term_dict
+
+
 def check_version(onto_file: str, version: str) -> None:
     version_iri = version_info = ""
     with open(onto_file, "r") as f:
@@ -505,6 +561,8 @@ def _parse_ontologies(
     :return: path to the output json file
     """
     cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
+    cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
+
     for onto_file in os.listdir(working_dir):
         if not onto_file.endswith(".owl"):
             continue
@@ -525,8 +583,23 @@ def _parse_ontologies(
         onto_dict = _extract_ontology_term_metadata(
             onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
         )
-        # Use maximum compression and no indentation for smaller file size
-        cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
+        compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
+        with open(output_file, "wb") as fp:
+            fp.write(compressed)
+        yield output_file
+
+    # Process fasta.gz ontologies (e.g. UniProt) not found by the .owl filesystem scan above.
+    for onto_name, onto_info in ontology_info.items():
+        if onto_info.get("format") != "fasta.gz":
+            continue
+        fasta_gz_path = os.path.join(working_dir, f"{onto_name}.fasta.gz")
+        if not os.path.exists(fasta_gz_path):
+            logging.warning(f"Expected fasta.gz file not found: {fasta_gz_path}, skipping.")
+            continue
+        version = onto_info["version"]
+        output_file = os.path.join(output_path, get_ontology_file_name(onto_name, version))
+        logging.info(f"Processing {output_file}")
+        onto_dict = _parse_uniprot_fasta(fasta_gz_path)
         compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
         with open(output_file, "wb") as fp:
             fp.write(compressed)
