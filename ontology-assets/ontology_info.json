@@ -107,9 +107,9 @@
       "UniProt": {
         "version": "2025-10-08",
         "source": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/{filename}",
-        "filename": "uniprot_sprot.xml.gz",
-        "format": "xml.gz",
-        "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.xml.gz"
+        "filename": "uniprot_sprot.fasta.gz",
+        "format": "fasta.gz",
+        "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz"
       }
     }
   },

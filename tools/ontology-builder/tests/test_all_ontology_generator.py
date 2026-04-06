@@ -16,7 +16,7 @@ from all_ontology_generator import (  # noqa: E402
     _extract_ontology_term_metadata,
     _load_cross_ontology_map,
     _parse_ontologies,
-    _parse_uniprot_xml,
+    _parse_uniprot_fasta,
     _remove_punning_terms_from_cl,
     check_version,
     deprecate_previous_cellxgene_schema_versions,
@@ -793,113 +793,102 @@ class TestRemovePunningTermsFromCL:
 
 
 # ---------------------------------------------------------------------------
-# UniProt XML streaming parser
+# UniProt FASTA parser
 # ---------------------------------------------------------------------------
 
-_UNIPROT_XML = """\
-<?xml version="1.0" encoding="UTF-8"?>
-<uniprot xmlns="http://uniprot.org/uniprot">
-  <entry dataset="Swiss-Prot">
-    <accession>P05112</accession>
-    <name>IL4_HUMAN</name>
-  </entry>
-  <entry dataset="Swiss-Prot">
-    <accession>P08575</accession>
-    <name>CD45_HUMAN</name>
-  </entry>
-</uniprot>
+_UNIPROT_FASTA = """\
+>sp|P05112|IL4_HUMAN Interleukin-4 OS=Homo sapiens OX=9606 GN=IL4 PE=1 SV=2
+MGLTSQLLPPLFFLLACAGNFVHGHKCDITLQEIIKTLNNSIPESGKILENRQLNLVAQK
+>sp|P08575|CD45_HUMAN Receptor-type tyrosine-protein phosphatase C OS=Homo sapiens OX=9606 GN=PTPRC PE=1 SV=4
+MWPVTLFLLSVALMYDPFRQEIPVRDNRFNSSPEAVLKAFRPNQKVVFIPKFHEYNFTY
 """
 
 
 @pytest.fixture
-def mock_uniprot_xml_gz(tmp_path):
-    xml_gz_path = tmp_path / "UniProt.xml.gz"
-    with gzip.open(xml_gz_path, "wb") as f:
-        f.write(_UNIPROT_XML.encode("utf-8"))
-    return str(xml_gz_path)
+def mock_uniprot_fasta_gz(tmp_path):
+    fasta_gz_path = tmp_path / "UniProt.fasta.gz"
+    with gzip.open(fasta_gz_path, "wt", encoding="utf-8") as f:
+        f.write(_UNIPROT_FASTA)
+    return str(fasta_gz_path)
 
 
-def test_parse_uniprot_xml(mock_uniprot_xml_gz):
-    result = _parse_uniprot_xml(mock_uniprot_xml_gz)
+def test_parse_uniprot_fasta(mock_uniprot_fasta_gz):
+    result = _parse_uniprot_fasta(mock_uniprot_fasta_gz)
     assert result == {
         "uniprot:P05112": {"label": "IL4_HUMAN", "deprecated": False, "ancestors": {}},
         "uniprot:P08575": {"label": "CD45_HUMAN", "deprecated": False, "ancestors": {}},
     }
 
 
-def test_parse_uniprot_xml_skips_entries_without_accession_or_name(tmp_path):
-    xml = """\
-<?xml version="1.0" encoding="UTF-8"?>
-<uniprot xmlns="http://uniprot.org/uniprot">
-  <entry dataset="Swiss-Prot">
-    <accession>P05112</accession>
-  </entry>
-  <entry dataset="Swiss-Prot">
-    <name>ORPHAN_HUMAN</name>
-  </entry>
-</uniprot>
+def test_parse_uniprot_fasta_skips_non_sp_headers(tmp_path):
+    fasta = """\
+>tr|A0A000|ORPHAN_HUMAN Some unreviewed protein OS=Homo sapiens
+MWPVTLFLL
+>sp|P08575|CD45_HUMAN Receptor-type tyrosine-protein phosphatase C OS=Homo sapiens
+MWPVTLFLL
 """
-    xml_gz_path = tmp_path / "UniProt.xml.gz"
-    with gzip.open(xml_gz_path, "wb") as f:
-        f.write(xml.encode("utf-8"))
-    result = _parse_uniprot_xml(str(xml_gz_path))
-    # Entry without <name> and entry without <accession> are both skipped
-    assert result == {}
+    fasta_gz_path = tmp_path / "UniProt.fasta.gz"
+    with gzip.open(fasta_gz_path, "wt", encoding="utf-8") as f:
+        f.write(fasta)
+    result = _parse_uniprot_fasta(str(fasta_gz_path))
+    # TrEMBL (>tr|) entries are skipped; only Swiss-Prot (>sp|) entries are included
+    assert result == {
+        "uniprot:P08575": {"label": "CD45_HUMAN", "deprecated": False, "ancestors": {}},
+    }
 
 
 # ---------------------------------------------------------------------------
-# xml.gz download path
+# fasta.gz download path
 # ---------------------------------------------------------------------------
 
 
 @pytest.fixture
-def mock_xml_gz_ontology_info():
+def mock_fasta_gz_ontology_info():
     return {
         "UniProt": {
             "source": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/{filename}",
             "version": "2025-10-08",
-            "filename": "uniprot_sprot.xml.gz",
-            "format": "xml.gz",
-            "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.xml.gz",
+            "filename": "uniprot_sprot.fasta.gz",
+            "format": "fasta.gz",
+            "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz",
         }
     }
 
 
-def test_download_ontologies_xml_gz_format(mock_xml_gz_ontology_info, tmp_path):
+def test_download_ontologies_fasta_gz_format(mock_fasta_gz_ontology_info, tmp_path):
     with patch("urllib.request.urlretrieve") as mock_urlretrieve, patch("urllib.request.urlopen") as mock_urlopen:
         mock_response = MagicMock()
         mock_response.code = 200
         mock_urlopen.return_value = mock_response
 
-        _download_ontologies(ontology_info=mock_xml_gz_ontology_info, output_dir=str(tmp_path))
+        _download_ontologies(ontology_info=mock_fasta_gz_ontology_info, output_dir=str(tmp_path))
 
         assert mock_urlretrieve.call_count == 1
         saved_path = mock_urlretrieve.call_args[0][1]
-        assert saved_path.endswith("UniProt.xml.gz"), f"Expected .xml.gz output, got: {saved_path}"
+        assert saved_path.endswith("UniProt.fasta.gz"), f"Expected .fasta.gz output, got: {saved_path}"
 
 
-def test_parse_ontologies_xml_gz(mock_uniprot_xml_gz, tmp_path):
-    xml_gz_ontology_info = {
+def test_parse_ontologies_fasta_gz(mock_uniprot_fasta_gz, tmp_path):
+    fasta_gz_ontology_info = {
         "UniProt": {
             "source": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/{filename}",
             "version": "2025-10-08",
-            "filename": "uniprot_sprot.xml.gz",
-            "format": "xml.gz",
+            "filename": "uniprot_sprot.fasta.gz",
+            "format": "fasta.gz",
         }
     }
     working_dir = str(tmp_path / "raw")
     os.makedirs(working_dir)
-    # Place the pre-built xml.gz fixture where _parse_ontologies expects it
     import shutil
 
-    shutil.copy(mock_uniprot_xml_gz, os.path.join(working_dir, "UniProt.xml.gz"))
+    shutil.copy(mock_uniprot_fasta_gz, os.path.join(working_dir, "UniProt.fasta.gz"))
 
     output_dir = str(tmp_path / "output")
     os.makedirs(output_dir)
 
     with patch("all_ontology_generator._load_cross_ontology_map", return_value={}):
         output_files = list(
-            _parse_ontologies(ontology_info=xml_gz_ontology_info, working_dir=working_dir, output_path=output_dir)
+            _parse_ontologies(ontology_info=fasta_gz_ontology_info, working_dir=working_dir, output_path=output_dir)
         )
 
     assert len(output_files) == 1

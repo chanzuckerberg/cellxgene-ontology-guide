@@ -8,7 +8,6 @@ import re
 import subprocess
 import sys
 import urllib.request
-import xml.etree.ElementTree as ET
 from datetime import datetime, timedelta
 from typing import Any, Dict, Iterator, List, Set
 from urllib.error import HTTPError, URLError
@@ -80,7 +79,11 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
         download_format = _url.split(".")[-1]
         output_file = os.path.join(output_dir, _ontology + ".owl")
 
-        if _url.endswith(".xml.gz"):
+        if _url.endswith(".fasta.gz"):
+            # Keep compressed; a lightweight streaming parser reads the gzip directly.
+            output_file = os.path.join(output_dir, _ontology + ".fasta.gz")
+            urllib.request.urlretrieve(_url, output_file)
+        elif _url.endswith(".xml.gz"):
             # Keep the file compressed; it will be parsed by a format-specific streaming parser.
             # Do NOT decompress: these files can be multiple GB when uncompressed and
             # would exceed GitHub Actions runner memory and disk limits.
@@ -457,44 +460,47 @@ def get_ontology_file_name(ontology_name: str, ontology_version: str) -> str:
     return f"{ontology_name}-ontology-{ontology_version}.json.zst"
 
 
-# UniProt XML namespace used in uniprot_sprot.xml.gz entries.
-_UNIPROT_NS = "http://uniprot.org/uniprot"
-
-
-def _parse_uniprot_xml(xml_gz_path: str) -> Dict[str, Any]:
+def _parse_uniprot_fasta(fasta_gz_path: str) -> Dict[str, Any]:
     """
-    Parse a gzip-compressed UniProt XML file (e.g. uniprot_sprot.xml.gz) using streaming
-    to extract a term_id → metadata mapping compatible with all_ontology_schema.json.
+    Parse a gzip-compressed UniProt Swiss-Prot FASTA file (uniprot_sprot.fasta.gz) to
+    extract a term_id → metadata mapping compatible with all_ontology_schema.json.
+
+    FASTA headers follow the UniProt format:
+        >sp|<accession>|<entry_name> <protein_name> OS=<organism> ...
+    Example:
+        >sp|P08575|CD45_HUMAN Receptor-type tyrosine-protein phosphatase C ...
+
+    Only header lines (starting with '>sp|') are read; sequence lines are skipped,
+    so memory usage is minimal regardless of file size (~35 MB compressed).
 
     NOTE: UniProt is a special case. Unlike OBO/OWL ontologies, UniProt does not expose a
     parseable is_a hierarchy through this pipeline. The ``ancestors`` field is intentionally
     stored as an empty dict for every term. Hierarchy support (e.g. via Gene Ontology
-    molecular-function annotations embedded in UniProt entries) would require a separate
-    implementation pass and is not yet supported by cellxgene-ontology-guide.
+    molecular-function annotations) would require a separate implementation pass and is
+    not yet supported by cellxgene-ontology-guide.
 
     Term IDs use the lowercase ``uniprot:`` prefix (e.g. ``uniprot:P08575``) as required
-    by the CXG schema. Labels are UniProt entry names (e.g. ``IL4_HUMAN``).
+    by the CXG schema. Labels are UniProt entry names (e.g. ``CD45_HUMAN``).
 
-    :param str xml_gz_path: path to a gzip-compressed UniProt XML file
+    :param str fasta_gz_path: path to a gzip-compressed UniProt Swiss-Prot FASTA file
     :return Dict[str, Any]: mapping of ``uniprot:<accession>`` → {label, deprecated, ancestors}
     """
     term_dict: Dict[str, Any] = {}
-    with gzip.open(xml_gz_path, "rb") as f:
-        for _event, elem in ET.iterparse(f, events=("end",)):
-            if elem.tag != f"{{{_UNIPROT_NS}}}entry":
+    with gzip.open(fasta_gz_path, "rt", encoding="utf-8") as f:
+        for line in f:
+            if not line.startswith(">sp|"):
                 continue
-            accessions = elem.findall(f"{{{_UNIPROT_NS}}}accession")
-            name_elem = elem.find(f"{{{_UNIPROT_NS}}}name")
-            if accessions and name_elem is not None:
-                primary_accession = accessions[0].text
-                entry_name = name_elem.text  # e.g. "IL4_HUMAN"
-                term_dict[f"uniprot:{primary_accession}"] = {
-                    "label": entry_name,
-                    "deprecated": False,
-                    "ancestors": {},
-                }
-            # Free the element immediately to avoid accumulating the entire tree in memory.
-            elem.clear()
+            # Header format: >sp|<accession>|<entry_name> <description>
+            parts = line[1:].split("|")  # strip leading '>'
+            if len(parts) < 3:
+                continue
+            accession = parts[1]
+            entry_name = parts[2].split()[0]  # entry name is first token before space
+            term_dict[f"uniprot:{accession}"] = {
+                "label": entry_name,
+                "deprecated": False,
+                "ancestors": {},
+            }
     return term_dict
 
 
@@ -582,18 +588,18 @@ def _parse_ontologies(
             fp.write(compressed)
         yield output_file
 
-    # Process xml.gz ontologies (e.g. UniProt) which are not found by the .owl filesystem scan above.
+    # Process fasta.gz ontologies (e.g. UniProt) not found by the .owl filesystem scan above.
     for onto_name, onto_info in ontology_info.items():
-        if onto_info.get("format") != "xml.gz":
+        if onto_info.get("format") != "fasta.gz":
             continue
-        xml_gz_path = os.path.join(working_dir, f"{onto_name}.xml.gz")
-        if not os.path.exists(xml_gz_path):
-            logging.warning(f"Expected xml.gz file not found: {xml_gz_path}, skipping.")
+        fasta_gz_path = os.path.join(working_dir, f"{onto_name}.fasta.gz")
+        if not os.path.exists(fasta_gz_path):
+            logging.warning(f"Expected fasta.gz file not found: {fasta_gz_path}, skipping.")
             continue
         version = onto_info["version"]
         output_file = os.path.join(output_path, get_ontology_file_name(onto_name, version))
         logging.info(f"Processing {output_file}")
-        onto_dict = _parse_uniprot_xml(xml_gz_path)
+        onto_dict = _parse_uniprot_fasta(fasta_gz_path)
         compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
         with open(output_file, "wb") as fp:
             fp.write(compressed)

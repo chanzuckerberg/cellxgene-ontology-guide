@@ -70,8 +70,8 @@
         },
         "format": {
           "type": "string",
-          "enum": ["owl", "owl.gz", "obo", "tsv", "xml.gz"],
-          "description": "File format of the ontology source. Defaults to 'owl' when absent. 'owl.gz' is a gzip-compressed OWL file decompressed before parsing. 'xml.gz' is a gzip-compressed XML file (e.g. UniProt) kept compressed and parsed with a format-specific streaming parser."
+          "enum": ["owl", "owl.gz", "obo", "tsv", "xml.gz", "fasta.gz"],
+          "description": "File format of the ontology source. Defaults to 'owl' when absent. 'owl.gz' is a gzip-compressed OWL file decompressed before parsing. 'xml.gz' is a gzip-compressed XML file kept compressed and parsed with a streaming parser. 'fasta.gz' is a gzip-compressed FASTA file parsed for accession and entry name (e.g. UniProt Swiss-Prot)."
         },
         "version_uri": {
           "type": "string",
