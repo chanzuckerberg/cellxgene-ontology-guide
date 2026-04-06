@@ -1,6 +1,7 @@
 name: Updates to Ontology Files
 
 on:
+  workflow_dispatch:
   push:
     paths:
       # TODO: This workflow may execute alongside the generate_diff_ontology.yml workflow if
@@ -11,6 +12,7 @@ on:
       - "**/asset-schemas/all_ontology_schema.json"
       - "**/tools/ontology-builder/src/all_ontology_generator.py"
       - "**/ontology-assets/ontology_info.json"
+      - ".github/workflows/generate_all_ontology.yml"
     branches-ignore:
       - main
 
