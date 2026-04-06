@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.10.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.9.0...ontology-assets-v1.10.0) (2026-04-06)
+
+
+### Features
+
+* add CHEBI and UniProt ontology support ([#315](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/315)) ([a09124e](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/a09124e97e22af4928264ddcb674c2d2fe0d9a91))
+
 ## [1.9.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.8.0...ontology-assets-v1.9.0) (2025-10-03)
 
 
