@@ -96,6 +96,19 @@
         "CL",
         "UBERON"
       ]
+    },
+    "CHEBI": {
+      "version": "2026-01-06",
+      "source": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/{filename}",
+      "filename": "chebi_lite.owl.gz",
+      "url": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.owl.gz"
+    },
+    "UniProt": {
+      "version": "2025-10-08",
+      "source": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/{filename}",
+      "filename": "uniprot_sprot.fasta.gz",
+      "format": "fasta.gz",
+      "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz"
     }
   }
 }
