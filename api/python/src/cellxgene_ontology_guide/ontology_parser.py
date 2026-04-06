@@ -61,7 +61,7 @@ class OntologyParser:
         :return: str name of ontology that term belongs to
         """
         # use names groups
-        patterns = [r"([A-Za-z]+):[0-9]+", r"([A-Za-z]+)_[A-Za-z0-9]+"]
+        patterns = [r"([A-Za-z]+):[A-Za-z0-9]+", r"([A-Za-z]+)_[A-Za-z0-9]+"]
         pattern = "|".join(patterns)
         match = re.match(pattern, term_id)
         if not match:
@@ -92,6 +92,11 @@ class OntologyParser:
         """
         if ontology_term_prefix in self.cxg_schema.supported_ontologies:
             return ontology_term_prefix
+        # Case-insensitive lookup (e.g. "uniprot" prefix matches "UniProt" key)
+        lower_prefix = ontology_term_prefix.lower()
+        for key in self.cxg_schema.supported_ontologies:
+            if key.lower() == lower_prefix:
+                return str(key)
         supported_ontology_name: Optional[str] = self.cxg_schema.imported_ontologies.get(ontology_term_prefix)
         return supported_ontology_name
 
