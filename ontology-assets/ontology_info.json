@@ -6,21 +6,21 @@
         "filename": "cellosaurus.obo",
         "version_url": "https://api.cellosaurus.org/release-info",
         "id_separator": "_",
-        "version": "53.0"
+        "version": "55.0"
       },
       "CL": {
-        "version": "v2025-07-30",
+        "version": "v2026-03-26",
         "source": "https://github.com/obophenotype/cell-ontology/releases/download/{version}/{filename}",
         "filename": "cl.owl",
         "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.82.0",
+        "version": "v3.88.0",
         "source": "https://github.com/EBISPOT/efo/releases/download/{version}/{filename}",
         "filename": "efo.owl"
       },
       "HANCESTRO": {
-        "version": "v2025-04-01",
+        "version": "v2025-10-14",
         "source": "https://github.com/EBISPOT/hancestro/raw/{version}/{filename}",
         "filename": "hancestro.owl",
         "additional_ontologies": [
@@ -33,7 +33,7 @@
         "filename": "hsapdv.owl"
       },
       "MONDO": {
-        "version": "v2025-09-02",
+        "version": "v2026-04-07",
         "source": "https://github.com/monarch-initiative/mondo/releases/download/{version}/{filename}",
         "filename": "mondo.owl"
       },
@@ -43,12 +43,12 @@
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2025-09-11",
+        "version": "v2025-12-03",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download/{version}/{filename}",
         "filename": "ncbitaxon.owl.gz"
       },
       "UBERON": {
-        "version": "v2025-08-15",
+        "version": "v2026-04-01",
         "source": "https://github.com/obophenotype/uberon/releases/download/{version}/{filename}",
         "filename": "uberon.owl",
         "cross_ontology_mapping": "uberon.sssom.tsv"
@@ -59,7 +59,7 @@
         "filename": "pato.owl"
       },
       "FBbt": {
-        "version": "v2025-08-07",
+        "version": "v2026-04-03",
         "source": "https://github.com/FlyBase/drosophila-anatomy-developmental-ontology/releases/download/{version}/{filename}",
         "filename": "fbbt.owl",
         "map_to": [
@@ -68,12 +68,12 @@
         ]
       },
       "FBdv": {
-        "version": "v2025-05-29",
+        "version": "v2026-04-02",
         "source": "https://github.com/FlyBase/drosophila-developmental-ontology/releases/download/{version}/{filename}",
         "filename": "fbdv.owl"
       },
       "ZFA": {
-        "version": "v2025-09-05",
+        "version": "v2026-03-31",
         "source": "https://github.com/ZFIN/zebrafish-anatomical-ontology/raw/{version}/{filename}",
         "filename": "zfa.owl",
         "additional_ontologies": [
@@ -90,7 +90,7 @@
         "filename": "wbls.owl"
       },
       "WBbt": {
-        "version": "v2025-08-18",
+        "version": "vWS276",
         "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw/{version}/{filename}",
         "filename": "wbbt.owl",
         "map_to": [
