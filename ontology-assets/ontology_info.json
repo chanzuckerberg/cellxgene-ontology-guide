@@ -15,7 +15,7 @@
         "cross_ontology_mapping": "cl.sssom.tsv"
       },
       "EFO": {
-        "version": "v3.88.0",
+        "version": "v3.90.0",
         "source": "https://github.com/EBISPOT/efo/releases/download/{version}/{filename}",
         "filename": "efo.owl"
       },
@@ -33,7 +33,7 @@
         "filename": "hsapdv.owl"
       },
       "MONDO": {
-        "version": "v2026-04-07",
+        "version": "v2026-05-05",
         "source": "https://github.com/monarch-initiative/mondo/releases/download/{version}/{filename}",
         "filename": "mondo.owl"
       },
@@ -43,7 +43,7 @@
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2025-12-03",
+        "version": "v2026-05-13",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download/{version}/{filename}",
         "filename": "ncbitaxon.owl.gz"
       },
@@ -99,13 +99,13 @@
         ]
       },
       "CHEBI": {
-        "version": "2026-01-06",
+        "version": "2026-05-01",
         "source": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/{filename}",
         "filename": "chebi_lite.owl.gz",
         "url": "https://ftp.ebi.ac.uk/pub/databases/chebi/ontology/chebi_lite.owl.gz"
       },
       "UniProt": {
-        "version": "2025-10-08",
+        "version": "2026-01-28",
         "source": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/{filename}",
         "filename": "uniprot_sprot.fasta.gz",
         "format": "fasta.gz",
