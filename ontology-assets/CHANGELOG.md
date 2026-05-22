@@ -1,6 +1,13 @@
 # Changelog
 
 
+## [1.11.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.10.0...ontology-assets-v1.11.0) (2026-05-22)
+
+
+### Features
+
+* bump schema 7.1.0 ontologies to latest releases ([#317](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/317)) ([c497943](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/c497943397ee4e0959d5fe391f42e44be1439fb7))
+
 ## [1.10.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/ontology-assets-v1.9.0...ontology-assets-v1.10.0) (2026-04-06)
 
 ### Features
