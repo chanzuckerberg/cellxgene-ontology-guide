@@ -60,6 +60,16 @@
         "id_separator": {
           "type": "string",
           "description": "Character that separates the ontology prefix from the identifier in CURIEs. The default is ':' (colon)."
+        },
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "Direct download URL for the ontology file. When present, overrides the URL constructed from source+version+filename. Used for ontologies whose distribution does not follow the {source}/{version}/{filename} path convention."
+        },
+        "format": {
+          "type": "string",
+          "enum": ["owl", "owl.gz", "obo", "tsv", "xml.gz", "fasta.gz"],
+          "description": "File format of the ontology source. Defaults to 'owl' when absent."
         }
       },
       "required": ["version", "source", "filename"],
