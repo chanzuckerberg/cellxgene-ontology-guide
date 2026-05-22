@@ -89,7 +89,7 @@
       "filename": "wbls.owl"
     },
     "WBbt": {
-      "version": "vWS276",
+      "version": "v2025-08-18",
       "source": "https://github.com/obophenotype/c-elegans-gross-anatomy-ontology/raw/{version}/{filename}",
       "filename": "wbbt.owl",
       "map_to": [
