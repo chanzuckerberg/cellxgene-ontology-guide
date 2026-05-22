@@ -9,7 +9,7 @@ import subprocess
 import sys
 import urllib.request
 from datetime import datetime, timedelta
-from typing import Any, Dict, Iterator, List, Set
+from typing import Any, Dict, Iterator, List, Optional, Set
 from urllib.error import HTTPError, URLError
 
 import docker_config
@@ -127,6 +127,33 @@ def _download_ontologies(ontology_info: Dict[str, Any], output_dir: str = env.RA
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = [
             executor.submit(download, ontology, url) for ontology in ontology_info for url in _build_urls(ontology)
+        ]
+        for future in concurrent.futures.as_completed(futures):
+            future.result()
+
+
+def _download_cross_ontology_mapping_files(
+    ontology_info: Dict[str, Any], output_dir: str = env.RAW_ONTOLOGY_DIR
+) -> None:
+    """
+    Download cross-ontology mapping (.sssom.tsv) files for ontologies in `ontology_info`
+    that declare a `cross_ontology_mapping`. Used in `--diff` mode to ensure mapping
+    files are present even when the providing ontology is not in the diff but is
+    referenced via another diff'd ontology's `map_to`.
+    """
+
+    def _download_sssom(_ontology: str, _info: Dict[str, Any]) -> None:
+        base_url = _info["source"].replace("{version}", _info["version"])
+        url = base_url.replace("{filename}", _info["cross_ontology_mapping"])
+        output_file = os.path.join(output_dir, f"{_ontology}.sssom.tsv")
+        logging.info(f"Downloading cross-ontology mapping {_ontology}.sssom.tsv from {url}")
+        urllib.request.urlretrieve(url, output_file)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [
+            executor.submit(_download_sssom, ontology, info)
+            for ontology, info in ontology_info.items()
+            if info.get("cross_ontology_mapping")
         ]
         for future in concurrent.futures.as_completed(futures):
             future.result()
@@ -383,8 +410,9 @@ def _extract_cross_ontology_terms(
     """
     cross_ontology_terms = {}
     for cross_ontology in map_to_cross_ontologies:
-        if term_id in cross_ontology_map[cross_ontology]:
-            cross_ontology_terms[cross_ontology] = cross_ontology_map[cross_ontology][term_id]
+        ontology_map = cross_ontology_map.get(cross_ontology, {})
+        if term_id in ontology_map:
+            cross_ontology_terms[cross_ontology] = ontology_map[term_id]
     return cross_ontology_terms
 
 
@@ -527,6 +555,7 @@ def _parse_ontologies(
     ontology_info: Any,
     working_dir: str = env.RAW_ONTOLOGY_DIR,
     output_path: str = env.ONTOLOGY_ASSETS_DIR,
+    cross_ontology_info: Optional[Dict[str, Any]] = None,
 ) -> Iterator[str]:
     """
     Parse all ontology files in working_dir. Extracts information from all classes in the ontology file.
@@ -560,7 +589,7 @@ def _parse_ontologies(
     :rtype str
     :return: path to the output json file
     """
-    cross_ontology_map = _load_cross_ontology_map(working_dir, ontology_info)
+    cross_ontology_map = _load_cross_ontology_map(working_dir, cross_ontology_info or ontology_info)
     cctx = zstd.ZstdCompressor(level=22)  # Maximum compression level for zstd
 
     for onto_file in os.listdir(working_dir):
@@ -731,6 +760,16 @@ if __name__ == "__main__":
 
     # download and parse ontologies and generate ontology assets
     _download_ontologies(ontologies_to_process)
+    # In --diff mode, some ontologies referenced via map_to may not be in the diff
+    # but still provide cross-ontology mapping data that diff'd ontologies need.
+    # Ensure those mapping files are present.
+    missing_cross_ontology_providers = {
+        ontology: info
+        for ontology, info in latest_ontology_version["ontologies"].items()
+        if info.get("cross_ontology_mapping") and ontology not in ontologies_to_process
+    }
+    if missing_cross_ontology_providers:
+        _download_cross_ontology_mapping_files(missing_cross_ontology_providers)
     deprecate_previous_cellxgene_schema_versions(ontology_info, current_version)
     expired_files = update_ontology_info(ontology_info)
     logging.info("Removing expired files:\n\t", "\t\n".join(expired_files))
@@ -742,7 +781,10 @@ if __name__ == "__main__":
     schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
     registry = register_schemas()
     result = [
-        verify_json(schema_file, output_file, registry) for output_file in _parse_ontologies(ontologies_to_process)
+        verify_json(schema_file, output_file, registry)
+        for output_file in _parse_ontologies(
+            ontologies_to_process, cross_ontology_info=latest_ontology_version["ontologies"]
+        )
     ]
     if not all(result):
         sys.exit(1)
