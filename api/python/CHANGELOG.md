@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.11.1](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.11.0...python-api-v1.11.1) (2026-05-22)
+
+
+### BugFixes
+
+* revert WBbt 7.1.0 regression from vWS276 to v2025-08-18 ([#319](https://github.com/chanzuckerberg/cellxgene-ontology-guide/issues/319)) ([b7a4ec4](https://github.com/chanzuckerberg/cellxgene-ontology-guide/commit/b7a4ec4e4f8bc98aa5730fbe5f1d80d358a3f74d))
+
 ## [1.11.0](https://github.com/chanzuckerberg/cellxgene-ontology-guide/compare/python-api-v1.10.0...python-api-v1.11.0) (2026-05-22)
 
 
