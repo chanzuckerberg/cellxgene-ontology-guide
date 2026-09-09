@@ -16,7 +16,7 @@ import docker_config
 import env
 import owlready2
 import zstandard as zstd
-from cellxgene_ontology_guide.supported_versions import get_latest_schema_version
+from cellxgene_ontology_guide.supported_versions import coerce_version, get_latest_schema_version
 from validate_json_schemas import register_schemas, verify_json
 
 
@@ -677,10 +677,17 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
 def deprecate_previous_cellxgene_schema_versions(ontology_info: Dict[str, Any], current_version: str) -> None:
     """
     Deprecate previous versions of the cellxgene schema. This modifies the ontology_info.json file in place.
+
+    A pre-release current version (e.g. 7.2.0-alpha) deprecates nothing. Pre-releases are published off a
+    branch for downstream testing, and the released schema version they precede is still canonical.
+
     :param ontology_info: the ontology information from ontology_info.json
     :param current_version: the current cellxgene schema version
     :return:
     """
+    if coerce_version(current_version).prerelease:
+        logging.info("%s is a pre-release version; leaving previous schema versions active.", current_version)
+        return
     for schema_version in ontology_info:
         if schema_version != current_version and "deprecated_on" not in ontology_info[schema_version]:
             ontology_info[schema_version]["deprecated_on"] = datetime.now().strftime("%Y-%m-%d")

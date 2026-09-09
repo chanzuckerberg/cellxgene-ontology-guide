@@ -263,6 +263,25 @@ def test_deprecate_previous_cellxgene_schema_versions(mock_datetime):
     assert ontology_info == expected_ontology_info
 
 
+def test_deprecate_previous_cellxgene_schema_versions_prerelease(mock_datetime):
+    ontology_info = {
+        "7.2.0-alpha": {},  # current version, a pre-release
+        "7.1.0": {},  # released and still canonical
+        "7.0.0": {"deprecated_on": "2026-04-06"},  # already deprecated
+    }
+    # a pre-release does not deprecate the released schema version it precedes
+    expected_ontology_info = {
+        "7.2.0-alpha": {},
+        "7.1.0": {},
+        "7.0.0": {"deprecated_on": "2026-04-06"},
+    }
+
+    # Call the function
+    deprecate_previous_cellxgene_schema_versions(ontology_info, "7.2.0-alpha")
+
+    assert ontology_info == expected_ontology_info
+
+
 @pytest.fixture
 def sample_ontology(tmp_path):
     # Create a new ontology
