@@ -78,6 +78,14 @@
       "type": "string",
       "pattern": "^uniprot:[A-Z0-9]+$"
     },
+    "GO_term_id": {
+      "type": "string",
+      "pattern": "^GO:[0-9]+$"
+    },
+    "FBbi_term_id": {
+      "type": "string",
+      "pattern": "^FBbi:[0-9]+$"
+    },
     "supported_term_id": {
       "anyOf": [
         {
@@ -136,6 +144,12 @@
         },
         {
           "$ref": "#/definitions/UniProt_term_id"
+        },
+        {
+          "$ref": "#/definitions/GO_term_id"
+        },
+        {
+          "$ref": "#/definitions/FBbi_term_id"
         }
       ]
     }

@@ -24,6 +24,8 @@ class Ontology(Enum):
     WBls = "wbls"
     CVCL = "cvcl"
     CHEBI = "chebi"
+    GO = "go"
+    FBbi = "fbbi"
     # NOTE: UniProt is a special case. Unlike OBO/OWL ontologies, UniProt does not expose a
     # parseable is-a hierarchy through this pipeline. The ``ancestors`` field is empty for
     # all UniProt terms. Hierarchy support (e.g. via Gene Ontology molecular-function

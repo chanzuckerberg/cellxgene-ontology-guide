@@ -16,8 +16,29 @@ import docker_config
 import env
 import owlready2
 import zstandard as zstd
-from cellxgene_ontology_guide.supported_versions import get_latest_schema_version
+from cellxgene_ontology_guide.supported_versions import coerce_version, get_latest_schema_version
 from validate_json_schemas import register_schemas, verify_json
+
+USER_AGENT = "cellxgene-ontology-guide/ontology-builder (+https://github.com/chanzuckerberg/cellxgene-ontology-guide)"
+
+
+def _install_url_opener(user_agent: str = USER_AGENT) -> None:
+    """
+    Install a global urllib opener that identifies the ontology builder.
+
+    Some ontology hosts reject the default "Python-urllib/x.y" User-Agent outright:
+    release.geneontology.org sits behind Cloudflare and answers it with a 403. Installing the
+    opener globally covers urlretrieve as well as urlopen, since urlretrieve delegates to it.
+
+    :param str user_agent: User-Agent header to send with every download
+    :rtype None
+    """
+    opener = urllib.request.build_opener()
+    opener.addheaders = [("User-Agent", user_agent)]
+    urllib.request.install_opener(opener)
+
+
+_install_url_opener()
 
 
 def get_ontology_info_file(ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> Any:
@@ -388,11 +409,13 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
                     queue.append((parent, distance + 1))
                     ancestors[parent_name] = distance
 
-    # filter out ancestors that are not from the ontology we are currently processing
+    # filter out ancestors that are not from the ontology we are currently processing, and
+    # structural root terms whose IDs are not valid CURIEs (e.g. FBbi_root_00000000), which
+    # are skipped as terms in _extract_ontology_term_metadata and so cannot be referenced
     return {
         ancestor: distance
         for ancestor, distance in sorted(ancestors.items(), key=lambda item: item[1])
-        if ancestor.split(":")[0] in allowed_ontologies
+        if len(ancestor.split(":")) == 2 and ancestor.split(":")[0] in allowed_ontologies
     }
 
 
@@ -474,7 +497,9 @@ def _extract_ontology_term_metadata(
             if getattr(onto_term, "IAO_0000233", None):
                 term_dict[term_id]["term_tracker"] = str(onto_term.IAO_0000233[0])
             # only need to record replaced_by OR considers
-            if onto_term.IAO_0100001:
+            # getattr: ontologies with no replacement annotations at all (e.g. FBbi) never
+            # declare IAO_0100001, and owlready2 raises AttributeError for undeclared properties
+            if getattr(onto_term, "IAO_0100001", None):
                 # url --> term
                 ontology_term = re.findall(r"[^\W_]+", str(onto_term.IAO_0100001[0]))
                 # It is accepted that this term may not be in the same ontology as the original term.
@@ -673,10 +698,17 @@ def update_ontology_info(ontology_info: Dict[str, Any]) -> Set[str]:
 def deprecate_previous_cellxgene_schema_versions(ontology_info: Dict[str, Any], current_version: str) -> None:
     """
     Deprecate previous versions of the cellxgene schema. This modifies the ontology_info.json file in place.
+
+    A pre-release current version (e.g. 7.2.0-alpha) deprecates nothing. Pre-releases are published off a
+    branch for downstream testing, and the released schema version they precede is still canonical.
+
     :param ontology_info: the ontology information from ontology_info.json
     :param current_version: the current cellxgene schema version
     :return:
     """
+    if coerce_version(current_version).prerelease:
+        logging.info("%s is a pre-release version; leaving previous schema versions active.", current_version)
+        return
     for schema_version in ontology_info:
         if schema_version != current_version and "deprecated_on" not in ontology_info[schema_version]:
             ontology_info[schema_version]["deprecated_on"] = datetime.now().strftime("%Y-%m-%d")

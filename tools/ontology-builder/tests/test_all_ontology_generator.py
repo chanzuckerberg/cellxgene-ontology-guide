@@ -10,10 +10,12 @@ import owlready2
 import pytest
 import zstandard as zstd
 from all_ontology_generator import (  # noqa: E402
+    USER_AGENT,
     _decompress,
     _download_ontologies,
     _extract_cross_ontology_terms,
     _extract_ontology_term_metadata,
+    _install_url_opener,
     _load_cross_ontology_map,
     _parse_ontologies,
     _parse_uniprot_fasta,
@@ -69,6 +71,17 @@ def mock_owl(tmpdir):
     onto.name = "FAKE"
 
     return onto
+
+
+def test_install_url_opener_sets_explicit_user_agent():
+    _install_url_opener()
+
+    opener = urllib.request._opener
+    assert opener is not None
+    user_agents = [value for header, value in opener.addheaders if header.lower() == "user-agent"]
+    assert user_agents == [USER_AGENT]
+    # the default Python-urllib User-Agent is 403'd by hosts behind Cloudflare (e.g. GO)
+    assert not user_agents[0].lower().startswith("python-urllib")
 
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):
@@ -263,6 +276,25 @@ def test_deprecate_previous_cellxgene_schema_versions(mock_datetime):
     assert ontology_info == expected_ontology_info
 
 
+def test_deprecate_previous_cellxgene_schema_versions_prerelease(mock_datetime):
+    ontology_info = {
+        "7.2.0-alpha": {},  # current version, a pre-release
+        "7.1.0": {},  # released and still canonical
+        "7.0.0": {"deprecated_on": "2026-04-06"},  # already deprecated
+    }
+    # a pre-release does not deprecate the released schema version it precedes
+    expected_ontology_info = {
+        "7.2.0-alpha": {},
+        "7.1.0": {},
+        "7.0.0": {"deprecated_on": "2026-04-06"},
+    }
+
+    # Call the function
+    deprecate_previous_cellxgene_schema_versions(ontology_info, "7.2.0-alpha")
+
+    assert ontology_info == expected_ontology_info
+
+
 @pytest.fixture
 def sample_ontology(tmp_path):
     # Create a new ontology
@@ -378,6 +410,54 @@ def test_extract_ontology_term_metadata_multiple_allowed_ontologies(sample_ontol
             "ancestors": {"FOO:000001": 1},
             "label": "Test Descendant Different Ontology Term",
             "deprecated": False,
+        },
+    }
+
+    assert result == expected_result
+
+
+@pytest.fixture
+def sample_ontology_with_structural_root():
+    # Mirrors the shape of FBbi: a structural root term whose ID is not a valid CURIE
+    # (FBbi_root_00000000), and a deprecated term in an ontology that never declares the
+    # IAO_0100001 (term replaced by) property. Built in an isolated World so that
+    # annotation properties declared by other fixtures do not leak into it.
+    world = owlready2.World()
+    onto = world.get_ontology("http://test.org/root_onto.owl")
+    onto.name = "BAR"
+
+    with onto:
+
+        class BAR_root_000000(owlready2.Thing):
+            label = ["Test Structural Root Term"]
+
+        class BAR_000001(BAR_root_000000):
+            label = ["Test Root Term"]
+
+        class BAR_000002(BAR_000001):
+            label = ["Test Deprecated Descendant Term"]
+            deprecated = [True]
+
+    return onto
+
+
+def test_extract_ontology_term_metadata_with_structural_root(sample_ontology_with_structural_root):
+    result = _extract_ontology_term_metadata(
+        sample_ontology_with_structural_root, ["BAR"], map_to_cross_ontologies=[], cross_ontology_map={}
+    )
+
+    # the structural root is neither emitted as a term nor retained as an ancestor, and the
+    # deprecated term is extracted even though IAO_0100001 is not defined in this ontology
+    expected_result = {
+        "BAR:000001": {
+            "ancestors": {},
+            "label": "Test Root Term",
+            "deprecated": False,
+        },
+        "BAR:000002": {
+            "ancestors": {"BAR:000001": 1},
+            "label": "Test Deprecated Descendant Term",
+            "deprecated": True,
         },
     }
 
