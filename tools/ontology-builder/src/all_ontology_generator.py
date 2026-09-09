@@ -19,6 +19,27 @@ import zstandard as zstd
 from cellxgene_ontology_guide.supported_versions import coerce_version, get_latest_schema_version
 from validate_json_schemas import register_schemas, verify_json
 
+USER_AGENT = "cellxgene-ontology-guide/ontology-builder (+https://github.com/chanzuckerberg/cellxgene-ontology-guide)"
+
+
+def _install_url_opener(user_agent: str = USER_AGENT) -> None:
+    """
+    Install a global urllib opener that identifies the ontology builder.
+
+    Some ontology hosts reject the default "Python-urllib/x.y" User-Agent outright:
+    release.geneontology.org sits behind Cloudflare and answers it with a 403. Installing the
+    opener globally covers urlretrieve as well as urlopen, since urlretrieve delegates to it.
+
+    :param str user_agent: User-Agent header to send with every download
+    :rtype None
+    """
+    opener = urllib.request.build_opener()
+    opener.addheaders = [("User-Agent", user_agent)]
+    urllib.request.install_opener(opener)
+
+
+_install_url_opener()
+
 
 def get_ontology_info_file(ontology_info_file: str = env.ONTOLOGY_INFO_FILE) -> Any:
     """

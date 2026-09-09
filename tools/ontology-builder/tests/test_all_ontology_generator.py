@@ -10,10 +10,12 @@ import owlready2
 import pytest
 import zstandard as zstd
 from all_ontology_generator import (  # noqa: E402
+    USER_AGENT,
     _decompress,
     _download_ontologies,
     _extract_cross_ontology_terms,
     _extract_ontology_term_metadata,
+    _install_url_opener,
     _load_cross_ontology_map,
     _parse_ontologies,
     _parse_uniprot_fasta,
@@ -69,6 +71,17 @@ def mock_owl(tmpdir):
     onto.name = "FAKE"
 
     return onto
+
+
+def test_install_url_opener_sets_explicit_user_agent():
+    _install_url_opener()
+
+    opener = urllib.request._opener
+    assert opener is not None
+    user_agents = [value for header, value in opener.addheaders if header.lower() == "user-agent"]
+    assert user_agents == [USER_AGENT]
+    # the default Python-urllib User-Agent is 403'd by hosts behind Cloudflare (e.g. GO)
+    assert not user_agents[0].lower().startswith("python-urllib")
 
 
 def test_get_ontology_info_file_default(mock_ontology_info_file):
