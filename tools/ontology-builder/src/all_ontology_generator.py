@@ -388,11 +388,13 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
                     queue.append((parent, distance + 1))
                     ancestors[parent_name] = distance
 
-    # filter out ancestors that are not from the ontology we are currently processing
+    # filter out ancestors that are not from the ontology we are currently processing, and
+    # structural root terms whose IDs are not valid CURIEs (e.g. FBbi_root_00000000), which
+    # are skipped as terms in _extract_ontology_term_metadata and so cannot be referenced
     return {
         ancestor: distance
         for ancestor, distance in sorted(ancestors.items(), key=lambda item: item[1])
-        if ancestor.split(":")[0] in allowed_ontologies
+        if len(ancestor.split(":")) == 2 and ancestor.split(":")[0] in allowed_ontologies
     }
 
 
@@ -474,7 +476,9 @@ def _extract_ontology_term_metadata(
             if getattr(onto_term, "IAO_0000233", None):
                 term_dict[term_id]["term_tracker"] = str(onto_term.IAO_0000233[0])
             # only need to record replaced_by OR considers
-            if onto_term.IAO_0100001:
+            # getattr: ontologies with no replacement annotations at all (e.g. FBbi) never
+            # declare IAO_0100001, and owlready2 raises AttributeError for undeclared properties
+            if getattr(onto_term, "IAO_0100001", None):
                 # url --> term
                 ontology_term = re.findall(r"[^\W_]+", str(onto_term.IAO_0100001[0]))
                 # It is accepted that this term may not be in the same ontology as the original term.

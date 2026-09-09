@@ -384,6 +384,54 @@ def test_extract_ontology_term_metadata_multiple_allowed_ontologies(sample_ontol
     assert result == expected_result
 
 
+@pytest.fixture
+def sample_ontology_with_structural_root():
+    # Mirrors the shape of FBbi: a structural root term whose ID is not a valid CURIE
+    # (FBbi_root_00000000), and a deprecated term in an ontology that never declares the
+    # IAO_0100001 (term replaced by) property. Built in an isolated World so that
+    # annotation properties declared by other fixtures do not leak into it.
+    world = owlready2.World()
+    onto = world.get_ontology("http://test.org/root_onto.owl")
+    onto.name = "BAR"
+
+    with onto:
+
+        class BAR_root_000000(owlready2.Thing):
+            label = ["Test Structural Root Term"]
+
+        class BAR_000001(BAR_root_000000):
+            label = ["Test Root Term"]
+
+        class BAR_000002(BAR_000001):
+            label = ["Test Deprecated Descendant Term"]
+            deprecated = [True]
+
+    return onto
+
+
+def test_extract_ontology_term_metadata_with_structural_root(sample_ontology_with_structural_root):
+    result = _extract_ontology_term_metadata(
+        sample_ontology_with_structural_root, ["BAR"], map_to_cross_ontologies=[], cross_ontology_map={}
+    )
+
+    # the structural root is neither emitted as a term nor retained as an ancestor, and the
+    # deprecated term is extracted even though IAO_0100001 is not defined in this ontology
+    expected_result = {
+        "BAR:000001": {
+            "ancestors": {},
+            "label": "Test Root Term",
+            "deprecated": False,
+        },
+        "BAR:000002": {
+            "ancestors": {"BAR:000001": 1},
+            "label": "Test Deprecated Descendant Term",
+            "deprecated": True,
+        },
+    }
+
+    assert result == expected_result
+
+
 def test_extract_cross_ontology_terms(mock_raw_ontology_dir, mock_ontology_info):
     cross_ontology_map = _load_cross_ontology_map(mock_raw_ontology_dir, mock_ontology_info)
 

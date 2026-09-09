@@ -110,6 +110,16 @@
         "filename": "uniprot_sprot.fasta.gz",
         "format": "fasta.gz",
         "url": "https://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/complete/uniprot_sprot.fasta.gz"
+      },
+      "GO": {
+        "version": "2026-08-05",
+        "source": "https://release.geneontology.org/{version}/ontology/{filename}",
+        "filename": "go.owl"
+      },
+      "FBbi": {
+        "version": "v2026-06-25",
+        "source": "https://github.com/foundingGIDE/fbbi/releases/download/{version}/{filename}",
+        "filename": "fbbi.owl"
       }
     }
   },
