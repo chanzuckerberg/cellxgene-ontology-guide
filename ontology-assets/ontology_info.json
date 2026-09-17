@@ -6,7 +6,7 @@
         "filename": "cellosaurus.obo",
         "version_url": "https://api.cellosaurus.org/release-info",
         "id_separator": "_",
-        "version": "55.0"
+        "version": "56.0"
       },
       "CL": {
         "version": "v2026-03-26",
@@ -43,7 +43,7 @@
         "filename": "mmusdv.owl"
       },
       "NCBITaxon": {
-        "version": "v2026-05-13",
+        "version": "v2026-07-12",
         "source": "https://github.com/obophenotype/ncbitaxon/releases/download/{version}/{filename}",
         "filename": "ncbitaxon.owl.gz"
       },
