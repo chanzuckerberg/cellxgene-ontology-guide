@@ -78,7 +78,21 @@
           "format": "uri",
           "description": "URI that resolves to the version of the ontology. The resolved version will be used to verify the version of the download ontology file, and backfill the version in ontology_info.json if not provided."
         },
-        "id_separator": {
+        "ancestor_relations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Names of object properties to follow as hierarchy edges when computing ancestors, in addition to rdfs:subClassOf. Defaults to [\"BFO_0000050\"] (part_of). Ontologies that declare no is_a hierarchy of their own name the relation that acts as one, e.g. Cellosaurus uses \"derived_from\"."
+    },
+    "synonym_properties": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "oboInOwl synonym annotation properties to collect in addition to hasExactSynonym, e.g. [\"hasRelatedSynonym\"] for ontologies that only declare RELATED-scope synonyms."
+    },
+    "id_separator": {
           "type": "string",
           "description": "Character that separates the ontology prefix from the identifier in CURIEs. The default is ':' (colon)."
         }

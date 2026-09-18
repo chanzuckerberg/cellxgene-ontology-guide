@@ -6,6 +6,12 @@
         "filename": "cellosaurus.obo",
         "version_url": "https://api.cellosaurus.org/release-info",
         "id_separator": "_",
+        "ancestor_relations": [
+          "derived_from"
+        ],
+        "synonym_properties": [
+          "hasRelatedSynonym"
+        ],
         "version": "56.0"
       },
       "CL": {

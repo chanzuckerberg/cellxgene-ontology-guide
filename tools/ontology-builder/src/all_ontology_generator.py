@@ -17,7 +17,7 @@ import env
 import owlready2
 import zstandard as zstd
 from cellxgene_ontology_guide.supported_versions import coerce_version, get_latest_schema_version
-from validate_json_schemas import register_schemas, verify_json
+from validate_json_schemas import validate_ontology_terms
 
 USER_AGENT = "cellxgene-ontology-guide/ontology-builder (+https://github.com/chanzuckerberg/cellxgene-ontology-guide)"
 
@@ -371,7 +371,12 @@ def _load_cross_ontology_map(working_dir: str, ontology_info: Any) -> Dict[str, 
     return cross_ontology_map
 
 
-def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: list[str]) -> Dict[str, int]:
+def _get_ancestors(
+    onto_class: owlready2.entity.ThingClass,
+    allowed_ontologies: list[str],
+    id_separator: str = ":",
+    ancestor_relations: Optional[List[str]] = None,
+) -> Dict[str, int]:
     """
     Returns a list of unique ancestor ontology term ids of the given onto class. Only returns those belonging to
     ontology_name, it will format the id from the form CL_xxxx to CL:xxxx. Ancestors are returned in ascending order
@@ -379,30 +384,36 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
 
     :param owlready2.entity.ThingClass onto_class: the class for which ancestors will be retrieved
     :param listp[str] allowed_ontologies: only ancestors from these ontologies will be kept
+    :param str id_separator: separator used in this ontology's term IDs, typically ":" or "_"
+    :param Optional[List[str]] ancestor_relations: names of object properties to follow as hierarchy edges in
+    addition to rdfs:subClassOf. Defaults to ["BFO_0000050"] (part_of). Ontologies with no is_a hierarchy of
+    their own declare the relation that acts as their hierarchy, e.g. Cellosaurus uses "derived_from".
 
     :rtype List[str]
     :return list of ancestors (term ids), it could be empty
     """
+    relations = ["BFO_0000050"] if ancestor_relations is None else ancestor_relations
     ancestors: Dict[str, int] = dict()
     queue = [(onto_class, 1)]
     while queue:
         term, distance = queue.pop(0)
         for parent in term.is_a:
-            # a branch ancestor is defined as having a "part_of" (BFO_0000050) relationship with a term
+            # a branch ancestor is defined as having one of `relations` (by default "part_of", BFO_0000050)
+            # as its relationship with a term
             if (
                 hasattr(parent, "property")
-                and parent.property.name == "BFO_0000050"
+                and parent.property.name in relations
                 and isinstance(parent.value, owlready2.entity.ThingClass)
             ):
-                branch_ancestor_name = parent.value.name.replace("obo.", "").replace("_", ":")
+                branch_ancestor_name = parent.value.name.replace("obo.", "").replace("_", id_separator)
                 if branch_ancestor_name in ancestors:
                     ancestors[branch_ancestor_name] = min(ancestors[branch_ancestor_name], distance)
                 else:
                     queue.append((parent.value, distance + 1))
-                    if branch_ancestor_name.split(":")[0] in allowed_ontologies:
+                    if branch_ancestor_name.split(id_separator)[0] in allowed_ontologies:
                         ancestors[branch_ancestor_name] = distance
             elif hasattr(parent, "name") and not hasattr(parent, "Classes"):
-                parent_name = parent.name.replace("_", ":")
+                parent_name = parent.name.replace("_", id_separator)
                 if parent_name in ancestors:
                     ancestors[parent_name] = min(ancestors[parent_name], distance)
                 else:
@@ -415,7 +426,7 @@ def _get_ancestors(onto_class: owlready2.entity.ThingClass, allowed_ontologies: 
     return {
         ancestor: distance
         for ancestor, distance in sorted(ancestors.items(), key=lambda item: item[1])
-        if len(ancestor.split(":")) == 2 and ancestor.split(":")[0] in allowed_ontologies
+        if len(ancestor.split(id_separator)) == 2 and ancestor.split(id_separator)[0] in allowed_ontologies
     }
 
 
@@ -445,6 +456,8 @@ def _extract_ontology_term_metadata(
     map_to_cross_ontologies: List[str],
     cross_ontology_map: Dict[str, Dict[str, str]],
     id_separator: str = ":",
+    ancestor_relations: Optional[List[str]] = None,
+    synonym_properties: Optional[List[str]] = None,
 ) -> Dict[str, Any]:
     """
     Extract relevant metadata from ontology object and save into a dictionary following our JSON Schema
@@ -455,6 +468,9 @@ def _extract_ontology_term_metadata(
     :param: map_to_cross_ontologies: List of ontologies to map equivalent terms to
     :param: cross_ontology_map: str for each ontology with a mapping, map to known equivalent terms in other ontologies
     :param: id_separator: separator to use for ontology term IDs, typically ":" or "_"
+    :param: ancestor_relations: object properties to follow as hierarchy edges, see _get_ancestors
+    :param: synonym_properties: oboInOwl synonym annotation properties to collect in addition to
+    hasExactSynonym, e.g. ["hasRelatedSynonym"] for ontologies that only declare RELATED synonyms
     :return: Dict[str, Any] map of ontology term IDs to pertinent metadata from ontology files
     """
     term_dict: Dict[str, Any] = dict()
@@ -466,11 +482,7 @@ def _extract_ontology_term_metadata(
         if len(term_id_parts) > 2 or term_id_parts[0] not in allowed_ontologies:
             continue
         # Gets ancestors
-        ancestors = _get_ancestors(onto_term, allowed_ontologies)
-
-        # Special Case: skip the current term if it is an NCBI Term, but not a descendant of 'NCBITaxon:33208' (Animal)
-        if onto.name == "NCBITaxon" and "NCBITaxon:33208" not in ancestors:
-            continue
+        ancestors = _get_ancestors(onto_term, allowed_ontologies, id_separator, ancestor_relations)
 
         term_dict[term_id] = dict()
         term_dict[term_id]["ancestors"] = ancestors
@@ -483,9 +495,16 @@ def _extract_ontology_term_metadata(
         # optional description, if available
         if getattr(onto_term, "IAO_0000115", None):
             term_dict[term_id]["description"] = onto_term.IAO_0000115[0]
-        # optional synonym list, if available
-        if hasExactSynonym := getattr(onto_term, "hasExactSynonym", None):
-            term_dict[term_id]["synonyms"] = [str(x) for x in hasExactSynonym]
+        # optional synonym list, if available. hasExactSynonym is always collected; ontologies whose
+        # synonyms carry a different scope (Cellosaurus declares every synonym as RELATED) name the
+        # extra annotation properties in `synonym_properties`.
+        synonyms: List[str] = []
+        for synonym_property in ["hasExactSynonym"] + (synonym_properties or []):
+            for synonym in getattr(onto_term, synonym_property, None) or []:
+                if (value := str(synonym)) not in synonyms:
+                    synonyms.append(value)
+        if synonyms:
+            term_dict[term_id]["synonyms"] = synonyms
         # Add the "deprecated" status and associated metadata if True
         term_dict[term_id]["deprecated"] = False
         if onto_term.deprecated and onto_term.deprecated.first():
@@ -634,9 +653,21 @@ def _parse_ontologies(
         allowed_ontologies = [onto.name] + ontology_info[onto.name].get("additional_ontologies", [])
         map_to_cross_ontologies = ontology_info[onto.name].get("map_to", [])
         id_separator = ontology_info[onto.name].get("id_separator", ":")
+        ancestor_relations = ontology_info[onto.name].get("ancestor_relations")
+        synonym_properties = ontology_info[onto.name].get("synonym_properties")
         onto_dict = _extract_ontology_term_metadata(
-            onto, allowed_ontologies, map_to_cross_ontologies, cross_ontology_map, id_separator
+            onto,
+            allowed_ontologies,
+            map_to_cross_ontologies,
+            cross_ontology_map,
+            id_separator,
+            ancestor_relations,
+            synonym_properties,
         )
+        # Validate before writing, against the in-memory dict. Reading the asset back to validate it
+        # would mean holding a second full copy of it in memory, which NCBITaxon cannot afford.
+        if not validate_ontology_terms(onto.name, onto_dict):
+            raise ValueError(f"{onto.name} failed validation against all_ontology_schema.json")
         compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
         with open(output_file, "wb") as fp:
             fp.write(compressed)
@@ -654,6 +685,8 @@ def _parse_ontologies(
         output_file = os.path.join(output_path, get_ontology_file_name(onto_name, version))
         logging.info(f"Processing {output_file}")
         onto_dict = _parse_uniprot_fasta(fasta_gz_path)
+        if not validate_ontology_terms(onto_name, onto_dict):
+            raise ValueError(f"{onto_name} failed validation against all_ontology_schema.json")
         compressed = cctx.compress(json.dumps(onto_dict, separators=(",", ":")).encode("utf-8"))
         with open(output_file, "wb") as fp:
             fp.write(compressed)
@@ -809,14 +842,13 @@ if __name__ == "__main__":
         os.remove(os.path.join(env.ONTOLOGY_ASSETS_DIR, file))
     save_ontology_info(ontology_info, latest_ontology_version)
 
-    # validate against the schema
-    schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
-    registry = register_schemas()
-    result = [
-        verify_json(schema_file, output_file, registry)
+    # Each asset is validated against all_ontology_schema.json inside _parse_ontologies, before it is
+    # compressed and written.
+    try:
         for output_file in _parse_ontologies(
             ontologies_to_process, cross_ontology_info=latest_ontology_version["ontologies"]
-        )
-    ]
-    if not all(result):
+        ):
+            logging.info(f"Wrote {output_file}")
+    except ValueError:
+        logging.exception("Ontology generation failed")
         sys.exit(1)

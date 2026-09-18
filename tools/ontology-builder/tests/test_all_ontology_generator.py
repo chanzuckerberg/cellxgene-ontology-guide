@@ -15,6 +15,7 @@ from all_ontology_generator import (  # noqa: E402
     _download_ontologies,
     _extract_cross_ontology_terms,
     _extract_ontology_term_metadata,
+    _get_ancestors,
     _install_url_opener,
     _load_cross_ontology_map,
     _parse_ontologies,
@@ -119,7 +120,10 @@ def test_parse_ontologies(mock_ontology_info, mock_raw_ontology_dir, tmpdir):
         MockOntologyObject = MagicMock()
         MockOntologyObject.name = "ontology_name"  # Must match the name of the ontology file
         mock_load_ontology.return_value = MockOntologyObject
-        mock_extract_metadata.return_value = {"term_id": {"label": "Term Label", "deprecated": False, "ancestors": {}}}
+        # must be a schema-valid term ID: _parse_ontologies validates each asset before writing it
+        mock_extract_metadata.return_value = {
+            "CL:0000001": {"label": "Term Label", "deprecated": False, "ancestors": {}}
+        }
         mock_load_cross_ontology_map.return_value = {}
         mock_extract_cross_ontology_terms.return_value = {}
 
@@ -981,3 +985,135 @@ def test_parse_ontologies_fasta_gz(mock_uniprot_fasta_gz, tmp_path):
 
     assert "uniprot:P05112" in result
     assert result["uniprot:P05112"] == {"label": "IL4_HUMAN", "deprecated": False, "ancestors": {}}
+
+
+ANCESTOR_RELATION_OWL = """<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:oboInOwl="http://www.geneontology.org/formats/oboInOwl#"
+     xml:base="http://purl.obolibrary.org/obo/relations.owl">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/relations.owl"/>
+    <owl:ObjectProperty rdf:about="http://purl.obolibrary.org/obo/BFO_0000050"/>
+    <owl:ObjectProperty rdf:about="http://purl.obolibrary.org/obo/cellosaurus#derived_from"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"/>
+    <owl:AnnotationProperty rdf:about="http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym"/>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/CL_0000001">
+        <rdfs:label>part-of parent</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/CL_0000002">
+        <rdfs:label>part-of child</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/BFO_0000050"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/CL_0000001"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/CVCL_0003">
+        <rdfs:label>grandparent line</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/CVCL_0002">
+        <rdfs:label>parent line</rdfs:label>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/cellosaurus#derived_from"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/CVCL_0003"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/CVCL_0001">
+        <rdfs:label>child line</rdfs:label>
+        <oboInOwl:hasRelatedSynonym>Z48-5MG-70</oboInOwl:hasRelatedSynonym>
+        <oboInOwl:hasRelatedSynonym>KAPPA-9</oboInOwl:hasRelatedSynonym>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="http://purl.obolibrary.org/obo/cellosaurus#derived_from"/>
+                <owl:someValuesFrom rdf:resource="http://purl.obolibrary.org/obo/CVCL_0002"/>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+    </owl:Class>
+</rdf:RDF>
+"""
+
+NCBITAXON_OWL = """<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xml:base="http://purl.obolibrary.org/obo/taxon.owl">
+    <owl:Ontology rdf:about="http://purl.obolibrary.org/obo/taxon.owl"/>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_2">
+        <rdfs:label>Bacteria</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_33208">
+        <rdfs:label>Metazoa</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_9606">
+        <rdfs:label>Homo sapiens</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://purl.obolibrary.org/obo/NCBITaxon_33208"/>
+    </owl:Class>
+</rdf:RDF>
+"""
+
+
+def _load_owl_from_string(tmpdir, name, contents):
+    owl_file = tmpdir.join(name)
+    owl_file.write(contents)
+    onto = owlready2.World().get_ontology(str(owl_file))
+    onto.load()
+    return onto
+
+
+@pytest.fixture
+def relations_ontology(tmpdir):
+    return _load_owl_from_string(tmpdir, "relations.owl", ANCESTOR_RELATION_OWL)
+
+
+@pytest.fixture
+def ncbitaxon_ontology(tmpdir):
+    return _load_owl_from_string(tmpdir, "taxon.owl", NCBITAXON_OWL)
+
+
+def _term(onto, name):
+    return next(term for term in onto.classes() if term.name == name)
+
+
+def test_get_ancestors_defaults_to_part_of(relations_ontology):
+    # part_of (BFO_0000050) is followed with no ancestor_relations configured
+    assert _get_ancestors(_term(relations_ontology, "CL_0000002"), ["CL"]) == {"CL:0000001": 1}
+
+
+def test_get_ancestors_ignores_unconfigured_relation(relations_ontology):
+    # derived_from is not a hierarchy edge unless asked for
+    assert _get_ancestors(_term(relations_ontology, "CVCL_0001"), ["CVCL"], "_") == {}
+
+
+def test_get_ancestors_follows_configured_relation(relations_ontology):
+    # Cellosaurus declares no is_a hierarchy; derived_from acts as one, and its IDs use "_"
+    assert _get_ancestors(_term(relations_ontology, "CVCL_0001"), ["CVCL"], "_", ["derived_from"]) == {
+        "CVCL_0002": 1,
+        "CVCL_0003": 2,
+    }
+    assert _get_ancestors(_term(relations_ontology, "CVCL_0002"), ["CVCL"], "_", ["derived_from"]) == {"CVCL_0003": 1}
+
+
+def test_extract_collects_configured_synonym_properties(relations_ontology):
+    relations_ontology.name = "CVCL"
+    terms = _extract_ontology_term_metadata(
+        relations_ontology, ["CVCL"], [], {}, "_", ["derived_from"], ["hasRelatedSynonym"]
+    )
+    assert terms["CVCL_0001"]["synonyms"] == ["Z48-5MG-70", "KAPPA-9"]
+    assert terms["CVCL_0001"]["ancestors"] == {"CVCL_0002": 1, "CVCL_0003": 2}
+    # RELATED-scope synonyms are ignored when the ontology does not opt in
+    default_terms = _extract_ontology_term_metadata(relations_ontology, ["CVCL"], [], {}, "_", ["derived_from"])
+    assert "synonyms" not in default_terms["CVCL_0001"]
+
+
+def test_extract_retains_taxa_outside_metazoa(ncbitaxon_ontology):
+    # NCBITaxon is no longer subset to descendants of NCBITaxon:33208 (Metazoa)
+    ncbitaxon_ontology.name = "NCBITaxon"
+    terms = _extract_ontology_term_metadata(ncbitaxon_ontology, ["NCBITaxon"], [], {})
+    assert set(terms) == {"NCBITaxon:2", "NCBITaxon:33208", "NCBITaxon:9606"}
+    assert terms["NCBITaxon:2"]["label"] == "Bacteria"
+    # Metazoa itself is a term, not only an ancestor of one
+    assert terms["NCBITaxon:9606"]["ancestors"] == {"NCBITaxon:33208": 1}
