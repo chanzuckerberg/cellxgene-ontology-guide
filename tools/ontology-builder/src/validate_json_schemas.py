@@ -110,6 +110,49 @@ def _term_fields(schema_dir: str = env.SCHEMA_DIR) -> Tuple[FrozenSet[str], Froz
     return frozenset(term_schema["properties"]), frozenset(term_schema["required"])
 
 
+@functools.cache
+def _term_id_patterns_by_prefix(schema_dir: str = env.SCHEMA_DIR) -> Dict[str, "re.Pattern[str]"]:
+    """
+    Map each ontology prefix to its term ID pattern, keyed by the prefix the pattern itself declares.
+
+    Keyed off the pattern rather than the definition name because the two can differ: UniProt is
+    defined as "UniProt_term_id" but its terms are "uniprot:P12345".
+
+    :param str schema_dir: directory holding the asset schemas
+    :rtype Dict[str, re.Pattern[str]]
+    :return prefix -> compiled pattern
+    """
+    with open(os.path.join(schema_dir, "ontology_term_id_schema.json")) as f:
+        definitions = json.load(f)["definitions"]
+    patterns = {}
+    for ref in definitions["supported_term_id"]["anyOf"]:
+        pattern = definitions[ref["$ref"].split("/")[-1]]["pattern"]
+        if prefix := re.match(r"\^([A-Za-z0-9]+)[:_]", pattern):
+            patterns[prefix.group(1)] = re.compile(pattern)
+    return patterns
+
+
+def is_registered_term_id(term_id: str, prefix: str) -> bool:
+    """
+    Check a term ID against the pattern registered for its prefix in ontology_term_id_schema.json.
+
+    Used to drop classes that share an ontology's IRI prefix without being terms of it: NCBITaxon
+    declares 49 taxonomic rank classes (NCBITaxon_species, NCBITaxon_genus, ...) alongside its taxa,
+    and they parse to plausible-looking IDs like "NCBITaxon:species".
+
+    An ontology with no registered pattern is not filtered here. Dropping its terms would silently
+    yield an empty asset; letting them through means the asset fails validation instead, which points
+    at the real problem -- a missing ontology_term_id_schema.json entry.
+
+    :param str term_id: term ID to check
+    :param str prefix: ontology prefix the term ID belongs to
+    :rtype bool
+    :return False only when a pattern is registered for prefix and term_id does not match it
+    """
+    pattern = _term_id_patterns_by_prefix().get(prefix)
+    return pattern is None or pattern.match(term_id) is not None
+
+
 def validate_ontology_terms(ontology_name: str, terms: Dict[str, Any]) -> bool:
     """
     Validate a generated ontology term dict against all_ontology_schema.json.

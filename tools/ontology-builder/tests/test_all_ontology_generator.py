@@ -1045,6 +1045,12 @@ NCBITAXON_OWL = """<?xml version="1.0"?>
     <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_2">
         <rdfs:label>Bacteria</rdfs:label>
     </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_species">
+        <rdfs:label>species</rdfs:label>
+    </owl:Class>
+    <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_forma_specialis">
+        <rdfs:label>forma specialis</rdfs:label>
+    </owl:Class>
     <owl:Class rdf:about="http://purl.obolibrary.org/obo/NCBITaxon_33208">
         <rdfs:label>Metazoa</rdfs:label>
     </owl:Class>
@@ -1113,7 +1119,17 @@ def test_extract_retains_taxa_outside_metazoa(ncbitaxon_ontology):
     # NCBITaxon is no longer subset to descendants of NCBITaxon:33208 (Metazoa)
     ncbitaxon_ontology.name = "NCBITaxon"
     terms = _extract_ontology_term_metadata(ncbitaxon_ontology, ["NCBITaxon"], [], {})
+    # the 49 taxonomic rank classes share NCBITaxon's IRI prefix but are not taxa
     assert set(terms) == {"NCBITaxon:2", "NCBITaxon:33208", "NCBITaxon:9606"}
     assert terms["NCBITaxon:2"]["label"] == "Bacteria"
     # Metazoa itself is a term, not only an ancestor of one
     assert terms["NCBITaxon:9606"]["ancestors"] == {"NCBITaxon:33208": 1}
+
+
+def test_extract_skips_classes_that_are_not_supported_term_ids(ncbitaxon_ontology):
+    # NCBITaxon_species and friends parse to "NCBITaxon:species", which has the right prefix and part
+    # count but is not a supported term ID. They were previously masked by the Metazoa filter.
+    ncbitaxon_ontology.name = "NCBITaxon"
+    terms = _extract_ontology_term_metadata(ncbitaxon_ontology, ["NCBITaxon"], [], {})
+    assert "NCBITaxon:species" not in terms
+    assert "NCBITaxon:forma:specialis" not in terms

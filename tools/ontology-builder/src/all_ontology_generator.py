@@ -17,7 +17,7 @@ import env
 import owlready2
 import zstandard as zstd
 from cellxgene_ontology_guide.supported_versions import coerce_version, get_latest_schema_version
-from validate_json_schemas import validate_ontology_terms
+from validate_json_schemas import is_registered_term_id, validate_ontology_terms
 
 USER_AGENT = "cellxgene-ontology-guide/ontology-builder (+https://github.com/chanzuckerberg/cellxgene-ontology-guide)"
 
@@ -426,7 +426,9 @@ def _get_ancestors(
     return {
         ancestor: distance
         for ancestor, distance in sorted(ancestors.items(), key=lambda item: item[1])
-        if len(ancestor.split(id_separator)) == 2 and ancestor.split(id_separator)[0] in allowed_ontologies
+        if len(ancestor.split(id_separator)) == 2
+        and ancestor.split(id_separator)[0] in allowed_ontologies
+        and is_registered_term_id(ancestor, ancestor.split(id_separator)[0])
     }
 
 
@@ -477,9 +479,14 @@ def _extract_ontology_term_metadata(
     for onto_term in onto.classes():
         term_id = onto_term.name.replace("_", id_separator)
 
-        # Skip terms that are not direct children from this ontology
+        # Skip terms that are not direct children from this ontology, and classes that share the
+        # ontology's IRI prefix without being terms of it (NCBITaxon declares taxonomic rank classes
+        # such as NCBITaxon_species alongside its taxa).
         term_id_parts = term_id.split(id_separator)
         if len(term_id_parts) > 2 or term_id_parts[0] not in allowed_ontologies:
+            continue
+        if not is_registered_term_id(term_id, term_id_parts[0]):
+            logging.debug(f"Skipping {term_id}: not a valid term ID for {term_id_parts[0]}")
             continue
         # Gets ancestors
         ancestors = _get_ancestors(onto_term, allowed_ontologies, id_separator, ancestor_relations)
