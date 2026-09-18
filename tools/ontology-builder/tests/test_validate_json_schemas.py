@@ -1,10 +1,11 @@
 import json
 import os
 
+import env
 import pytest
 import zstandard as zstd
 from referencing import Resource
-from validate_json_schemas import get_schema_file_name, register_schemas, verify_json
+from validate_json_schemas import get_schema_file_name, register_schemas, validate_ontology_terms, verify_json
 
 
 @pytest.fixture
@@ -174,3 +175,66 @@ class TestVerifyJsonCustomLogic:
 
         # Assert validation passes
         assert verify_json(ontology_info_schema_file_fixture, str(json_file), ontology_info_registry_fixture) is True
+
+
+class TestValidateOntologyTerms:
+    """
+    validate_ontology_terms replaces running jsonschema over the generated assets, so these cases mirror
+    what all_ontology_schema.json enforces, plus referential integrity, which the schema cannot express.
+    """
+
+    @pytest.fixture
+    def terms(self):
+        return {
+            "CL:0000000": {"label": "cell", "deprecated": False, "ancestors": {}},
+            "CL:0000001": {
+                "label": "primary cultured cell",
+                "deprecated": False,
+                "ancestors": {"CL:0000000": 1},
+                "synonyms": ["primary cell"],
+            },
+        }
+
+    def test_valid_terms(self, terms):
+        assert validate_ontology_terms("CL", terms) is True
+
+    def test_valid_terms_with_underscore_separator(self):
+        terms = {
+            "CVCL_0002": {"label": "parent line", "deprecated": False, "ancestors": {}},
+            "CVCL_0001": {"label": "child line", "deprecated": False, "ancestors": {"CVCL_0002": 1}},
+        }
+        assert validate_ontology_terms("CVCL", terms) is True
+
+    def test_malformed_term_id(self, terms):
+        terms["CL:not_a_number"] = terms.pop("CL:0000001")
+        assert validate_ontology_terms("CL", terms) is False
+
+    def test_missing_required_field(self, terms):
+        del terms["CL:0000001"]["label"]
+        assert validate_ontology_terms("CL", terms) is False
+
+    def test_unexpected_field(self, terms):
+        terms["CL:0000001"]["bogus_field"] = "value"
+        assert validate_ontology_terms("CL", terms) is False
+
+    def test_non_boolean_deprecated(self, terms):
+        terms["CL:0000001"]["deprecated"] = "no"
+        assert validate_ontology_terms("CL", terms) is False
+
+    def test_non_integer_ancestor_distance(self, terms):
+        terms["CL:0000001"]["ancestors"] = {"CL:0000000": "1"}
+        assert validate_ontology_terms("CL", terms) is False
+
+    def test_dangling_ancestor_reference(self, terms):
+        # jsonschema accepts this; an ancestor that is not a term in the same file cannot be resolved
+        terms["CL:0000001"]["ancestors"] = {"CL:9999999": 1}
+        assert validate_ontology_terms("CL", terms) is False
+
+    def test_agrees_with_jsonschema_on_generated_asset(self, terms, tmpdir):
+        # the fast validator must accept exactly what jsonschema accepts for a well-formed asset
+        asset = tmpdir.join("CL-ontology-v1.json.zst")
+        with open(str(asset), "wb") as f:
+            f.write(zstd.ZstdCompressor().compress(json.dumps(terms).encode("utf-8")))
+        schema_file = os.path.join(env.SCHEMA_DIR, "all_ontology_schema.json")
+        assert verify_json(schema_file, str(asset), register_schemas()) is True
+        assert validate_ontology_terms("CL", terms) is True
